@@ -22,5 +22,14 @@ class Board(val rows: Int, val columns: Int) {
 
     fun isPositionValid(row: Int, column: Int) = !(row < 0 || column < 0 || row >= rows || column >= columns)
 
+    fun isPlayable(): Boolean {
+        for (row in 0 until rows) {
+           for (column in 0 until columns) {
+               if (cells[row][column] == null) return true
+           }
+        }
+        return false
+    }
+
 }
 

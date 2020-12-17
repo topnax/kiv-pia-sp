@@ -2,7 +2,7 @@ package com.zcu.kiv.pia.tictactoe.game
 
 abstract class BoardChecker(val board: Board, val victoriousCells: Int) {
     abstract fun isCellVictorious(row: Int, column: Int): Boolean
-    abstract fun getVictriousCells(): Set<Cell>
+    abstract fun getVictoriousCells(): Set<Cell>
 }
 
 class SimpleBoardChecker(board: Board, victoriousCells: Int) : BoardChecker(board, victoriousCells) {
@@ -49,7 +49,7 @@ class SimpleBoardChecker(board: Board, victoriousCells: Int) : BoardChecker(boar
         return false
     }
 
-    override fun getVictriousCells(): Set<Cell> = winningCells
+    override fun getVictoriousCells(): Set<Cell> = winningCells
 
     fun getCellsWithSameSeed(cell: Cell, dr: Int, dc: Int): Set<Cell> {
         val cells = HashSet<Cell>()

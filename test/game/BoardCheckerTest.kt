@@ -35,13 +35,13 @@ class BoardCheckerTest {
         val victoriousCells = setOf(b[0, 0], b[1, 1], b[2, 2])
 
         assert(checker.isCellVictorious(0, 0))
-        assert(checker.getVictriousCells() == victoriousCells)
+        assert(checker.getVictoriousCells() == victoriousCells)
 
         assert(checker.isCellVictorious(1, 1))
-        assert(checker.getVictriousCells() == victoriousCells)
+        assert(checker.getVictoriousCells() == victoriousCells)
 
         assert(checker.isCellVictorious(2, 2))
-        assert(checker.getVictriousCells() == victoriousCells)
+        assert(checker.getVictoriousCells() == victoriousCells)
 
         assert(!checker.isCellVictorious(0, 1))
         assert(!checker.isCellVictorious(0, 2))
@@ -68,16 +68,16 @@ class BoardCheckerTest {
         val victoriousCells = setOf(b[1, 0], b[1, 1], b[1, 2], b[1, 3])
 
         assert(checker.isCellVictorious(1, 0))
-        assert(checker.getVictriousCells() == victoriousCells)
+        assert(checker.getVictoriousCells() == victoriousCells)
 
         assert(checker.isCellVictorious(1, 1))
-        assert(checker.getVictriousCells() == victoriousCells)
+        assert(checker.getVictoriousCells() == victoriousCells)
 
         assert(checker.isCellVictorious(1, 2))
-        assert(checker.getVictriousCells() == victoriousCells)
+        assert(checker.getVictoriousCells() == victoriousCells)
 
         assert(checker.isCellVictorious(1, 3))
-        assert(checker.getVictriousCells() == victoriousCells)
+        assert(checker.getVictoriousCells() == victoriousCells)
 
         assert(!checker.isCellVictorious(-1, 0))
         assert(!checker.isCellVictorious(0, -1))

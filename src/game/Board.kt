@@ -1,19 +1,22 @@
 package com.zcu.kiv.pia.tictactoe.game
 
 class Board(val rows: Int, val columns: Int) {
-    val cells = Array(rows) { Array<Cell?>(columns) { null } }
+    private val cells = Array(rows) { Array<Cell?>(columns) { null } }
 
     fun addCell(c: Cell): Boolean {
-
-        if (c.row < 0 || c.column < 0 || c.row >= rows || c.column >= columns || cells[c.row][c.column] != null) {
+        return if (!canCellBePlaced(c)) {
             // cell already used or invalid cell position specified
-            return false
+            false
         } else {
             // cell not use - assign it
             cells[c.row][c.column] = c
-            return true
+            true
         }
     }
+
+    fun canCellBePlaced(c: Cell) = isPositionValid(c.row, c.column) && cells[c.row][c.column] == null
+
+    fun isPositionValid(row: Int, column: Int) = !(row < 0 || column < 0 || row >= rows || column >= columns)
 
 }
 

@@ -14,6 +14,10 @@ class Board(val rows: Int, val columns: Int) {
         }
     }
 
+    fun getCell(row: Int, column: Int) = if (isPositionValid(row, column)) cells[row][column] else null
+
+    operator fun get(row:Int, column: Int) = getCell(row, column)
+
     fun canCellBePlaced(c: Cell) = isPositionValid(c.row, c.column) && cells[c.row][c.column] == null
 
     fun isPositionValid(row: Int, column: Int) = !(row < 0 || column < 0 || row >= rows || column >= columns)

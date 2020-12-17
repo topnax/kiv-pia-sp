@@ -4,8 +4,8 @@ import org.junit.Test
 
 class BoardTest {
     @Test
-    fun testRoot() {
-        val b = Board(3, 3);
+    fun testAddCell() {
+        val b = Board(3, 3)
         assert(b.addCell(Cell(0,0)))
         assert(b.addCell(Cell(1,0)))
         assert(b.addCell(Cell(2,0)))

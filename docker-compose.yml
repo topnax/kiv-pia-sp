@@ -5,3 +5,15 @@ services:
         image: tictactoe-server
         ports:
             - '8080:8080'
+    mariadb:
+        image: mariadb:10.2
+        environment:
+            MYSQL_ROOT_PASSWORD: ultrastrongpassword
+            MYSQL_DATABASE: ttt_db
+            MYSQL_USER: ttt_user
+            MYSQL_PASSWORD: notsostrongpasword
+        logging:
+          driver: syslog
+          options:
+            tag: "{{.DaemonName}}(image={{.ImageName}};name={{.Name}};id={{.ID}})"
+

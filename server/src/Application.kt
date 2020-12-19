@@ -5,7 +5,12 @@ import com.zcu.kiv.pia.tictactoe.authentication.JwtConfig
 import com.zcu.kiv.pia.tictactoe.authentication.UserCredential
 import com.zcu.kiv.pia.tictactoe.authentication.UserPrincipal
 import com.zcu.kiv.pia.tictactoe.controller.gameRoutes
-import com.zcu.kiv.pia.tictactoe.modules.mainModule
+import com.zcu.kiv.pia.tictactoe.controller.loginRoutes
+import com.zcu.kiv.pia.tictactoe.database.DatabaseFactory
+import com.zcu.kiv.pia.tictactoe.modules.mainModules
+import com.zcu.kiv.pia.tictactoe.repository.DatabaseUserRepository
+import com.zcu.kiv.pia.tictactoe.repository.UserRepository
+import com.zcu.kiv.pia.tictactoe.service.*
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
@@ -18,6 +23,7 @@ import io.ktor.routing.*
 import kotlinx.coroutines.Dispatchers
 import mu.KotlinLogging
 import org.koin.ktor.ext.Koin
+import org.koin.ktor.ext.inject
 
 private val logger = KotlinLogging.logger {}
 
@@ -31,15 +37,11 @@ fun Application.module(testing: Boolean = false) {
     install(CallLogging)
 
     install(Koin) {
-        modules(mainModule)
+        modules(
+            mainModules
+        )
     }
 
-    val jwtIssuer = environment.config.property("jwt.domain").getString()
-    val jwtSecret = environment.config.property("jwt.secret").getString()
-    val jwtAudience = environment.config.property("jwt.audience").getString()
-    val jwtRealm = environment.config.property("jwt.realm").getString()
-
-    val jvtConfig = JwtConfig(jwtIssuer, jwtSecret, 10 * 60)
 
     install(ContentNegotiation) {
         jackson {
@@ -47,22 +49,53 @@ fun Application.module(testing: Boolean = false) {
         }
     }
 
-    install(Authentication) {
-        jwt("jwt-auth") {
-            verifier(jvtConfig.verifier)
-            realm = jwtRealm
-            validate {
-                with(it.payload) {
-                    val login = getClaim("username").isNull
-                    val id = getClaim("info").isNull
-                    if (login || id)
-                        null
-                    else
-                        JWTPrincipal(it.payload)
+    if (!testing) {
+        logger.debug { "not testing" }
+        DatabaseFactory.init()
+
+        val jwtIssuer = environment.config.property("jwt.domain").getString()
+        val jwtSecret = environment.config.property("jwt.secret").getString()
+        val jwtAudience = environment.config.property("jwt.audience").getString()
+        val jwtRealm = environment.config.property("jwt.realm").getString()
+
+        val jvtConfig = JwtConfig(jwtIssuer, jwtSecret, 10 * 60)
+
+        install(Authentication) {
+            jwt("jwt-auth") {
+                verifier(jvtConfig.verifier)
+                realm = jwtRealm
+                validate {
+                    with(it.payload) {
+                        val login = getClaim("username").isNull
+                        val id = getClaim("info").isNull
+                        if (login || id)
+                            null
+                        else
+                            JWTPrincipal(it.payload)
+                    }
                 }
             }
         }
+
+        routing {
+
+            loginRoutes(jvtConfig)
+
+            authenticate("jwt-auth") {
+                get("/secret") {
+                    call.respondText("Hello from secret", contentType = ContentType.Text.Plain)
+                    logger.debug {
+                        "got username ${
+                            call.principal<JWTPrincipal>()?.payload?.getClaim("username")?.asString()
+                        }"
+                    }
+                }
+            }
+        }
+    } else {
+        logger.debug { "testing!!!" }
     }
+
 
 //    install(io.ktor.websocket.WebSockets) {
 //        pingPeriod = Duration.ofSeconds(15)
@@ -74,30 +107,9 @@ fun Application.module(testing: Boolean = false) {
     routing {
         gameRoutes()
         get("/") {
-            call.respondText("Hello from root", contentType = ContentType.Text.Plain)
+            call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
         }
 
-        post("/login") {
-            with(Dispatchers.IO) {
-                val credentials = call.receive<UserCredential>()
-                if (credentials.username == "foo" && credentials.password == "bar") {
-                    call.respond(jvtConfig.makeToken(UserPrincipal("foo", "This is foo")))
-                } else if (credentials.username == "baz" && credentials.password == "boo") {
-                    call.respond(jvtConfig.makeToken(UserPrincipal("baz", "This is bazingus")))
-                } else call.respond(HttpStatusCode.Unauthorized)
-            }
-        }
-
-        authenticate("jwt-auth") {
-            get("/secret") {
-                call.respondText("Hello from secret", contentType = ContentType.Text.Plain)
-                logger.debug {
-                    "got username ${
-                        call.principal<JWTPrincipal>()?.payload?.getClaim("username")?.asString()
-                    }"
-                }
-            }
-        }
 
     }
 

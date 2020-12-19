@@ -1,19 +1,21 @@
 version: '3.3'
 services:
+    mariadb:
+        image: mariadb:10.2
+        environment:
+            MYSQL_DATABASE: ttt_db
+            MYSQL_USER: user
+            MYSQL_PASSWORD: password
+            MYSQL_ROOT_PASSWORD: password
     server:
         build: server/
         image: tictactoe-server
         ports:
             - '8080:8080'
-    mariadb:
-        image: mariadb:10.2
         environment:
-            MYSQL_ROOT_PASSWORD: ultrastrongpassword
-            MYSQL_DATABASE: ttt_db
-            MYSQL_USER: ttt_user
-            MYSQL_PASSWORD: notsostrongpasword
-        logging:
-          driver: syslog
-          options:
-            tag: "{{.DaemonName}}(image={{.ImageName}};name={{.Name}};id={{.ID}})"
+            TTT_DB: ttt_db
+            TTT_DB_ADDRESS: mariadb
+            TTT_DB_USER: root
+            TTT_DB_PASSWORD: password
+            TTT_DB_PORT: 3306
 

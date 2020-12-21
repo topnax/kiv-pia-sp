@@ -66,9 +66,8 @@ fun Application.module(testing: Boolean = false) {
                 realm = jwtRealm
                 validate {
                     with(it.payload) {
-                        val login = getClaim("username").isNull
-                        val id = getClaim("info").isNull
-                        if (login || id)
+                        val email = getClaim("email").isNull
+                        if (email)
                             null
                         else
                             JWTPrincipal(it.payload)

@@ -1,3 +1,3 @@
 package com.zcu.kiv.pia.tictactoe.model
 
-class User(val email: String)
+class User(val id: Int, val email: String)

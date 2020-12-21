@@ -1,3 +1,3 @@
 package com.zcu.kiv.pia.tictactoe.authentication
 
-class UserPrincipal(val email: String)
+class UserPrincipal(val id: Int, val email: String)

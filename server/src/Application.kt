@@ -60,7 +60,8 @@ fun Application.module(testing: Boolean = false) {
                 validate {
                     with(it.payload) {
                         val email = getClaim("email").isNull
-                        if (email)
+                        val id = getClaim("id").isNull
+                        if (email || id)
                             null
                         else
                             JWTPrincipal(it.payload)
@@ -78,11 +79,6 @@ fun Application.module(testing: Boolean = false) {
             authenticate(JWT_AUTH_NAME) {
                 get("/secret") {
                     call.respondText("Hello from secret", contentType = ContentType.Text.Plain)
-                    logger.debug {
-                        "got username ${
-                            call.principal<JWTPrincipal>()?.payload?.getClaim("username")?.asString()
-                        }"
-                    }
                 }
             }
         }

@@ -39,8 +39,8 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
             call.respond(HttpStatusCode.Unauthorized)
         } else {
             // user has logged in
-            userService.addLoggedInUser(User(user.email))
-            call.respond(DataResponse(Token(jvtConfig.makeToken(UserPrincipal(user.email)))))
+            userService.addLoggedInUser(User(user.id, user.email))
+            call.respond(DataResponse(Token(jvtConfig.makeToken(UserPrincipal(user.id, user.email)))))
             logger.debug {
                 "LoggedIn users: ${userService.getLoggedInUsers().joinToString(separator = "\n") { it.email }}"
             }

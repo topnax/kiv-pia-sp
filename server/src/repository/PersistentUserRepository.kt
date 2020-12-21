@@ -23,7 +23,7 @@ interface PersistentUserRepository {
 class SQLUserRepository : PersistentUserRepository {
 
     private fun toUser(row: ResultRow): User =
-        User(row[Users.email])
+        User(row[Users.id].value, row[Users.email])
 
     override suspend fun addUser(email: String, password: String): Unit = dbQuery {
         Users.insert {

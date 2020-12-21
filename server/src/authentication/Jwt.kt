@@ -19,6 +19,7 @@ class JwtConfig(val issuer: String, val secret: String, val validityInMInutes: I
     fun makeToken(user: UserPrincipal): String = JWT.create()
         .withSubject("Authentication")
         .withIssuer(issuer)
+        .withClaim("id", user.id)
         .withClaim("email", user.email)
         .withExpiresAt(getExpiration())
         .sign(algorithm)

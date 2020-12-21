@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.zcu.kiv.pia.tictactoe.authentication.JwtConfig
 import com.zcu.kiv.pia.tictactoe.controller.gameRoutes
 import com.zcu.kiv.pia.tictactoe.controller.loginRoutes
+import com.zcu.kiv.pia.tictactoe.controller.userProfileRoutes
 import com.zcu.kiv.pia.tictactoe.database.DatabaseFactory
 import com.zcu.kiv.pia.tictactoe.module.mainModule
 import io.ktor.application.*
@@ -17,6 +18,7 @@ import io.ktor.routing.*
 import mu.KotlinLogging
 import org.koin.ktor.ext.Koin
 
+const val JWT_AUTH_NAME = "jwt-auth"
 private val logger = KotlinLogging.logger {}
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -52,7 +54,7 @@ fun Application.module(testing: Boolean = false) {
         val jvtConfig = JwtConfig(jwtIssuer, jwtSecret, 10 * 60)
 
         install(Authentication) {
-            jwt("jwt-auth") {
+            jwt(JWT_AUTH_NAME) {
                 verifier(jvtConfig.verifier)
                 realm = jwtRealm
                 validate {
@@ -71,7 +73,9 @@ fun Application.module(testing: Boolean = false) {
 
             loginRoutes(jvtConfig)
 
-            authenticate("jwt-auth") {
+            userProfileRoutes()
+
+            authenticate(JWT_AUTH_NAME) {
                 get("/secret") {
                     call.respondText("Hello from secret", contentType = ContentType.Text.Plain)
                     logger.debug {

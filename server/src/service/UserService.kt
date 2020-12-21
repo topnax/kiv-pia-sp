@@ -26,6 +26,11 @@ interface UserService {
     suspend fun getUserByCredentials(email: String, passwordHash: String): User?
 
     /**
+     * Changes password of the given  user
+     */
+    suspend fun changeUserPassword(user: User, passwordHash: String)
+
+    /**
      * Adds a logged in user to an in-memory database
      */
     fun addLoggedInUser(user: User)
@@ -39,6 +44,7 @@ interface UserService {
      * Returns all logged in users from an in-memory database
      */
     fun getLoggedInUsers(): List<User>
+
 }
 
 
@@ -56,6 +62,10 @@ class UserServiceImpl(
     override suspend fun getUserByCredentials(email: String, passwordHash: String) =
         persistentUserRepository.userByCredentials(email, passwordHash)
 
+    override suspend fun changeUserPassword(user: User, passwordHash: String) {
+        persistentUserRepository.updateUserPassword(user, passwordHash)
+    }
+
     override fun addLoggedInUser(user: User) {
         inMemoryUserRepository.addLoggedInUser(user)
     }
@@ -65,4 +75,5 @@ class UserServiceImpl(
     }
 
     override fun getLoggedInUsers() = inMemoryUserRepository.getLoggedInUsers()
+
 }

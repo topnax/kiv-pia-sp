@@ -16,6 +16,8 @@ interface PersistentUserRepository {
     suspend fun getUsers(): List<User>
 
     suspend fun userByCredentials(email: String, passwordHash: String): User?
+
+    suspend fun updateUserPassword(user: User, passwordHash: String)
 }
 
 class SQLUserRepository : PersistentUserRepository {
@@ -48,5 +50,11 @@ class SQLUserRepository : PersistentUserRepository {
         }.mapNotNull {
             toUser(it)
         }.firstOrNull()
+    }
+
+    override suspend fun updateUserPassword(user: User, passwordHash: String): Unit = dbQuery {
+        val i = Users.update({ Users.email eq user.email }) {
+            it[password] = passwordHash
+        }
     }
 }

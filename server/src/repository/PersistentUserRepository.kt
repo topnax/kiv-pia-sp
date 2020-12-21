@@ -53,7 +53,7 @@ class SQLUserRepository : PersistentUserRepository {
     }
 
     override suspend fun updateUserPassword(user: User, passwordHash: String): Unit = dbQuery {
-        val i = Users.update({ Users.email eq user.email }) {
+        Users.update({ Users.email eq user.email }) {
             it[password] = passwordHash
         }
     }

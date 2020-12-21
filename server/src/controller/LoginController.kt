@@ -1,8 +1,10 @@
 package com.zcu.kiv.pia.tictactoe.controller
 
 import com.zcu.kiv.pia.tictactoe.authentication.JwtConfig
+import com.zcu.kiv.pia.tictactoe.authentication.Token
 import com.zcu.kiv.pia.tictactoe.authentication.UserCredential
 import com.zcu.kiv.pia.tictactoe.authentication.UserPrincipal
+import com.zcu.kiv.pia.tictactoe.model.response.DataResponse
 import com.zcu.kiv.pia.tictactoe.model.response.ErrorResponse
 import com.zcu.kiv.pia.tictactoe.model.response.SuccessResponse
 import com.zcu.kiv.pia.tictactoe.repository.UserRepository
@@ -16,6 +18,7 @@ import io.ktor.routing.*
 import mu.KotlinLogging
 import org.koin.ktor.ext.inject
 import java.util.regex.Pattern
+import java.util.regex.Pattern.compile
 
 private val logger = KotlinLogging.logger {}
 
@@ -32,7 +35,7 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
         if (user == null) {
             call.respond(HttpStatusCode.Unauthorized)
         } else {
-            call.respond(jvtConfig.makeToken(UserPrincipal(user.email)))
+            call.respond(DataResponse(Token(jvtConfig.makeToken(UserPrincipal(user.email)))))
         }
     }
 
@@ -46,6 +49,9 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
                 isNotEmpty() -> {
                     call.respond(ErrorResponse(this))
                 }
+                !credentials.email.isEmail() -> {
+                    call.respond(ErrorResponse("Email not in valid format"))
+                }
                 userRepository.getUserByEmail(credentials.email) != null -> {
                     call.respond(ErrorResponse("Email already in use"))
                 }
@@ -56,4 +62,18 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
             }
         }
     }
+}
+
+private val emailRegex = compile(
+    "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
+            "\\@" +
+            "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
+            "(" +
+            "\\." +
+            "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
+            ")+"
+)
+
+fun String.isEmail() : Boolean {
+    return emailRegex.matcher(this).matches()
 }

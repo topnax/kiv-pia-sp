@@ -4,7 +4,9 @@ open class BaseResponse(
     val responseCode: Int, val message: String
 )
 
-class SuccessResponse(): BaseResponse(ResponseCode.SUCCESS.code, "")
+class SuccessResponse() : BaseResponse(ResponseCode.SUCCESS.code, "")
+
+class DataResponse(val data: Any) : BaseResponse(ResponseCode.SUCCESS.code, "")
 
 enum class ResponseCode(val code: Int) {
     SUCCESS(0),

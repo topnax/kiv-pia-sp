@@ -8,7 +8,7 @@ import org.jetbrains.exposed.sql.*
 
 private val logger = KotlinLogging.logger {}
 
-interface UserRepository {
+interface PersistentUserRepository {
     suspend fun addUser(email: String, password: String)
 
     suspend fun getUserByEmail(email: String): User?
@@ -18,7 +18,7 @@ interface UserRepository {
     suspend fun userByCredentials(email: String, passwordHash: String): User?
 }
 
-class DatabaseUserRepository : UserRepository {
+class SQLUserRepository : PersistentUserRepository {
 
     private fun toUser(row: ResultRow): User =
         User(row[Users.email])

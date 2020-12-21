@@ -2,28 +2,20 @@ package com.zcu.kiv.pia.tictactoe
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.zcu.kiv.pia.tictactoe.authentication.JwtConfig
-import com.zcu.kiv.pia.tictactoe.authentication.UserCredential
-import com.zcu.kiv.pia.tictactoe.authentication.UserPrincipal
 import com.zcu.kiv.pia.tictactoe.controller.gameRoutes
 import com.zcu.kiv.pia.tictactoe.controller.loginRoutes
 import com.zcu.kiv.pia.tictactoe.database.DatabaseFactory
-import com.zcu.kiv.pia.tictactoe.modules.mainModules
-import com.zcu.kiv.pia.tictactoe.repository.DatabaseUserRepository
-import com.zcu.kiv.pia.tictactoe.repository.UserRepository
-import com.zcu.kiv.pia.tictactoe.service.*
+import com.zcu.kiv.pia.tictactoe.module.mainModule
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.jackson.*
-import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import kotlinx.coroutines.Dispatchers
 import mu.KotlinLogging
 import org.koin.ktor.ext.Koin
-import org.koin.ktor.ext.inject
 
 private val logger = KotlinLogging.logger {}
 
@@ -38,10 +30,9 @@ fun Application.module(testing: Boolean = false) {
 
     install(Koin) {
         modules(
-            mainModules
+            mainModule
         )
     }
-
 
     install(ContentNegotiation) {
         jackson {

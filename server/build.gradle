@@ -52,6 +52,8 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 
+    compile "redis.clients:jedis:2.10.2"
+
     // Dependency injection
     compile "org.koin:koin-ktor:$koin_version"
     testCompile "org.koin:koin-test:$koin_version"

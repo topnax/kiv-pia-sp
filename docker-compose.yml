@@ -18,4 +18,6 @@ services:
             TTT_DB_USER: root
             TTT_DB_PASSWORD: password
             TTT_DB_PORT: 3306
+    redis:
+        image: redis:6-alpine
 

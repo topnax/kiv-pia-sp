@@ -4,10 +4,11 @@ import com.zcu.kiv.pia.tictactoe.authentication.JwtConfig
 import com.zcu.kiv.pia.tictactoe.authentication.Token
 import com.zcu.kiv.pia.tictactoe.authentication.UserCredential
 import com.zcu.kiv.pia.tictactoe.authentication.UserPrincipal
+import com.zcu.kiv.pia.tictactoe.model.User
 import com.zcu.kiv.pia.tictactoe.model.response.DataResponse
 import com.zcu.kiv.pia.tictactoe.model.response.ErrorResponse
 import com.zcu.kiv.pia.tictactoe.model.response.SuccessResponse
-import com.zcu.kiv.pia.tictactoe.repository.UserRepository
+import com.zcu.kiv.pia.tictactoe.service.UserService
 import com.zcu.kiv.pia.tictactoe.service.HashService
 import com.zcu.kiv.pia.tictactoe.utils.PasswordRuleVerifier
 import io.ktor.application.*
@@ -17,25 +18,32 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import mu.KotlinLogging
 import org.koin.ktor.ext.inject
-import java.util.regex.Pattern
 import java.util.regex.Pattern.compile
 
 private val logger = KotlinLogging.logger {}
 
 fun Route.loginRoutes(jvtConfig: JwtConfig) {
-    val userRepository: UserRepository by inject()
     val hashService: HashService by inject()
+    val userService: UserService by inject()
 
     post("/login") {
         val credentials = call.receive<UserCredential>()
-        val user = userRepository.userByCredentials(
+
+        // check whether use login credentials are valid
+        val user = userService.getUserByCredentials(
             credentials.email,
             hashService.hashPassword(credentials.password)
         )
         if (user == null) {
+            // user not found
             call.respond(HttpStatusCode.Unauthorized)
         } else {
+            // user has logged in
+            userService.addLoggedInUser(User(user.email))
             call.respond(DataResponse(Token(jvtConfig.makeToken(UserPrincipal(user.email)))))
+            logger.debug {
+                "LoggedIn users: ${userService.getLoggedInUsers().joinToString(separator = "\n") { it.email }}"
+            }
         }
     }
 
@@ -52,11 +60,11 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
                 !credentials.email.isEmail() -> {
                     call.respond(ErrorResponse("Email not in valid format"))
                 }
-                userRepository.getUserByEmail(credentials.email) != null -> {
+                userService.getUserByEmail(credentials.email) != null -> {
                     call.respond(ErrorResponse("Email already in use"))
                 }
                 else -> {
-                    userRepository.addUser(credentials.email, hashService.hashPassword(credentials.password))
+                    userService.addUser(credentials.email, hashService.hashPassword(credentials.password))
                     call.respond(SuccessResponse())
                 }
             }

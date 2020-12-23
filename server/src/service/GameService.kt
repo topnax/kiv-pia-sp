@@ -1,20 +1,29 @@
 package com.zcu.kiv.pia.tictactoe.service
 
-import com.zcu.kiv.pia.tictactoe.model.Game
+import com.zcu.kiv.pia.tictactoe.database.logger
+import com.zcu.kiv.pia.tictactoe.model.GameLobby
 import com.zcu.kiv.pia.tictactoe.model.User
 
 interface GameService {
     fun playGame(): String
 
-    fun createGame(user: User, boardSize: Int): Boolean
+    fun createGame(user: User, boardSize: Int, victoriousCells: Int): Boolean
 
     fun addUserToAGame(user: User, gameId: Int): Boolean
+
+    fun isItUsersTurn(user: User, gameLobby: GameLobby): Boolean
 
     fun removeUserFromAGame(user: User, gameId: Int): Boolean
 
     fun removeUserFromAGame(user: User): Boolean
 
     fun isUserInAGame(user: User): Boolean
+
+    fun placeSeed(user: User, row: Int, column: Int): Boolean
+
+    fun startGame(gameLobby: GameLobby): Boolean
+
+    fun getGameByUser(user: User): GameLobby?
 }
 
 class GameRepository {
@@ -28,20 +37,25 @@ class GameServiceImpl(private val gameRepository: GameRepository) : GameService 
     /**
      * User IDs to a game they participate in
      */
-    private val userToGames = hashMapOf<Int, Game>()
+    private val userToGames = hashMapOf<Int, GameLobby>()
 
-    private val games = hashMapOf<Int, Game>()
+    private val games = hashMapOf<Int, GameLobby>()
 
-    override fun createGame(user: User, boardSize: Int): Boolean {
+    override fun createGame(user: User, boardSize: Int, victoriousCells: Int): Boolean {
         if (isUserInAGame(user)) return false
 
-        val game = Game(availableId, user, boardSize)
+        val game = GameLobby(availableId, user, boardSize, victoriousCells)
         games[availableId] = game
         userToGames[user.id] = game
         // TODO update all games list and propagate this change via websockets to all waiting players
         availableId++
 
         return true
+    }
+
+    override fun isItUsersTurn(user: User, gameLobby: GameLobby): Boolean {
+        val userSeed = if (user == gameLobby.owner) gameLobby.ownerSeed else gameLobby.opponentSeed
+        return gameLobby.game?.currentSeed == userSeed
     }
 
     override fun addUserToAGame(user: User, gameId: Int): Boolean {
@@ -54,6 +68,29 @@ class GameServiceImpl(private val gameRepository: GameRepository) : GameService 
             return true
         }
         return false
+    }
+
+    override fun startGame(gameLobby: GameLobby): Boolean {
+        if (gameLobby.start()) {
+            // TODO notify opponent that the game has started
+            //
+            return true
+        }
+        return false
+    }
+
+    override fun placeSeed(user: User, row: Int, column: Int): Boolean {
+        val game = userToGames[user.id]
+
+        logger.debug { "game is null? ${game == null}" }
+
+        if (game?.game == null) return false
+
+        logger.debug { "game.game is null - no!" }
+        val seed = if (game.owner == user) game.ownerSeed else game.opponentSeed
+        val added = game.game?.addSeed(row, column, seed) ?: false
+        // TODO check whether the game has ended
+        return added
     }
 
     override fun removeUserFromAGame(user: User, gameId: Int): Boolean {
@@ -79,12 +116,14 @@ class GameServiceImpl(private val gameRepository: GameRepository) : GameService 
     }
 
     override fun removeUserFromAGame(user: User): Boolean {
-       val game = userToGames[user.id]
+        val game = userToGames[user.id]
         game?.let {
             return removeUserFromAGame(user, game.id)
         }
         return false
     }
+
+    override fun getGameByUser(user: User): GameLobby? = userToGames[user.id]
 
     override fun isUserInAGame(user: User) = userToGames.containsKey(user.id)
 

@@ -2,7 +2,7 @@ package com.zcu.kiv.pia.tictactoe.game
 
 import org.junit.Test
 
-class TicTacToeGameTest {
+class TicTacToeGameLobbyTest {
     @Test
     fun testAddSeed() {
         val g = TicTacToeGame(3, Seed.CROSS, 3)

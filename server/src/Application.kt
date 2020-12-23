@@ -72,6 +72,7 @@ fun Application.module(testing: Boolean = false) {
 
         routing {
 
+            gameRoutes()
             loginRoutes(jvtConfig)
 
             userProfileRoutes()
@@ -95,7 +96,6 @@ fun Application.module(testing: Boolean = false) {
 //    }
 
     routing {
-        gameRoutes()
         get("/") {
             call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
         }

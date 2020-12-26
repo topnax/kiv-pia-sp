@@ -36,6 +36,16 @@ fun Application.module(testing: Boolean = false) {
         )
     }
 
+    install(CORS) {
+        method(HttpMethod.Options)
+        header(HttpHeaders.XForwardedProto)
+
+        // TODO change
+        anyHost()
+        allowCredentials = true
+        allowNonSimpleContentTypes = true
+    }
+
     install(ContentNegotiation) {
         jackson {
             enable(SerializationFeature.INDENT_OUTPUT)

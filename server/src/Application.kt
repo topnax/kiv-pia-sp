@@ -1,6 +1,7 @@
 package com.zcu.kiv.pia.tictactoe
 
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.zcu.kiv.pia.tictactoe.authentication.JwtConfig
 import com.zcu.kiv.pia.tictactoe.controller.gameRoutes
 import com.zcu.kiv.pia.tictactoe.controller.loginRoutes
@@ -29,6 +30,15 @@ fun Application.module(testing: Boolean = false) {
 
     install(DefaultHeaders)
     install(CallLogging)
+
+    // handle call handler exceptions
+    install(StatusPages) {
+        // JSON parser exception
+        exception<MissingKotlinParameterException> { cause ->
+            logger.info {"Got MissingKotlinParameterException: ${cause.message}"}
+            call.respond(HttpStatusCode.BadRequest)
+        }
+    }
 
     install(Koin) {
         modules(
@@ -82,10 +92,13 @@ fun Application.module(testing: Boolean = false) {
 
         routing {
 
-            gameRoutes()
-            loginRoutes(jvtConfig)
+            route("/api") {
+                gameRoutes()
 
-            userProfileRoutes()
+                loginRoutes(jvtConfig)
+
+                userProfileRoutes()
+            }
 
             authenticate(JWT_AUTH_NAME) {
                 get("/secret") {

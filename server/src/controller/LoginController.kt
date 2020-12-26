@@ -23,26 +23,30 @@ import java.util.regex.Pattern.compile
 private val logger = KotlinLogging.logger {}
 
 fun Route.loginRoutes(jvtConfig: JwtConfig) {
+
     val hashService: HashService by inject()
     val userService: UserService by inject()
 
-    post("/login") {
-        val credentials = call.receive<UserCredential>()
+    route("/auth") {
+        post("/login") {
+            val credentials = call.receive<UserCredential>()
 
-        // check whether use login credentials are valid
-        val user = userService.getUserByCredentials(
-            credentials.email,
-            hashService.hashPassword(credentials.password)
-        )
-        if (user == null) {
-            // user not found
-            call.respond(HttpStatusCode.Unauthorized)
-        } else {
-            // user has logged in
-            userService.addLoggedInUser(User(user.id, user.email))
-            call.respond(DataResponse(Token(jvtConfig.makeToken(UserPrincipal(user.id, user.email)))))
-            logger.debug {
-                "LoggedIn users: ${userService.getLoggedInUsers().joinToString(separator = "\n") { it.email }}"
+
+            // check whether use login credentials are valid
+            val user = userService.getUserByCredentials(
+                credentials.email,
+                hashService.hashPassword(credentials.password)
+            )
+            if (user == null) {
+                // user not found
+                call.respond(HttpStatusCode.Unauthorized)
+            } else {
+                // user has logged in
+                userService.addLoggedInUser(User(user.id, user.email))
+                call.respond(DataResponse(Token(jvtConfig.makeToken(UserPrincipal(user.id, user.email)))))
+                logger.debug {
+                    "LoggedIn users: ${userService.getLoggedInUsers().joinToString(separator = "\n") { it.email }}"
+                }
             }
         }
     }

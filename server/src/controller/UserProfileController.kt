@@ -50,18 +50,18 @@ fun Route.userProfileRoutes() {
                     )
                 }
 
-                userService.getUserByCredentials(email, hashService.hashPassword(request.currentPassword)) == null -> {
-                    call.respond(
-                        HttpStatusCode.Unauthorized,
-                        ErrorResponse("Current password not correct")
-                    )
-                }
-
                 else -> {
-                    userService.changeUserPassword(User(id, email), hashService.hashPassword(request.password))
-                    call.respond(
-                        SuccessResponse()
-                    )
+                    userService.getUserByCredentials(email, hashService.hashPassword(request.currentPassword))?.let {
+                        userService.changeUserPassword(it, hashService.hashPassword(request.password))
+                        call.respond(
+                            SuccessResponse()
+                        )
+                    } ?: run {
+                        call.respond(
+                            HttpStatusCode.Unauthorized,
+                            ErrorResponse("Current password not correct")
+                        )
+                    }
                 }
             }
         }

@@ -11,7 +11,7 @@ class GameLobbyTest {
     fun `user should be able to create just one game`(){
         val gameService = GameServiceImpl(GameRepository())
 
-        val user1 = User(1, "foo@bar.cz")
+        val user1 = User(1, "foo@bar.cz", "foo")
 
         assert(gameService.createGame(user1, 10, 3))
         assert(!gameService.createGame(user1, 10, 3))
@@ -21,8 +21,8 @@ class GameLobbyTest {
     fun `user should be able to join an existing game`(){
         val gameService = GameServiceImpl(GameRepository())
 
-        val user1 = User(1, "foo@bar.cz")
-        val user2 = User(2, "foo@bar.cz")
+        val user1 = User(1, "foo@bar.cz", "foo")
+        val user2 = User(2, "foo@bar.cz", "foo")
 
         assert(gameService.createGame(user1, 10, 3))
         assert(gameService.addUserToAGame(user2, 0))

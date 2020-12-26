@@ -8,6 +8,7 @@ import com.zcu.kiv.pia.tictactoe.model.User
 import com.zcu.kiv.pia.tictactoe.model.response.DataResponse
 import com.zcu.kiv.pia.tictactoe.model.response.ErrorResponse
 import com.zcu.kiv.pia.tictactoe.model.response.SuccessResponse
+import com.zcu.kiv.pia.tictactoe.request.game.RegisterRequest
 import com.zcu.kiv.pia.tictactoe.service.UserService
 import com.zcu.kiv.pia.tictactoe.service.HashService
 import com.zcu.kiv.pia.tictactoe.utils.PasswordRuleVerifier
@@ -42,8 +43,8 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
                 call.respond(HttpStatusCode.Unauthorized)
             } else {
                 // user has logged in
-                userService.addLoggedInUser(User(user.id, user.email))
-                call.respond(DataResponse(Token(jvtConfig.makeToken(UserPrincipal(user.id, user.email)))))
+                userService.addLoggedInUser(user)
+                call.respond(DataResponse(Token(jvtConfig.makeToken(UserPrincipal(user.id, user.email, user.username)))))
                 logger.debug {
                     "LoggedIn users: ${userService.getLoggedInUsers().joinToString(separator = "\n") { it.email }}"
                 }
@@ -52,23 +53,26 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
     }
 
     post("/register") {
-        val credentials = call.receive<UserCredential>()
+        val request = call.receive<RegisterRequest>()
 
-        with(PasswordRuleVerifier.verifyPassword(credentials.password).joinToString(separator = "\n") {
+        with(PasswordRuleVerifier.verifyPassword(request.password).joinToString(separator = "\n") {
             it.violationMessage
         }) {
             when {
                 isNotEmpty() -> {
                     call.respond(ErrorResponse(this))
                 }
-                !credentials.email.isEmail() -> {
+                !request.email.isEmail() -> {
                     call.respond(ErrorResponse("Email not in valid format"))
                 }
-                userService.getUserByEmail(credentials.email) != null -> {
+                userService.getUserByEmail(request.email) != null -> {
                     call.respond(ErrorResponse("Email already in use"))
                 }
+                userService.getUserByUsername(request.username) != null -> {
+                    call.respond(ErrorResponse("Username already in use"))
+                }
                 else -> {
-                    userService.addUser(credentials.email, hashService.hashPassword(credentials.password))
+                    userService.addUser(request.email, request.username, hashService.hashPassword(request.password))
                     call.respond(SuccessResponse())
                 }
             }

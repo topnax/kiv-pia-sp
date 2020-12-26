@@ -8,12 +8,17 @@ interface UserService {
     /**
      * Adds a user to a persistent database
      */
-    suspend fun addUser(email: String, password: String)
+    suspend fun addUser(email: String, username: String, password: String)
 
     /**
      * Searches for a user in a persistent database by the specified email
      */
     suspend fun getUserByEmail(email: String): User?
+
+    /**
+     * Searches for a user in a persistent database by the specified username
+     */
+    suspend fun getUserByUsername(username: String): User?
 
     /**
      * Returns all users in the persistent database
@@ -53,9 +58,12 @@ class UserServiceImpl(
     private val inMemoryUserRepository: InMemoryUserRepository
 ) : UserService {
 
-    override suspend fun addUser(email: String, password: String) = persistentUserRepository.addUser(email, password)
+    override suspend fun addUser(email: String, username: String, password: String) =
+        persistentUserRepository.addUser(email, password, username)
 
     override suspend fun getUserByEmail(email: String) = persistentUserRepository.getUserByEmail(email)
+
+    override suspend fun getUserByUsername(username: String) = persistentUserRepository.getUserByUsername(username)
 
     override suspend fun getUsers() = persistentUserRepository.getUsers()
 

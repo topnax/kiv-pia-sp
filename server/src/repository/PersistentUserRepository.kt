@@ -9,9 +9,11 @@ import org.jetbrains.exposed.sql.*
 private val logger = KotlinLogging.logger {}
 
 interface PersistentUserRepository {
-    suspend fun addUser(email: String, password: String)
+    suspend fun addUser(email: String, username: String, password: String)
 
     suspend fun getUserByEmail(email: String): User?
+
+    suspend fun getUserByUsername(username: String): User?
 
     suspend fun getUsers(): List<User>
 
@@ -23,10 +25,11 @@ interface PersistentUserRepository {
 class SQLUserRepository : PersistentUserRepository {
 
     private fun toUser(row: ResultRow): User =
-        User(row[Users.id].value, row[Users.email])
+        User(row[Users.id].value, row[Users.email], row[Users.username])
 
-    override suspend fun addUser(email: String, password: String): Unit = dbQuery {
+    override suspend fun addUser(email: String, username: String, password: String): Unit = dbQuery {
         Users.insert {
+            it[Users.email] = email
             it[Users.email] = email
             it[Users.password] = password
         }
@@ -41,6 +44,12 @@ class SQLUserRepository : PersistentUserRepository {
     override suspend fun getUserByEmail(email: String): User? = dbQuery {
         Users.select {
             (Users.email eq email)
+        }.mapNotNull { toUser(it) }.singleOrNull()
+    }
+
+    override suspend fun getUserByUsername(username: String): User? = dbQuery {
+        Users.select {
+            (Users.username eq username)
         }.mapNotNull { toUser(it) }.singleOrNull()
     }
 

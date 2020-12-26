@@ -38,6 +38,7 @@ fun Application.module(testing: Boolean = false) {
             logger.info {"Got MissingKotlinParameterException: ${cause.message}"}
             call.respond(HttpStatusCode.BadRequest)
         }
+        // TODO invalid json
     }
 
     install(Koin) {
@@ -81,7 +82,8 @@ fun Application.module(testing: Boolean = false) {
                     with(it.payload) {
                         val email = getClaim("email").isNull
                         val id = getClaim("id").isNull
-                        if (email || id)
+                        val username = getClaim("username").isNull
+                        if (email || id || username)
                             null
                         else
                             JWTPrincipal(it.payload)

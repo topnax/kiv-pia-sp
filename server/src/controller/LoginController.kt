@@ -1,5 +1,6 @@
 package com.zcu.kiv.pia.tictactoe.controller
 
+import com.zcu.kiv.pia.tictactoe.JWT_AUTH_NAME
 import com.zcu.kiv.pia.tictactoe.authentication.JwtConfig
 import com.zcu.kiv.pia.tictactoe.authentication.Token
 import com.zcu.kiv.pia.tictactoe.authentication.UserCredential
@@ -13,6 +14,7 @@ import com.zcu.kiv.pia.tictactoe.service.UserService
 import com.zcu.kiv.pia.tictactoe.service.HashService
 import com.zcu.kiv.pia.tictactoe.utils.PasswordRuleVerifier
 import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
@@ -29,9 +31,17 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
     val userService: UserService by inject()
 
     route("/auth") {
+        authenticate(JWT_AUTH_NAME) {
+            get("/user") {
+                call.respond(User.fromJWTToken(call.principal()!!))
+            }
+            post("/logout") {
+                call.respond(SuccessResponse())
+            }
+        }
+
         post("/login") {
             val credentials = call.receive<UserCredential>()
-
 
             // check whether use login credentials are valid
             val user = userService.getUserByCredentials(
@@ -44,7 +54,19 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
             } else {
                 // user has logged in
                 userService.addLoggedInUser(user)
-                call.respond(DataResponse(Token(jvtConfig.makeToken(UserPrincipal(user.id, user.email, user.username)))))
+                call.respond(
+                    DataResponse(
+                        Token(
+                            jvtConfig.makeToken(
+                                UserPrincipal(
+                                    user.id,
+                                    user.email,
+                                    user.username
+                                )
+                            )
+                        )
+                    )
+                )
                 logger.debug {
                     "LoggedIn users: ${userService.getLoggedInUsers().joinToString(separator = "\n") { it.email }}"
                 }
@@ -90,6 +112,6 @@ private val emailRegex = compile(
             ")+"
 )
 
-fun String.isEmail() : Boolean {
+fun String.isEmail(): Boolean {
     return emailRegex.matcher(this).matches()
 }

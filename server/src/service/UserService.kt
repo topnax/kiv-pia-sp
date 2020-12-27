@@ -59,7 +59,7 @@ class UserServiceImpl(
 ) : UserService {
 
     override suspend fun addUser(email: String, username: String, password: String) =
-        persistentUserRepository.addUser(email, password, username)
+        persistentUserRepository.addUser(email, username, password)
 
     override suspend fun getUserByEmail(email: String) = persistentUserRepository.getUserByEmail(email)
 

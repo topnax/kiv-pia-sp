@@ -30,7 +30,7 @@ class SQLUserRepository : PersistentUserRepository {
     override suspend fun addUser(email: String, username: String, password: String): Unit = dbQuery {
         Users.insert {
             it[Users.email] = email
-            it[Users.email] = email
+            it[Users.username] = username
             it[Users.password] = password
         }
     }

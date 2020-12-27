@@ -28,13 +28,13 @@
                   :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                   @click:append="showPassword = !showPassword"/>
 
-                <v-btn text @click="loginUser" >SIGN IN</v-btn>
+                <v-btn text @click="loginUser">SIGN IN</v-btn>
               </v-tab-item>
 
               <v-tab-item class="pa-5" align="center">
                 <span class="subtitle-1 font-weight-light">Do not have an account yet? Sign up, it's free!</span>
                 <v-text-field
-                  v-model="email"
+                  v-model="emailR"
                   :rules="emailRules"
                   label="E-mail"
                   required
@@ -48,16 +48,23 @@
                   required
                 ></v-text-field>
                 <v-text-field
+                  v-model="passwordR"
                   label="Password"
+                  :rules="passwordRules"
+                  :counter="20"
                   :type="showPassword ? 'text' : 'password'"
                   :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                   @click:append="showPassword = !showPassword"/>
                 <v-text-field
                   label="Repeat password"
-                  :type="showPassword ? 'text' : 'password'"/>
-                <v-btn text >SIGN UP</v-btn>
+                  v-model="passwordRConfirm"
+                  :rules="[passwordConfirmationRule]"
+                  :type="showPassword ? 'text' : 'password'"
+                />
+                <v-btn text
+                       @click="register">SIGN UP
+                </v-btn>
               </v-tab-item>
-
             </v-tabs>
           </v-card>
         </v-col>
@@ -71,12 +78,20 @@ import Logo from '~/components/Logo.vue'
 import VuetifyLogo from '~/components/VuetifyLogo.vue'
 
 export default {
+  computed: {
+    passwordConfirmationRule() {
+      return () => (this.passwordR === this.passwordRConfirm) || 'Password must match'
+    }
+  },
+
   data: () => ({
 
     showLogin: true,
     showPassword: false,
     valid: false,
     password: "",
+    passwordR: "",
+    passwordRConfirm: "",
     username: '',
     lastname: '',
     nameRules: [
@@ -84,31 +99,76 @@ export default {
       v => v.length <= 16 || 'Username must be less than 16 characters',
     ],
     email: '',
+    emailR: '',
     emailRules: [
       v => !!v || 'E-mail is required',
       v => /.+@.+/.test(v) || 'E-mail must be valid',
     ],
+    passwordRules: [
+      p => !!p || "Password is required",
+      p => p.length >= 8 || "Password must consist of at least 8 characters",
+      p => p.length <= 20 || "Password must consist of 20 characters at most",
+      p => containsUppercase(p) || "Password must contain at least one uppercase character",
+      p => containsLowercase(p) || "Password must contain at least one lowercase character",
+      p => containsNumber(p) || "Password must contain at least one number",
+    ],
+
   }),
   components: {
     Logo,
     VuetifyLogo
   },
   methods: {
+
     async loginUser() {
-      alert(this.email + this.password);
       try {
         await this.$auth.loginWith("local", {
           data: {
-            username: this.email,
+            email: this.email,
             password: this.password
           }
         });
-        alert("have logged in :)");
+        await this.$store.dispatch("snackbar/showSuccess", "Logged in!");
       } catch (e) {
-        console.log(e);
-        alert("Failed to log in :(");
+        await this.$store.dispatch("snackbar/showError", "Invalid credentials");
       }
+    },
+
+    async register() {
+      await this.$store.dispatch("login/register", {
+        email: this.emailR,
+        username: this.username,
+        password: this.passwordR
+      })
     }
   }
 }
+
+function containsNumber(password) {
+  for (const c of password) {
+    if (c >= '0' && c <= '9') {
+      return true
+    }
+  }
+  return false
+}
+
+function containsLowercase(password) {
+  for (const c of password) {
+    if (c.toLowerCase() === c) {
+      return true
+    }
+  }
+  return false
+}
+
+function containsUppercase(password) {
+  for (const c of password) {
+    if (c.toUpperCase() === c) {
+      return true
+    }
+  }
+  return false
+}
+
 </script>

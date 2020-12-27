@@ -19,7 +19,7 @@
             <v-icon>{{ item.icon }}</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title v-text="item.title" />
+            <v-list-item-title v-text="item.title"/>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -29,7 +29,7 @@
       fixed
       app
     >
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer"/>
       <v-btn
         icon
         @click.stop="miniVariant = !miniVariant"
@@ -48,8 +48,8 @@
       >
         <v-icon>mdi-minus</v-icon>
       </v-btn>
-      <v-toolbar-title v-text="title" />
-      <v-spacer />
+      <v-toolbar-title v-text="title"/>
+      <v-spacer/>
       <v-btn
         icon
         @click.stop="rightDrawer = !rightDrawer"
@@ -59,7 +59,22 @@
     </v-app-bar>
     <v-main>
       <v-container>
-        <nuxt />
+        <nuxt/>
+        <v-snackbar
+          v-model="showing"
+          :timeout="timeout"
+          :color="snackbar.color"
+        >
+          {{ snackbar.text }}
+          <v-btn
+            color="white"
+            text
+            @click="showing = false"
+            align-end
+          >
+            Close
+          </v-btn>
+        </v-snackbar>
       </v-container>
     </v-main>
     <v-navigation-drawer
@@ -89,9 +104,24 @@
 </template>
 
 <script>
+import {mapState} from 'vuex'
+
 export default {
-  data () {
+  computed: {
+    showing: {
+      get() {
+        return this.$store.state.snackbar.showing
+      },
+      set(v) {
+        this.$store.commit('snackbar/SET_SNACKBAR', {showing: v})
+      }
+    },
+    ...mapState(["snackbar"])
+
+  },
+  data() {
     return {
+      timeout: 2000,
       clipped: false,
       drawer: false,
       fixed: false,

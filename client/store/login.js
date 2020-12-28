@@ -29,7 +29,11 @@ export const actions = {
       })
       await context.dispatch("snackbar/showSuccess", "Logged in!", {root: true})
     } catch (e) {
-      await context.dispatch("snackbar/showError", "Invalid credentials", {root: true})
+      if (e.response && e.response.status && e.response.status === 401){
+        await context.dispatch("snackbar/showError", "Invalid credentials", {root: true})
+      } else {
+        await context.dispatch("snackbar/showError", "Failed to login into the service", {root: true})
+      }
     }
   }
 }

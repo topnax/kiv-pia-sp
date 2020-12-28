@@ -55,7 +55,6 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
                 // user has logged in
                 userService.addLoggedInUser(user)
                 call.respond(
-                    DataResponse(
                         Token(
                             jvtConfig.makeToken(
                                 UserPrincipal(
@@ -65,7 +64,6 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
                                 )
                             )
                         )
-                    )
                 )
                 logger.debug {
                     "LoggedIn users: ${userService.getLoggedInUsers().joinToString(separator = "\n") { it.email }}"

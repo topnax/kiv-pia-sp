@@ -53,6 +53,7 @@ fun Application.module(testing: Boolean = false) {
 
         // TODO change
         anyHost()
+        header("Authorization")
         allowCredentials = true
         allowNonSimpleContentTypes = true
     }

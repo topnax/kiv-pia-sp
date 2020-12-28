@@ -33,7 +33,7 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
     route("/auth") {
         authenticate(JWT_AUTH_NAME) {
             get("/user") {
-                call.respond(User.fromJWTToken(call.principal()!!))
+                call.respond(DataResponse(User.fromJWTToken(call.principal()!!)))
             }
             post("/logout") {
                 call.respond(SuccessResponse())

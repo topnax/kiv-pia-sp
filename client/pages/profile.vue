@@ -53,7 +53,6 @@ export default {
     passwordR: "",
     // TODO reuse password rules between registration and this screen
     passwordRules: [
-      p => !!p || "Password is required",
       p => p.length >= 8 || "Password must consist of at least 8 characters",
       p => p.length <= 20 || "Password must consist of 20 characters at most",
       p => containsUppercase(p) || "Password must contain at least one uppercase character",
@@ -63,6 +62,7 @@ export default {
   }),
   methods: {
     async change() {
+
       let data = {
         email: this.$store.$auth.user.email,
         password: this.passwordR,
@@ -70,6 +70,9 @@ export default {
         currentPassword: this.password
       }
       await this.$store.dispatch("profile/changePassword", data)
+      this.passwordR = ""
+      this.passwordRConfirm = ""
+      this.password = ""
     }
   }
 }

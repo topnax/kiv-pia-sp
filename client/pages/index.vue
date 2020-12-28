@@ -121,24 +121,18 @@ export default {
   methods: {
 
     async loginUser() {
-      try {
-        await this.$auth.loginWith("local", {
-          data: {
-            email: this.email,
-            password: this.password
-          }
-        });
-        await this.$store.dispatch("snackbar/showSuccess", "Logged in!");
-      } catch (e) {
-        await this.$store.dispatch("snackbar/showError", "Invalid credentials");
-      }
+      await this.$store.dispatch("login/login", {
+        email: this.email,
+        password: this.password
+      })
     },
 
     async register() {
       await this.$store.dispatch("login/register", {
         email: this.emailR,
         username: this.username,
-        password: this.passwordR
+        password: this.passwordR,
+        login: true
       })
     }
   }

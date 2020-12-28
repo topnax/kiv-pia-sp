@@ -54,17 +54,23 @@ export default {
           property: 'token',
         },
         user: {
-          property: 'user',
-          // autoFetch: true
+          property: 'data'
         },
         endpoints: {
           login: {url: "/auth/login", method: "post", propertyName: "token"},
           logout: {url: "/auth/logout", method: "post"},
           user: {url: "/auth/user", method: "get"},
-        }
+        },
+
 
       },
-    }
+
+    },
+    redirect: {
+      home: '/dashboard',
+      login: '/',
+      logout: '/',
+    },
   },
 
 

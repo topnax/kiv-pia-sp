@@ -36,6 +36,7 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
                 call.respond(DataResponse(User.fromJWTToken(call.principal()!!)))
             }
             post("/logout") {
+                userService.removeLoggedInUser(User.fromJWTToken(call.principal()!!))
                 call.respond(SuccessResponse())
             }
         }

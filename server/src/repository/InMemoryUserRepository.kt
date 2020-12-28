@@ -21,7 +21,7 @@ class RedisUserRepository(private val redis: RedisDatabase): InMemoryUserReposit
     }
 
     override fun removeLoggedInUser(user: User) {
-        redis.client.srem(jsonMapper.writeValueAsString(user))
+        redis.client.srem("$dbName:loggedin", jsonMapper.writeValueAsString(user))
     }
 
     override fun getLoggedInUsers(): List<User> {

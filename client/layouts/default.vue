@@ -94,19 +94,16 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
-    <v-footer
-      :absolute="!fixed"
-      app
-    >
-      <span>&copy; {{ new Date().getFullYear() }}</span>
-    </v-footer>
+    <Footer/>
   </v-app>
 </template>
 
 <script>
 import {mapState} from 'vuex'
+import Footer from "@/components/Footer";
 
 export default {
+  components: {Footer},
   computed: {
     showing: {
       get() {

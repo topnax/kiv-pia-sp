@@ -1,6 +1,3 @@
-import com.auth0.jwt.JWT
-import com.auth0.jwt.exceptions.JWTVerificationException
-import com.auth0.jwt.impl.JWTParser
 import com.zcu.kiv.pia.tictactoe.authentication.JwtConfig
 import com.zcu.kiv.pia.tictactoe.model.User
 import com.zcu.kiv.pia.tictactoe.service.SimpleMessageParser
@@ -26,8 +23,8 @@ class SimpleMessageParserTest {
        val audience = "tictactoe-audience"
        val realm = "kiv pia SP - tictactoe "
        val token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJBdXRoZW50aWNhdGlvbiIsImlzcyI6ImxvY2FsaG9zdCIsImlkIjoyLCJleHAiOjE2MDkzNzAwMTgsImVtYWlsIjoiZm9vMkBiYXIuY3oiLCJ1c2VybmFtZSI6ImZvbzIifQ.rFR4QSYmrDdFNHk-RllhUJta6guJKOU2zmQdSjGfjyibMczD-rM1NpuWCwYDBTy-bHmorTXl9ZDtOp9pClEN-w"
-       val jvtConfig = JwtConfig(domain, secret, 10 * 60)
-       val payload = jvtConfig.verifier.verify(token)
+       val jwtConfig = JwtConfig(domain, secret, 10 * 60)
+       val payload = jwtConfig.verifier.verify(token)
 
        val user = User.fromJWTToken(JWTPrincipal(payload))
        assertEquals("foo2@bar.cz", user.email)

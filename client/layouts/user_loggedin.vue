@@ -22,6 +22,7 @@
             <v-list-item-title v-text="item.title"/>
           </v-list-item-content>
         </v-list-item>
+
         <v-list-item
           :key="99"
           @click.stop="logout"
@@ -160,6 +161,11 @@ export default {
           icon: 'mdi-account',
           title: 'Profile',
           to: '/profile'
+        },
+        {
+          icon: 'mdi-account-multiple',
+          title: 'Friends',
+          to: '/friends'
         }
       ],
       rightDrawer: true,

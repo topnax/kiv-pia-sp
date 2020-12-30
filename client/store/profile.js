@@ -1,4 +1,3 @@
-
 export const actions = {
   async changePassword(context, data) {
     try {

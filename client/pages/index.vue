@@ -76,6 +76,8 @@
 <script>
 import Logo from '~/components/Logo.vue'
 import VuetifyLogo from '~/components/VuetifyLogo.vue'
+import Vue from 'vue'
+import VueNativeSock from 'vue-native-websocket'
 
 export default {
   computed: {
@@ -83,7 +85,11 @@ export default {
       return () => (this.passwordR === this.passwordRConfirm) || 'Password must match'
     }
   },
+  mounted() {
 
+    console.log("ws!")
+    Vue.use(VueNativeSock, 'ws://localhost:8080/api/ws', { store: this.$store.websocket })
+  },
   data: () => ({
 
     showLogin: true,

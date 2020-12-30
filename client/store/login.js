@@ -24,10 +24,12 @@ export const actions = {
 
   async login(context, data) {
     try {
-      await this.$auth.loginWith("local", {
+      let result = await this.$auth.loginWith("local", {
         data
       })
+      console.log(result)
       await context.dispatch("snackbar/showSuccess", "Logged in!", {root: true})
+      await context.dispatch("websocket/sendMessage", "jwt;" + result.data.token, {root: true})
     } catch (e) {
       if (e.response && e.response.status && e.response.status === 401){
         await context.dispatch("snackbar/showError", "Invalid credentials", {root: true})

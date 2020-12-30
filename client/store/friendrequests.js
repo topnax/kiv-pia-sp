@@ -18,13 +18,14 @@ export const actions = {
     context.commit("SET_LOADING", true)
     await new Promise(resolve => setTimeout(resolve, 200))
     try {
-      let result = await this.$axios.$post("/friend/accept", {
+      let result = await this.$axios.$post("/friend/acceptRequest", {
         requestId
       })
 
       if (result.responseCode === 0) {
         await context.dispatch("fetchRequests")
         await context.dispatch("snackbar/showSuccess", "Friend request accepted!", {root: true})
+        await context.dispatch("friends/fetchFriends", "", {root: true})
       } else {
 
         await context.dispatch("snackbar/showError", result.message, {root: true})
@@ -39,7 +40,7 @@ export const actions = {
     context.commit("SET_LOADING", true)
     await new Promise(resolve => setTimeout(resolve, 200))
     try {
-      let result = await this.$axios.$post("/friend/decline", {
+      let result = await this.$axios.$post("/friend/declineRequest", {
         requestId
       })
 

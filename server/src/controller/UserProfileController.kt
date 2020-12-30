@@ -25,16 +25,16 @@ fun Route.userProfileRoutes() {
     authenticate(JWT_AUTH_NAME) {
         post("/profile/changepassword") {
             val request = call.receive<ChangePasswordRequest>()
-            val email = call.principal<JWTPrincipal>()?.payload?.getClaim("email")?.asString()
-            val id = call.principal<JWTPrincipal>()?.payload?.getClaim("id")?.asInt()
+            val user = User.fromJWTToken(call.principal()!!)
+            val email = user.email
 
             when {
-                email == null || id == null -> {
+/*                email == null || id == null -> {
                     call.respond(
                         HttpStatusCode.Unauthorized,
                         ErrorResponse("Cannot change the password without being logged in")
                     )
-                }
+                }*/
 
                 email != request.email -> {
                     call.respond(

@@ -11,6 +11,8 @@ private val logger = KotlinLogging.logger {}
 interface PersistentUserRepository {
     suspend fun addUser(email: String, username: String, password: String)
 
+    suspend fun getUserById(id: Int): User?
+
     suspend fun getUserByEmail(email: String): User?
 
     suspend fun getUserByUsername(username: String): User?
@@ -44,6 +46,12 @@ class SQLUserRepository : PersistentUserRepository {
     override suspend fun getUserByEmail(email: String): User? = dbQuery {
         Users.select {
             (Users.email eq email)
+        }.mapNotNull { toUser(it) }.singleOrNull()
+    }
+
+    override suspend fun getUserById(id: Int) = dbQuery {
+        Users.select {
+            (Users.id eq id)
         }.mapNotNull { toUser(it) }.singleOrNull()
     }
 

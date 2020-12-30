@@ -3,6 +3,7 @@ package com.zcu.kiv.pia.tictactoe
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.zcu.kiv.pia.tictactoe.authentication.JwtConfig
+import com.zcu.kiv.pia.tictactoe.controller.friendRoutes
 import com.zcu.kiv.pia.tictactoe.controller.gameRoutes
 import com.zcu.kiv.pia.tictactoe.controller.loginRoutes
 import com.zcu.kiv.pia.tictactoe.controller.userProfileRoutes
@@ -13,11 +14,14 @@ import io.ktor.auth.*
 import io.ktor.auth.jwt.*
 import io.ktor.features.*
 import io.ktor.http.*
+import io.ktor.http.cio.websocket.*
 import io.ktor.jackson.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import io.ktor.websocket.*
 import mu.KotlinLogging
 import org.koin.ktor.ext.Koin
+import java.time.Duration
 
 const val JWT_AUTH_NAME = "jwt-auth"
 private val logger = KotlinLogging.logger {}
@@ -64,6 +68,13 @@ fun Application.module(testing: Boolean = false) {
         }
     }
 
+    install(WebSockets) {
+        pingPeriod = Duration.ofSeconds(15)
+        timeout = Duration.ofSeconds(15)
+        maxFrameSize = Long.MAX_VALUE
+        masking = false
+    }
+
     if (!testing) {
         logger.debug { "not testing" }
         DatabaseFactory.init()
@@ -101,6 +112,8 @@ fun Application.module(testing: Boolean = false) {
                 loginRoutes(jvtConfig)
 
                 userProfileRoutes()
+
+                friendRoutes()
             }
 
             authenticate(JWT_AUTH_NAME) {

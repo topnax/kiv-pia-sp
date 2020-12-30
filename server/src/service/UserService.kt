@@ -11,6 +11,11 @@ interface UserService {
     suspend fun addUser(email: String, username: String, password: String)
 
     /**
+     * Searches for a user in a persistent database by the specified id
+     */
+    suspend fun getUserById(id: Int): User?
+
+    /**
      * Searches for a user in a persistent database by the specified email
      */
     suspend fun getUserByEmail(email: String): User?
@@ -62,6 +67,8 @@ class UserServiceImpl(
         persistentUserRepository.addUser(email, username, password)
 
     override suspend fun getUserByEmail(email: String) = persistentUserRepository.getUserByEmail(email)
+
+    override suspend fun getUserById(id: Int) = persistentUserRepository.getUserById(id)
 
     override suspend fun getUserByUsername(username: String) = persistentUserRepository.getUserByUsername(username)
 

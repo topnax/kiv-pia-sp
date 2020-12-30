@@ -1,10 +1,7 @@
 package com.zcu.kiv.pia.tictactoe.module
 
 import com.zcu.kiv.pia.tictactoe.database.RedisDatabase
-import com.zcu.kiv.pia.tictactoe.repository.SQLUserRepository
-import com.zcu.kiv.pia.tictactoe.repository.InMemoryUserRepository
-import com.zcu.kiv.pia.tictactoe.repository.RedisUserRepository
-import com.zcu.kiv.pia.tictactoe.repository.PersistentUserRepository
+import com.zcu.kiv.pia.tictactoe.repository.*
 import com.zcu.kiv.pia.tictactoe.service.*
 import org.koin.dsl.module
 
@@ -18,5 +15,9 @@ val mainModule = listOf(
         single { RedisDatabase() }
         single<InMemoryUserRepository> { RedisUserRepository(get()) }
         single<UserService> { UserServiceImpl(get(), get()) }
+
+        single<FriendListRepository> { SQLFriendListRepository() }
+        single<FriendRequestRepository> { SQLFriendRequestRepository() }
+        single<FriendService> { FriendServiceImpl(get(), get(), get()) }
     }
 )

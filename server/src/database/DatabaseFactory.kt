@@ -1,5 +1,6 @@
 package com.zcu.kiv.pia.tictactoe.database
 
+import com.zcu.kiv.pia.tictactoe.repository.FriendListRepository
 import mu.KotlinLogging
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -34,6 +35,8 @@ object DatabaseFactory {
         transaction {
             addLogger(StdOutSqlLogger)
             SchemaUtils.create(Users)
+            SchemaUtils.create(FriendRequests)
+            SchemaUtils.create(UsersFriendList)
         }
     }
 

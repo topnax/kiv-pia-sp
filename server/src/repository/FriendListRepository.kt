@@ -35,16 +35,12 @@ class SQLFriendListRepository : FriendListRepository {
     }
 
     override suspend fun getFriends(id: Int): List<User> = dbQuery {
-        val userTable1 = UsersFriendList.alias("u1")
-        val userTable2 = UsersFriendList.alias("u2")
-
-        Users.innerJoin(otherTable = userTable1, {Users.id}, {userTable1[UsersFriendList.user1Id]})
-            .innerJoin(otherTable = userTable2, {Users.id}, {userTable2[UsersFriendList.user2Id]})
+        Users.join(UsersFriendList, JoinType.INNER, additionalConstraint = {(Users.id eq UsersFriendList.user1Id) or (Users.id eq UsersFriendList.user2Id)})
             .select {
-            ((userTable1[UsersFriendList.user2Id] eq id) or (userTable2[UsersFriendList.user2Id] eq id)) and (Users.id eq id)
+            ((UsersFriendList.user2Id eq id) or (UsersFriendList.user2Id eq id)) and (Users.id neq id)
         }.map {
             User(it[Users.id].value, it[Users.email], it[Users.username])
-        }.filter { it.id != id }.toList()
+        }.toList()
     }
 
     override suspend fun isFriendship(userId1: Int, userId2: Int): Boolean = dbQuery {

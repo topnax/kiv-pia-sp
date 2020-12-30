@@ -7,10 +7,7 @@ import com.zcu.kiv.pia.tictactoe.model.response.DataResponse
 import com.zcu.kiv.pia.tictactoe.model.response.ErrorResponse
 import com.zcu.kiv.pia.tictactoe.model.response.FriendRequestResponse
 import com.zcu.kiv.pia.tictactoe.model.response.SuccessResponse
-import com.zcu.kiv.pia.tictactoe.request.AcceptFriendRequest
-import com.zcu.kiv.pia.tictactoe.request.CancelFriendRequest
-import com.zcu.kiv.pia.tictactoe.request.DeclineFriendRequest
-import com.zcu.kiv.pia.tictactoe.request.NewFriendRequest
+import com.zcu.kiv.pia.tictactoe.request.*
 import com.zcu.kiv.pia.tictactoe.service.FriendService
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -34,7 +31,7 @@ fun Route.friendRoutes() {
             }
         }
 
-        post("/accept") {
+        post("/acceptRequest") {
             val request = call.receive<AcceptFriendRequest>()
             val user = getLoggedUser()
 
@@ -45,7 +42,7 @@ fun Route.friendRoutes() {
             }
         }
 
-        post("/decline") {
+        post("/declineRequest") {
             val request = call.receive<DeclineFriendRequest>()
             val user = getLoggedUser()
 
@@ -56,14 +53,25 @@ fun Route.friendRoutes() {
             }
         }
 
-        post("/cancel") {
-            val request = call.receive<CancelFriendRequest>()
+        post("/cancelRequest") {
+            val request = call.receive<CancelFriendRequestRequest>()
             val user = getLoggedUser()
 
             if (friendService.cancelFriendRequest(request.requestId, user.id)) {
                 successResponse()
             } else {
                 errorResponse("Could not cancel the given friend request")
+            }
+        }
+
+        post("/cancel") {
+            val request = call.receive<CancelFriendshipRequest>()
+            val user = getLoggedUser()
+
+            if (friendService.cancelFriendship(user.id, request.userId)) {
+                successResponse()
+            } else {
+                errorResponse("Could not cancel a friendship.")
             }
         }
 

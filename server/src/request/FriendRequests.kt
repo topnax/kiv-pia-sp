@@ -1,6 +1,8 @@
 package com.zcu.kiv.pia.tictactoe.request
 
-class CancelFriendRequest(val requestId: Int)
+class CancelFriendRequestRequest(val requestId: Int)
+
+class CancelFriendshipRequest(val userId: Int)
 
 class AcceptFriendRequest(val requestId: Int)
 

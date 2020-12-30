@@ -9,6 +9,7 @@ import com.zcu.kiv.pia.tictactoe.model.response.FriendRequestResponse
 import com.zcu.kiv.pia.tictactoe.model.response.SuccessResponse
 import com.zcu.kiv.pia.tictactoe.request.*
 import com.zcu.kiv.pia.tictactoe.service.FriendService
+import com.zcu.kiv.pia.tictactoe.utils.*
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.request.*
@@ -92,10 +93,4 @@ fun Route.friendRoutes() {
     }
 }
 
-fun PipelineContext<Unit, ApplicationCall>.getLoggedUser() = User.fromJWTToken(this.call.principal()!!)
 
-suspend fun PipelineContext<Unit, ApplicationCall>.successResponse() = call.respond(SuccessResponse())
-suspend fun PipelineContext<Unit, ApplicationCall>.errorResponse(message: String) = call.respond(ErrorResponse(message))
-suspend fun PipelineContext<Unit, ApplicationCall>.dataResponse(any: Any) = call.respond(DataResponse(any))
-fun Route.jwtAuthenticatedRoute(path: String, build: Route.() -> Unit) =
-    authenticate(JWT_AUTH_NAME) { createRouteFromPath(path).apply(build) }

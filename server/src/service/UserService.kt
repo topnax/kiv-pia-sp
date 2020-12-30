@@ -60,7 +60,8 @@ interface UserService {
 
 class UserServiceImpl(
     private val persistentUserRepository: PersistentUserRepository,
-    private val inMemoryUserRepository: InMemoryUserRepository
+    private val inMemoryUserRepository: InMemoryUserRepository,
+    private val realtimeService: RealtimeService
 ) : UserService {
 
     override suspend fun addUser(email: String, username: String, password: String) =
@@ -83,6 +84,7 @@ class UserServiceImpl(
 
     override fun addLoggedInUser(user: User) {
         inMemoryUserRepository.addLoggedInUser(user)
+        realtimeService.addMessage(object : RealtimeMessage(RealtimeMessage.Type.USER_ONLINE){})
     }
 
     override fun removeLoggedInUser(user: User) {

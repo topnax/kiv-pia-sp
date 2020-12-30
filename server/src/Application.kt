@@ -3,10 +3,7 @@ package com.zcu.kiv.pia.tictactoe
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.zcu.kiv.pia.tictactoe.authentication.JwtConfig
-import com.zcu.kiv.pia.tictactoe.controller.friendRoutes
-import com.zcu.kiv.pia.tictactoe.controller.gameRoutes
-import com.zcu.kiv.pia.tictactoe.controller.loginRoutes
-import com.zcu.kiv.pia.tictactoe.controller.userProfileRoutes
+import com.zcu.kiv.pia.tictactoe.controller.*
 import com.zcu.kiv.pia.tictactoe.database.DatabaseFactory
 import com.zcu.kiv.pia.tictactoe.module.mainModule
 import io.ktor.application.*
@@ -114,6 +111,8 @@ fun Application.module(testing: Boolean = false) {
                 userProfileRoutes()
 
                 friendRoutes()
+
+                websocketRoutes()
             }
 
             authenticate(JWT_AUTH_NAME) {

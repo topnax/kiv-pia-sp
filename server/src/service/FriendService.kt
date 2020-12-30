@@ -9,7 +9,7 @@ import com.zcu.kiv.pia.tictactoe.repository.FriendRequestRepository
 interface FriendService {
     suspend fun addFriendRequest(request: FriendRequest): Boolean
 
-    suspend fun getFriendRequests(user: User): List<FriendRequest>
+    suspend fun getFriendRequests(user: User): List<Pair<Int, String>>
 
     suspend fun confirmFriendRequest(requestId: Int, userId: Int): Boolean
 
@@ -34,6 +34,10 @@ class FriendServiceImpl(
             logger.warn { "Trying to add a friend request in which one of the users does not exist." }
             return false
         }
+        if (friendListRepository.isFriendship(request.requestor, request.requested)) {
+            logger.warn { "Trying to create a friend request when the users are already in a friendship." }
+            return false
+        }
         if (friendRequestRepository.getFriendRequest(request) == null &&
             friendRequestRepository.getFriendRequest(request.inverse()) == null
         ) {
@@ -45,7 +49,7 @@ class FriendServiceImpl(
         return false
     }
 
-    override suspend fun getFriendRequests(user: User) = friendRequestRepository.getFriendRequests(user)
+    override suspend fun getFriendRequests(user: User) = friendRequestRepository.getFriendRequestsWithUsernames(user)
 
     override suspend fun confirmFriendRequest(requestId: Int, userId: Int): Boolean {
         val request = friendRequestRepository.getFriendRequestById(requestId)
@@ -63,8 +67,9 @@ class FriendServiceImpl(
             } else {
                 logger.warn { "Trying to confirm a friend request when the users are already friends." }
             }
+        } ?: run {
+            logger.warn { "Tried to confirm non-existent friend request" }
         }
-        logger.warn { "Tried to confirm non-existent friend request" }
         return false
     }
 

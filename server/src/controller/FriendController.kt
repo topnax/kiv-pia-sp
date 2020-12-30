@@ -5,6 +5,7 @@ import com.zcu.kiv.pia.tictactoe.model.FriendRequest
 import com.zcu.kiv.pia.tictactoe.model.User
 import com.zcu.kiv.pia.tictactoe.model.response.DataResponse
 import com.zcu.kiv.pia.tictactoe.model.response.ErrorResponse
+import com.zcu.kiv.pia.tictactoe.model.response.FriendRequestResponse
 import com.zcu.kiv.pia.tictactoe.model.response.SuccessResponse
 import com.zcu.kiv.pia.tictactoe.request.AcceptFriendRequest
 import com.zcu.kiv.pia.tictactoe.request.CancelFriendRequest
@@ -68,7 +69,12 @@ fun Route.friendRoutes() {
 
         get("/requests") {
             val user = getLoggedUser()
-            dataResponse(friendService.getFriendRequests(user))
+            dataResponse(friendService.getFriendRequests(user).map {
+                FriendRequestResponse(
+                    it.first,
+                    it.second
+                )
+            }.toList())
         }
 
         get("/list") {

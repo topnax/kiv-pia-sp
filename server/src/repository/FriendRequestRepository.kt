@@ -12,6 +12,8 @@ interface FriendRequestRepository {
 
     suspend fun getFriendRequest(friendRequest: FriendRequest): FriendRequest?
 
+    suspend fun getFriendRequestsWithUsernames(user: User): List<Pair<Int, String>>
+
     suspend fun getFriendRequestById(id: Int): FriendRequest?
 
     suspend fun addFriendRequest(friendRequest: FriendRequest)
@@ -20,9 +22,12 @@ interface FriendRequestRepository {
 }
 
 class SQLFriendRequestRepository : FriendRequestRepository {
-    private fun toFriendRequest(row: ResultRow) = FriendRequest(row[FriendRequests.requestor], row[FriendRequests.requested], row[FriendRequests.id].value)
+    private fun toFriendRequest(row: ResultRow) =
+        FriendRequest(row[FriendRequests.requestor], row[FriendRequests.requested], row[FriendRequests.id].value)
 
     override suspend fun getFriendRequests(user: User) = dbQuery {
+        Users.join(FriendRequests, JoinType.INNER, additionalConstraint = { Users.id eq FriendRequests.requested })
+            .slice(Users.username, FriendRequests.id)
         FriendRequests.select {
             (FriendRequests.requested eq user.id)
         }.map {
@@ -30,10 +35,20 @@ class SQLFriendRequestRepository : FriendRequestRepository {
         }.toList()
     }
 
+    override suspend fun getFriendRequestsWithUsernames(user: User): List<Pair<Int, String>> = dbQuery {
+        Users.join(FriendRequests, JoinType.INNER, additionalConstraint = { Users.id eq FriendRequests.requestor })
+            .slice(Users.username, FriendRequests.id)
+            .select {
+                (FriendRequests.requested eq user.id)
+            }
+            .map { Pair(it[FriendRequests.id].value, it[Users.username]) }
+            .toList()
+    }
+
     override suspend fun getFriendRequestById(id: Int): FriendRequest? = dbQuery {
         FriendRequests.select {
             (FriendRequests.id eq id)
-        }.mapNotNull { toFriendRequest(it)}.singleOrNull()
+        }.mapNotNull { toFriendRequest(it) }.singleOrNull()
     }
 
     override suspend fun getFriendRequest(friendRequest: FriendRequest): FriendRequest? = dbQuery {

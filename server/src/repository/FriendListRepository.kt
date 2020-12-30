@@ -37,7 +37,7 @@ class SQLFriendListRepository : FriendListRepository {
     override suspend fun getFriends(id: Int): List<User> = dbQuery {
         Users.join(UsersFriendList, JoinType.INNER, additionalConstraint = {(Users.id eq UsersFriendList.user1Id) or (Users.id eq UsersFriendList.user2Id)})
             .select {
-            ((UsersFriendList.user2Id eq id) or (UsersFriendList.user2Id eq id)) and (Users.id neq id)
+            ((UsersFriendList.user1Id eq id) or (UsersFriendList.user2Id eq id)) and (Users.id neq id)
         }.map {
             User(it[Users.id].value, it[Users.email], it[Users.username])
         }.toList()

@@ -147,7 +147,7 @@ class WebsocketService(private val configurationService: ConfigurationService) :
             if (allUsers) {
                 logger.info { "Sending to all users..." }
                 usersToConnections.filter { it.key != exclude }.forEach {
-                    logger.info { "Sending a mesage to ${it.key.username}..." }
+                    logger.info { "Sending a message to ${it.key.username}..." }
                     it.value.send(Frame.Text(json))
                 }
             } else {

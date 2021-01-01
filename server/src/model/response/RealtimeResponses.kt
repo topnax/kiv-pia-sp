@@ -13,6 +13,11 @@ class UserOfflineResponse(user: User) {
     val id = user.id
 }
 
+class FriendGoneResponse(user: User) {
+    val username = user.username
+    val id = user.id
+}
+
 class UsersOnlineResponse(users: List<User>) {
     val users: List<Any> = users.map {
         object {

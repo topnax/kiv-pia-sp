@@ -3,10 +3,7 @@ package com.zcu.kiv.pia.tictactoe.service
 import com.zcu.kiv.pia.tictactoe.database.logger
 import com.zcu.kiv.pia.tictactoe.model.FriendRequest
 import com.zcu.kiv.pia.tictactoe.model.User
-import com.zcu.kiv.pia.tictactoe.model.response.FriendRequestResponse
-import com.zcu.kiv.pia.tictactoe.model.response.NewFriendRequestResponse
-import com.zcu.kiv.pia.tictactoe.model.response.NewFriendResponse
-import com.zcu.kiv.pia.tictactoe.model.response.NotificationResponse
+import com.zcu.kiv.pia.tictactoe.model.response.*
 import com.zcu.kiv.pia.tictactoe.repository.FriendListRepository
 import com.zcu.kiv.pia.tictactoe.repository.FriendRequestRepository
 
@@ -22,7 +19,7 @@ interface FriendService {
 
     suspend fun declineFriendRequest(requestId: Int, requestedId: Int): Boolean
 
-    suspend fun cancelFriendship(initiator: Int, friend: Int): Boolean
+    suspend fun cancelFriendship(initiatorId: Int, friendId: Int): Boolean
 
     suspend fun getFriendList(user: User): List<User>
 
@@ -65,8 +62,10 @@ class FriendServiceImpl(
                         RealtimeMessage.Namespace.FRIENDREQUESTS,
                         "incomingRequest",
                         NewFriendRequestResponse(
-                            FriendRequestResponse(id,
-                            requestorUser.username)
+                            FriendRequestResponse(
+                                id,
+                                requestorUser.username
+                            )
                         )
                     ),
                     users = arrayOf(requestedUser)
@@ -156,9 +155,30 @@ class FriendServiceImpl(
         return false
     }
 
-    override suspend fun cancelFriendship(initiator: Int, friend: Int): Boolean {
-        return friendListRepository.removeFriendship(initiator, friend) > 0
+    override suspend fun cancelFriendship(initiatorId: Int, friendId: Int): Boolean {
+        val removed = friendListRepository.removeFriendship(initiatorId, friendId) > 0
+
+        if (removed) {
+            logger.info { "Removing a friend" }
+
+            userService.getUserById(initiatorId)?.let { initiator ->
+                userService.getUserById(friendId)?.let { friend ->
+                    realtimeService.sendMessage(
+                        RealtimeMessage(
+                            RealtimeMessage.Namespace.FRIENDS,
+                            "friendGone",
+                            FriendGoneResponse(
+                                initiator
+                            ),
+                        ),
+                        users = arrayOf(friend)
+                    )
+                }
+            }
+        }
+        return removed
     }
+
 
     override suspend fun getFriendList(user: User) = friendListRepository.getFriends(user.id)
 

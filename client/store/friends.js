@@ -83,3 +83,15 @@ export const actions = {
     }
   },
 }
+
+export const getters = {
+  onlineFriends: (state, getters, rootState, rootGetters) => {
+    return rootState.users.onlineUsers
+      .filter(user => user.id !== rootState.auth.user.id) // exclude current user
+      .filter(user => rootState.friends.friends.map(friend => friend.id).indexOf(user.id) !== -1) // filter friends
+  },
+  offlineFriends: (state, getters, rootState, rootGetters) => {
+    return state.friends
+      .filter(friend => rootState.users.onlineUsers.map(user => user.id).indexOf(friend.id) === -1)
+  }
+}

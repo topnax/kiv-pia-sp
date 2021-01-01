@@ -86,7 +86,7 @@
     >
       <v-list class="ps-2 pt-5">
 
-        <span class="title ms-2 mt-10 pt-10">Friends:</span>
+        <span class="title ms-2 mt-10 pt-10" v-if="friends.friends.length > 0">Friends:</span>
         <v-list-item
           v-for="(item, i) in onlineFriends"
           exact
@@ -95,7 +95,7 @@
             <v-icon color="green" size="10">mdi-checkbox-blank-circle</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title v-text="item.name"/>
+            <v-list-item-title v-text="item.username"/>
           </v-list-item-content>
         </v-list-item>
         <v-list-item
@@ -107,7 +107,7 @@
             <v-icon color="red" size="10">mdi-checkbox-blank-circle</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title v-text="item.name"/>
+            <v-list-item-title v-text="item.username"/>
           </v-list-item-content>
         </v-list-item>
         <span class="title ms-2"> Online users:</span>
@@ -144,9 +144,13 @@ export default {
       }
     },
     ...mapGetters({
-      onlineUsers: 'users/otherOnlineUsers'
+      onlineUsers: 'users/otherOnlineUsers',
+      onlineFriends: 'friends/onlineFriends',
+      offlineFriends: 'friends/offlineFriends',
     }),
-    ...mapState(["snackbar"]),
+    ...mapState(["snackbar", "friends"]),
+
+
 
 
   },
@@ -161,7 +165,6 @@ export default {
       await this.$store.$auth.logout()
     },
     async newFriendRequest(user) {
-      console.log("sending a request to " + user.id)
       await this.$store.dispatch("friendrequests/newRequest", user.id, {root: true})
     }
   },
@@ -186,33 +189,6 @@ export default {
       rightDrawer: true,
       right: true,
       title: 'Tic Tac Toe',
-      onlineFriends: [
-        {
-          name: "vojta33"
-        },
-        {
-          name: "Pipous3k"
-        }
-      ],
-      offlineFriends: [
-        {
-          name: "Papi"
-        },
-        {
-          name: "Gebron"
-        }
-      ],
-      onlineUsers2: [
-        {
-          name: "topnax"
-        },
-        {
-          name: "JIGGERS"
-        },
-        {
-          name: "Paagrio"
-        },
-      ]
     }
   }
 }

@@ -1,8 +1,12 @@
 package com.zcu.kiv.pia.tictactoe.service
 
 import com.zcu.kiv.pia.tictactoe.model.User
+import com.zcu.kiv.pia.tictactoe.model.response.UserOfflineResponse
+import com.zcu.kiv.pia.tictactoe.model.response.UserOnlineResponse
+import com.zcu.kiv.pia.tictactoe.model.response.UsersOnlineResponse
 import com.zcu.kiv.pia.tictactoe.repository.InMemoryUserRepository
 import com.zcu.kiv.pia.tictactoe.repository.PersistentUserRepository
+import mu.KotlinLogging
 
 interface UserService {
     /**
@@ -57,12 +61,38 @@ interface UserService {
 
 }
 
+private val logger = KotlinLogging.logger {}
 
 class UserServiceImpl(
     private val persistentUserRepository: PersistentUserRepository,
     private val inMemoryUserRepository: InMemoryUserRepository,
     private val realtimeService: RealtimeService
 ) : UserService {
+
+    init {
+        realtimeService.addOnConnectionStartedListener(
+            object : RealtimeService.ConnectionStatusListener {
+
+                override fun onConnected(user: User) {
+                    addLoggedInUser(user)
+                    realtimeService.sendMessage(
+                        RealtimeMessage(
+                            RealtimeMessage.Namespace.USERS,
+                            "onlineUsers",
+                            UsersOnlineResponse(inMemoryUserRepository.getLoggedInUsers()),
+                        ),
+                        users = arrayOf(user)
+                        )
+                }
+
+                override fun onDisconnected(user: User) {
+                    logger.info { "UserServiceImpl ${user.username} disconnected" }
+                    removeLoggedInUser(user)
+                }
+
+            }
+        )
+    }
 
     override suspend fun addUser(email: String, username: String, password: String) =
         persistentUserRepository.addUser(email, username, password)
@@ -83,11 +113,25 @@ class UserServiceImpl(
     }
 
     override fun addLoggedInUser(user: User) {
+        // TODO do not allow two connections
         inMemoryUserRepository.addLoggedInUser(user)
-        realtimeService.addMessage(object : RealtimeMessage(RealtimeMessage.Type.USER_ONLINE){})
+        realtimeService.sendMessage(
+            RealtimeMessage(
+                RealtimeMessage.Namespace.USERS,
+                "userOnline",
+                UserOnlineResponse(user)
+            ), allUsers = true, exclude = user
+        )
     }
 
     override fun removeLoggedInUser(user: User) {
+        realtimeService.sendMessage(
+            RealtimeMessage(
+                RealtimeMessage.Namespace.USERS,
+                "offlineUser",
+                UserOfflineResponse(user)
+            ), allUsers = true, exclude = user
+        )
         inMemoryUserRepository.removeLoggedInUser(user)
     }
 

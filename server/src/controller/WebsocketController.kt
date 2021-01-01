@@ -16,15 +16,13 @@ private val logger = KotlinLogging.logger{}
 fun Route.websocketRoutes() {
     val wsService: RealtimeService by inject()
         webSocket("/ws") {
-//            val user = getLoggedUser()
-//            wsService.addConnection(this, user)
-            send(Frame.Text("Testing :)"))
+            wsService.addConnection(this)
             try {
                 while (true) {
                     val frame = incoming.receive()
                     when (frame) {
                         is Frame.Text -> {
-                            wsService.addMessage(frame.readText())
+                            wsService.addMessage(frame.readText(), this)
                             logger.info { "received \"${frame.readText()}\"" }
                         }
                         else -> {
@@ -35,7 +33,7 @@ fun Route.websocketRoutes() {
             } catch (exception: ClosedReceiveChannelException) {
                logger.warn { "a connection disconnected from the websocket" }
             } finally {
-                // wsService.removeConnection(this, user)
+                wsService.removeConnection(this)
             }
         }
 }

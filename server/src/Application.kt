@@ -6,6 +6,8 @@ import com.zcu.kiv.pia.tictactoe.authentication.JwtConfig
 import com.zcu.kiv.pia.tictactoe.controller.*
 import com.zcu.kiv.pia.tictactoe.database.DatabaseFactory
 import com.zcu.kiv.pia.tictactoe.module.mainModule
+import com.zcu.kiv.pia.tictactoe.service.ConfigurationService
+import com.zcu.kiv.pia.tictactoe.service.ConfigurationServiceImpl
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
@@ -19,6 +21,8 @@ import io.ktor.websocket.*
 import mu.KotlinLogging
 import org.koin.ktor.ext.Koin
 import java.time.Duration
+import org.koin.dsl.module
+import org.koin.ktor.ext.inject
 
 const val JWT_AUTH_NAME = "jwt-auth"
 private val logger = KotlinLogging.logger {}
@@ -36,15 +40,16 @@ fun Application.module(testing: Boolean = false) {
     install(StatusPages) {
         // JSON parser exception
         exception<MissingKotlinParameterException> { cause ->
-            logger.info {"Got MissingKotlinParameterException: ${cause.message}"}
+            logger.info { "Got MissingKotlinParameterException: ${cause.message}" }
             call.respond(HttpStatusCode.BadRequest)
         }
         // TODO invalid json
     }
-
     install(Koin) {
         modules(
-            mainModule
+            mainModule + module {
+                single<ConfigurationService> { ConfigurationServiceImpl(environment) }
+            }
         )
     }
 
@@ -75,18 +80,13 @@ fun Application.module(testing: Boolean = false) {
     if (!testing) {
         logger.debug { "not testing" }
         DatabaseFactory.init()
-
-        val jwtIssuer = environment.config.property("jwt.domain").getString()
-        val jwtSecret = environment.config.property("jwt.secret").getString()
-        val jwtAudience = environment.config.property("jwt.audience").getString()
-        val jwtRealm = environment.config.property("jwt.realm").getString()
-
-        val jvtConfig = JwtConfig(jwtIssuer, jwtSecret, 10 * 60)
+        val configurationService: ConfigurationService by inject()
+        val jwtConfig = JwtConfig(configurationService.jwtIssuer, configurationService.jwtSecret, 10 * 60)
 
         install(Authentication) {
             jwt(JWT_AUTH_NAME) {
-                verifier(jvtConfig.verifier)
-                realm = jwtRealm
+                verifier(jwtConfig.verifier)
+                realm = configurationService.jwtRealm
                 validate {
                     with(it.payload) {
                         val email = getClaim("email").isNull
@@ -106,7 +106,7 @@ fun Application.module(testing: Boolean = false) {
             route("/api") {
                 gameRoutes()
 
-                loginRoutes(jvtConfig)
+                loginRoutes(jwtConfig)
 
                 userProfileRoutes()
 

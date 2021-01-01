@@ -14,7 +14,7 @@ val mainModule = listOf(
 
         single { RedisDatabase() }
         single<InMemoryUserRepository> { RedisUserRepository(get()) }
-        single<RealtimeService> { WebsocketService() }
+        single<RealtimeService> { WebsocketService(get()) }
         single<UserService> { UserServiceImpl(get(), get(), get()) }
 
         single<FriendListRepository> { SQLFriendListRepository() }

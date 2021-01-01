@@ -58,7 +58,7 @@
       </v-btn>
     </v-app-bar>
     <v-main>
-      <v-container>
+      <v-container fill-height>
         <nuxt/>
         <v-snackbar
           v-model="showing"
@@ -249,6 +249,11 @@ export default {
       drawer: true,
       fixed: false,
       items: [
+        {
+          icon: 'mdi-gamepad-variant',
+          title: 'Game',
+          to: '/game'
+        },
         {
           icon: 'mdi-account',
           title: 'Profile',

@@ -113,7 +113,7 @@
         <span class="title ms-2"> Online users:</span>
         <v-list-item
           v-for="(item, i) in onlineUsers"
-          @click.stop="alert('hello')"
+          @click.stop="newFriendRequest(item)"
           exact
         >
           <v-list-item-action>
@@ -159,6 +159,10 @@ export default {
   methods: {
     async logout() {
       await this.$store.$auth.logout()
+    },
+    async newFriendRequest(user) {
+      console.log("sending a request to " + user.id)
+      await this.$store.dispatch("friendrequests/newRequest", user.id, {root: true})
     }
   },
   data() {

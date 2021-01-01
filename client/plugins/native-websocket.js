@@ -19,13 +19,9 @@ export default ({ store }, inject) => {
       let msg = event
       if (this.format === 'json' && event.data) {
         msg = JSON.parse(event.data)
-        console.log("what")
-        console.log(msg)
         if (msg.mutation) {
-          console.log("mutating")
           target = [msg.namespace || '', msg.mutation].filter((e) => !!e).join('/')
         } else if (msg.action) {
-          console.log("lol")
           method = 'dispatch'
           target = [msg.namespace || '', msg.action].filter((e) => !!e).join('/')
 

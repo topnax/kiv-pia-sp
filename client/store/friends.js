@@ -10,18 +10,30 @@ export const mutations = {
     state.friends = friends
   },
 
+  ADD_FRIEND(state, friend) {
+    console.log("adding friend:")
+    console.log(friend)
+    state.friends.push(friend)
+  },
+
   SET_LOADING(state, loading) {
     state.loading = loading
   },
 
   // default handler called for all methods
-  SOCKET_ONMESSAGE (state, message) {
+  SOCKET_ONMESSAGE(state, message) {
     console.log(">>>>>>friends received: " + message)
     console.log(message)
   },
 }
 
 export const actions = {
+
+  async newFriend(context, user) {
+    await context.dispatch("snackbar/showSuccess", `A ${user.username} has been added to your friend list`, {root: true})
+    await context.commit("ADD_FRIEND", user)
+  },
+
   async fetchFriends(context, data) {
     context.commit("SET_LOADING", true)
     await new Promise(resolve => setTimeout(resolve, 200))

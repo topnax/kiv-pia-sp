@@ -13,6 +13,13 @@ export const mutations = {
 }
 
 export const actions = {
+  showInfo: (context, text) => {
+    context.commit("SET_SNACKBAR", {
+      showing: true,
+      text: text,
+      color: "info"
+    })
+  },
   showSuccess: (context, text) => {
     context.commit("SET_SNACKBAR", {
       showing: true,

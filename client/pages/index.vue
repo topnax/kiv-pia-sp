@@ -87,8 +87,8 @@ export default {
   },
   mounted() {
 
-    console.log("ws!")
-    Vue.use(VueNativeSock, 'ws://localhost:8080/api/ws', { store: this.$store.websocket })
+//    console.log("ws!")
+//    Vue.use(VueNativeSock, 'ws://localhost:8080/api/ws', { store: this.$store.websocket })
   },
   data: () => ({
 

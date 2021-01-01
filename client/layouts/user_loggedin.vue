@@ -48,7 +48,7 @@
       <v-toolbar-title v-text="title"/>
       <v-spacer/>
       <v-icon>mdi-account</v-icon>
-      <span class="ms-3">{{$store.$auth.user.username}} ({{$store.$auth.user.email}})</span>
+      <span class="ms-3">{{ $store.$auth.user.username }} ({{ $store.$auth.user.email }})</span>
       <v-btn
         icon
         @click.stop="rightDrawer = !rightDrawer"
@@ -113,14 +113,14 @@
         <span class="title ms-2"> Online users:</span>
         <v-list-item
           v-for="(item, i) in onlineUsers"
-          onclick="alert('hello')"
+          @click.stop="alert('hello')"
           exact
         >
           <v-list-item-action>
             <v-icon color="green" size="10">mdi-checkbox-blank-circle</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title v-text="item.name"/>
+            <v-list-item-title v-text="item.username"/>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -131,6 +131,7 @@
 
 <script>
 import {mapState} from 'vuex'
+import {mapGetters} from 'vuex'
 
 export default {
   computed: {
@@ -142,8 +143,18 @@ export default {
         this.$store.commit('snackbar/SET_SNACKBAR', {showing: v})
       }
     },
-    ...mapState(["snackbar"])
+    ...mapGetters({
+      onlineUsers: 'users/otherOnlineUsers'
+    }),
+    ...mapState(["snackbar"]),
 
+
+  },
+  async mounted() {
+    let token = this.$auth.strategy.token.get()
+    token = token.substring(7, token.length)
+    console.log(`Sending token=${token}`)
+    await this.$store.dispatch("websocket/sendMessage", "jwt;" + token, {root: true})
   },
   methods: {
     async logout() {
@@ -187,7 +198,7 @@ export default {
           name: "Gebron"
         }
       ],
-      onlineUsers: [
+      onlineUsers2: [
         {
           name: "topnax"
         },

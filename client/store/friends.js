@@ -12,7 +12,13 @@ export const mutations = {
 
   SET_LOADING(state, loading) {
     state.loading = loading
-  }
+  },
+
+  // default handler called for all methods
+  SOCKET_ONMESSAGE (state, message) {
+    console.log(">>>>>>friends received: " + message)
+    console.log(message)
+  },
 }
 
 export const actions = {

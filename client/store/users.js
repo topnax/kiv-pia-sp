@@ -13,8 +13,6 @@ export const mutations = {
     )
   },
   ADD_ONLINE_USER(state, user) {
-    console.log("adding")
-
     if (state.onlineUsers.map(user => user.id).indexOf(user.id) === -1) {
       state.onlineUsers.push(user)
     }
@@ -22,7 +20,6 @@ export const mutations = {
   REMOVE_ONLINE_USER(state, user) {
     const i = state.onlineUsers.map(user => user.id).indexOf(user.id);
     if (i > -1) {
-      console.log("removing")
       console.log(user)
       state.onlineUsers.splice(i, 1);
     }

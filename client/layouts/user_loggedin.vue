@@ -87,42 +87,108 @@
       <v-list class="ps-2 pt-5">
 
         <span class="title ms-2 mt-10 pt-10" v-if="friends.friends.length > 0">Friends:</span>
-        <v-list-item
+
+        <v-menu
           v-for="(item, i) in onlineFriends"
-          exact
+          transition="slide-x-transition"
+          :close-on-click="true"
+          bottom
+          right
         >
-          <v-list-item-action>
-            <v-icon color="green" size="10">mdi-checkbox-blank-circle</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title v-text="item.username"/>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item
+          <template v-slot:activator="{ on, attrs }">
+            <v-list-item
+              dark
+              v-bind="attrs"
+              v-on="on"
+              exact
+            >
+              <v-list-item-action>
+                <v-icon color="green" size="10">mdi-checkbox-blank-circle</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title v-text="item.username"/>
+              </v-list-item-content>
+            </v-list-item>
+          </template>
+
+          <v-list>
+            <v-list-item
+              :key="1"
+              @click="cancelFriendship(item.id)"
+            >
+              <v-list-item-title>Remove from friend list</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+
+        <v-menu
           v-for="(item, i) in offlineFriends"
-          onclick="alert('hello')"
-          exact
+          transition="slide-x-transition"
+          :close-on-click="true"
+          bottom
+          right
         >
-          <v-list-item-action>
-            <v-icon color="red" size="10">mdi-checkbox-blank-circle</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title v-text="item.username"/>
-          </v-list-item-content>
-        </v-list-item>
+          <template v-slot:activator="{ on, attrs }">
+            <v-list-item
+              dark
+              v-bind="attrs"
+              v-on="on"
+              exact
+            >
+              <v-list-item-action>
+                <v-icon color="red" size="10">mdi-checkbox-blank-circle</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title v-text="item.username"/>
+              </v-list-item-content>
+            </v-list-item>
+          </template>
+
+          <v-list>
+            <v-list-item
+              :key="1"
+              @click="cancelFriendship(item.id)"
+            >
+              <v-list-item-title>Remove from friend list</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+
         <span class="title ms-2"> Online users:</span>
-        <v-list-item
+
+        <v-menu
           v-for="(item, i) in onlineUsers"
-          @click.stop="newFriendRequest(item)"
-          exact
+          transition="slide-x-transition"
+          :close-on-click="true"
+          bottom
+          right
         >
-          <v-list-item-action>
-            <v-icon color="green" size="10">mdi-checkbox-blank-circle</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title v-text="item.username"/>
-          </v-list-item-content>
-        </v-list-item>
+          <template v-slot:activator="{ on, attrs }">
+            <v-list-item
+              dark
+              v-bind="attrs"
+              v-on="on"
+              exact
+            >
+              <v-list-item-action>
+                <v-icon color="green" size="10">mdi-checkbox-blank-circle</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title v-text="item.username"/>
+              </v-list-item-content>
+            </v-list-item>
+          </template>
+
+          <v-list>
+            <v-list-item
+              :key="1"
+              @click="newFriendRequest(item)"
+            >
+              <v-list-item-title>Send friend request</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+
       </v-list>
     </v-navigation-drawer>
     <Footer/>
@@ -167,10 +233,17 @@ export default {
     },
     async newFriendRequest(user) {
       await this.$store.dispatch("friendrequests/newRequest", user.id, {root: true})
+    },
+    async removeFromFriendList(user) {
+      await this.$store.dispatch("friend/newRequest", user.id, {root: true})
+    },
+    async cancelFriendship(userId) {
+      this.$store.dispatch("friends/cancel", userId)
     }
   },
   data() {
     return {
+      closeOnClick: true,
       timeout: 5000,
       clipped: true,
       drawer: true,

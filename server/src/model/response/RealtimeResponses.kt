@@ -1,5 +1,6 @@
 package com.zcu.kiv.pia.tictactoe.model.response
 
+import com.zcu.kiv.pia.tictactoe.model.FriendRequest
 import com.zcu.kiv.pia.tictactoe.model.User
 
 class UserOnlineResponse(user: User) {
@@ -19,4 +20,13 @@ class UsersOnlineResponse(users: List<User>) {
             val id = it.id
         }
     }
+}
+
+class NotificationResponse(val text: String)
+
+class NewFriendRequestResponse(val request: FriendRequestResponse)
+
+class NewFriendResponse(user: User) {
+    val username = user.username
+    val id = user.id
 }

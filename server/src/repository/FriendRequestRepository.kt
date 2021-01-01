@@ -16,7 +16,7 @@ interface FriendRequestRepository {
 
     suspend fun getFriendRequestById(id: Int): FriendRequest?
 
-    suspend fun addFriendRequest(friendRequest: FriendRequest)
+    suspend fun addFriendRequest(friendRequest: FriendRequest): Int
 
     suspend fun removeFriendRequest(requestId: Int): Boolean
 }
@@ -57,11 +57,11 @@ class SQLFriendRequestRepository : FriendRequestRepository {
         }.mapNotNull { friendRequest }.singleOrNull()
     }
 
-    override suspend fun addFriendRequest(friendRequest: FriendRequest): Unit = dbQuery {
+    override suspend fun addFriendRequest(friendRequest: FriendRequest): Int = dbQuery {
         FriendRequests.insert {
             it[FriendRequests.requestor] = friendRequest.requestor
             it[FriendRequests.requested] = friendRequest.requested
-        }
+        } [FriendRequests.id].value
     }
 
     override suspend fun removeFriendRequest(requestId: Int): Boolean = dbQuery {

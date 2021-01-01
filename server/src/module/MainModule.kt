@@ -19,6 +19,6 @@ val mainModule = listOf(
 
         single<FriendListRepository> { SQLFriendListRepository() }
         single<FriendRequestRepository> { SQLFriendRequestRepository() }
-        single<FriendService> { FriendServiceImpl(get(), get(), get()) }
+        single<FriendService> { FriendServiceImpl(get(), get(), get(), get()  ) }
     }
 )

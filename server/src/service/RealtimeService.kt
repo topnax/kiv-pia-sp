@@ -18,7 +18,10 @@ class RealtimeMessage(namespace: Namespace, val action: String, val data: Any) {
     val namespace = namespace.name.toLowerCase()
 
     enum class Namespace {
-        USERS
+        USERS,
+        NOTIFICATIONS,
+        FRIENDS,
+        FRIENDREQUESTS
     }
 }
 

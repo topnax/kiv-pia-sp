@@ -8,6 +8,7 @@ import com.zcu.kiv.pia.tictactoe.model.response.ErrorResponse
 import com.zcu.kiv.pia.tictactoe.model.response.FriendRequestResponse
 import com.zcu.kiv.pia.tictactoe.model.response.SuccessResponse
 import com.zcu.kiv.pia.tictactoe.request.*
+import com.zcu.kiv.pia.tictactoe.service.FriendRequestException
 import com.zcu.kiv.pia.tictactoe.service.FriendService
 import com.zcu.kiv.pia.tictactoe.utils.*
 import io.ktor.application.*
@@ -25,10 +26,14 @@ fun Route.friendRoutes() {
             val request = call.receive<NewFriendRequest>()
             val user = getLoggedUser()
 
-            if (friendService.addFriendRequest(FriendRequest(user.id, request.userId))) {
-                successResponse()
-            } else {
-                errorResponse("Could not create a new friend request")
+            try {
+                if (friendService.addFriendRequest(FriendRequest(user.id, request.userId))) {
+                    successResponse()
+                } else {
+                    errorResponse("Could not create a new friend request")
+                }
+            } catch (ex: FriendRequestException) {
+                errorResponse(ex.reason)
             }
         }
 

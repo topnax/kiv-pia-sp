@@ -3,10 +3,15 @@ package com.zcu.kiv.pia.tictactoe.service
 import com.zcu.kiv.pia.tictactoe.database.logger
 import com.zcu.kiv.pia.tictactoe.model.FriendRequest
 import com.zcu.kiv.pia.tictactoe.model.User
+import com.zcu.kiv.pia.tictactoe.model.response.FriendRequestResponse
+import com.zcu.kiv.pia.tictactoe.model.response.NewFriendRequestResponse
+import com.zcu.kiv.pia.tictactoe.model.response.NewFriendResponse
+import com.zcu.kiv.pia.tictactoe.model.response.NotificationResponse
 import com.zcu.kiv.pia.tictactoe.repository.FriendListRepository
 import com.zcu.kiv.pia.tictactoe.repository.FriendRequestRepository
 
 interface FriendService {
+    @Throws(FriendRequestException::class)
     suspend fun addFriendRequest(request: FriendRequest): Boolean
 
     suspend fun getFriendRequests(user: User): List<Pair<Int, String>>
@@ -23,12 +28,16 @@ interface FriendService {
 
 }
 
+class FriendRequestException(val reason: String) : Exception(reason)
+
 class FriendServiceImpl(
     private val userService: UserService,
     private val friendRequestRepository: FriendRequestRepository,
-    private val friendListRepository: FriendListRepository
+    private val friendListRepository: FriendListRepository,
+    private val realtimeService: RealtimeService,
 ) :
     FriendService {
+    @Throws(FriendRequestException::class)
     override suspend fun addFriendRequest(request: FriendRequest): Boolean {
         if (userService.getUserById(request.requestor) == null || userService.getUserById(request.requested) == null) {
             logger.warn { "Trying to add a friend request in which one of the users does not exist." }
@@ -38,15 +47,34 @@ class FriendServiceImpl(
             logger.warn { "Trying to create a friend request when the users are already in a friendship." }
             return false
         }
-        if (friendRequestRepository.getFriendRequest(request) == null &&
-            friendRequestRepository.getFriendRequest(request.inverse()) == null
-        ) {
-            friendRequestRepository.addFriendRequest(request)
-            // TODO notify via websockets
-            return true
+
+        if (friendRequestRepository.getFriendRequest(request) != null) {
+            throw FriendRequestException("Friend request already sent")
         }
-        logger.warn { "Trying to add a friend request to which an inverse request already exists" }
-        return false
+
+        if (friendRequestRepository.getFriendRequest(request.inverse()) != null) {
+            throw FriendRequestException("This user has already sent you a friend request. Check pending friend requests.")
+        }
+
+        val id = friendRequestRepository.addFriendRequest(request)
+
+        userService.getUserById(request.requested)?.let { requestedUser ->
+            userService.getUserById(request.requestor)?.let { requestorUser ->
+                realtimeService.sendMessage(
+                    RealtimeMessage(
+                        RealtimeMessage.Namespace.FRIENDREQUESTS,
+                        "incomingRequest",
+                        NewFriendRequestResponse(
+                            FriendRequestResponse(id,
+                            requestorUser.username)
+                        )
+                    ),
+                    users = arrayOf(requestedUser)
+                )
+            }
+        }
+
+        return true
     }
 
     override suspend fun getFriendRequests(user: User) = friendRequestRepository.getFriendRequestsWithUsernames(user)
@@ -62,7 +90,30 @@ class FriendServiceImpl(
             if (!friendListRepository.isFriendship(it.requestor, it.requested)) {
                 friendRequestRepository.removeFriendRequest(requestId)
                 friendListRepository.addFriendship(it.requestor, it.requested)
-                // TODO notify via websockets
+                userService.getUserById(request.requested)?.let { requested ->
+                    userService.getUserById(request.requestor)?.let { requestor ->
+                        realtimeService.sendMessage(
+                            RealtimeMessage(
+                                RealtimeMessage.Namespace.FRIENDS,
+                                "newFriend",
+                                NewFriendResponse(
+                                    requested
+                                )
+                            ),
+                            users = arrayOf(requestor)
+                        )
+                        realtimeService.sendMessage(
+                            RealtimeMessage(
+                                RealtimeMessage.Namespace.FRIENDS,
+                                "newFriend",
+                                NewFriendResponse(
+                                    requestor
+                                )
+                            ),
+                            users = arrayOf(requested)
+                        )
+                    }
+                }
                 return true
             } else {
                 logger.warn { "Trying to confirm a friend request when the users are already friends." }

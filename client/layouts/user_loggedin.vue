@@ -159,6 +159,7 @@ export default {
     token = token.substring(7, token.length)
     console.log(`Sending token=${token}`)
     await this.$store.dispatch("websocket/sendMessage", "jwt;" + token, {root: true})
+    await this.$store.dispatch("friends/fetchFriends")
   },
   methods: {
     async logout() {

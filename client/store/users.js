@@ -5,13 +5,19 @@ export const state = () => ({
 
 export const mutations = {
   SET_ONLINE_USERS(state, onlineUsers) {
-    state.onlineUsers = onlineUsers
-    console.log(state.onlineUsers)
+    let onlineUserIds = state.onlineUsers.map(user => user.id)
+    onlineUsers.filter(
+      user => onlineUserIds.indexOf(user.id) === -1
+    ).forEach(
+      user => state.onlineUsers.push(user)
+    )
   },
   ADD_ONLINE_USER(state, user) {
     console.log("adding")
-    state.onlineUsers.push(user)
-    console.log(state.onlineUsers)
+
+    if (state.onlineUsers.map(user => user.id).indexOf(user.id) === -1) {
+      state.onlineUsers.push(user)
+    }
   },
   REMOVE_ONLINE_USER(state, user) {
     const i = state.onlineUsers.map(user => user.id).indexOf(user.id);
@@ -31,7 +37,6 @@ export const actions = {
     await context.commit("REMOVE_ONLINE_USER", {username: data.username, id: data.id})
   },
   async onlineUsers(context, data) {
-    console.log("Online users!")
     await context.commit("SET_ONLINE_USERS", data.users)
   },
 

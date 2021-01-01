@@ -16,22 +16,33 @@ export const mutations = {
     state.friends.push(friend)
   },
 
+  REMOVE_FRIEND(state, friend) {
+    console.log("removing a friend:")
+    console.log(friend)
+    const i = state.friends.map(user => user.id).indexOf(friend.id);
+    if (i > -1) {
+      console.log("removing")
+      console.log(friend)
+      state.friends.splice(i, 1);
+    }
+  },
+
   SET_LOADING(state, loading) {
     state.loading = loading
   },
 
-  // default handler called for all methods
-  SOCKET_ONMESSAGE(state, message) {
-    console.log(">>>>>>friends received: " + message)
-    console.log(message)
-  },
 }
 
 export const actions = {
 
   async newFriend(context, user) {
-    await context.dispatch("snackbar/showSuccess", `A ${user.username} has been added to your friend list`, {root: true})
+    await context.dispatch("snackbar/showSuccess", `${user.username} has been added to your friend list`, {root: true})
     await context.commit("ADD_FRIEND", user)
+  },
+
+  async friendGone(context, user) {
+    await context.commit("REMOVE_FRIEND", user)
+    await context.dispatch("snackbar/showInfo", `${user.username} has removed you from their friend list`, {root: true})
   },
 
   async fetchFriends(context, data) {

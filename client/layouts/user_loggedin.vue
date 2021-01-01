@@ -167,7 +167,7 @@ export default {
   },
   data() {
     return {
-      timeout: 2000,
+      timeout: 5000,
       clipped: true,
       drawer: true,
       fixed: false,

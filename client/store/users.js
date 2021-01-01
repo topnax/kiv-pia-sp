@@ -14,10 +14,6 @@ export const mutations = {
     console.log(state.onlineUsers)
   },
   REMOVE_ONLINE_USER(state, user) {
-    console.log("user offline")
-    console.log(user)
-    console.log(state.onlineUsers)
-    const index = state.onlineUsers.indexOf(user)
     const i = state.onlineUsers.map(user => user.id).indexOf(user.id);
     if (i > -1) {
       console.log("removing")
@@ -43,9 +39,6 @@ export const actions = {
 
 export const getters = {
   otherOnlineUsers: (state, getters, rootState, rootGetters) => {
-    console.log(`auth.id=${rootState.auth.user.id}`)
-    console.log(state.onlineUsers)
-    console.log(rootState)
-    return state.onlineUsers.filter(user => user.id !== rootState.auth.user.id)
+    return state.onlineUsers.filter(user => user.id !== rootState.auth.user.id).filter(user => rootState.friends.friends.map(friend => friend.id).indexOf(user.id) === -1)
   }
 }

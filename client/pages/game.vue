@@ -1,13 +1,20 @@
 <template>
   <v-container>
-    <board :squares="['X', null, null, null, null, null, null, null, null,null, null, null]" :size="5"/>
+    <board :squares="squares" :size="5"/>
   </v-container>
 </template>
 
 
 
 <script>
+import {mapState} from "vuex";
+
 export default {
+  computed: {
+    ...mapState({
+      squares: state => state.game.squares
+    })
+  },
   layout: "user_loggedin",
   name: "game",
   middleware: ["auth"],

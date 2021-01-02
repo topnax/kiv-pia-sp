@@ -3,14 +3,12 @@
   <v-container fill-height fluid>
     <v-row align="center"
            justify="center">
-
-
       <div :class="'board board-' + size" v-if="squares">
         <div v-for="row in size" :key="row" :class="`board-` + size + `-row board-row`">
-          <square v-for="i in size" :key="indexByRow(i, row)"
-                  :value="squares[indexByRow(i, row)]"
+          <square v-for="i in size" :key="indexByRow(i, row, size)"
+                  :value="squares[indexByRow(i, row, size)]"
                   :disabled="!!winner"
-                  :winner="!!winner && winner.includes(indexByRow(i, row))"
+                  :winner="!!winner && winner.includes(indexByRow(i, row, size))"
                   @click="click(i, row)"/>
         </div>
       </div>
@@ -35,6 +33,8 @@ export default {
       return (row * max + index) - (max + 1)
     },
     click(index, row) {
+      console.log(`${index}, ${row} index and row ${this.indexByRow(index, row, this.size)}`)
+      this.$store.dispatch("game/move", {index: this.indexByRow(index, row, this.size), seed: "O"})
 //      this.$emit('click', this.indexByRow(index, row));
     }
   }
@@ -46,6 +46,7 @@ export default {
 .board-3 {
   grid-template-rows: repeat(3, 1fr);
 }
+
 .board-3-row {
   grid-template-columns: repeat(3, 1fr);
 }
@@ -53,6 +54,7 @@ export default {
 .board-5 {
   grid-template-rows: repeat(5, 1fr);
 }
+
 .board-5-row {
   grid-template-columns: repeat(5, 1fr);
 }
@@ -60,6 +62,7 @@ export default {
 .board-10 {
   grid-template-rows: repeat(10, 1fr);
 }
+
 .board-10-row {
   grid-template-columns: repeat(10, 1fr);
 }

@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <board :squares="['X', null, null, null, null, null, null, null, null,null]"/>
+    <board :squares="['X', null, null, null, null, null, null, null, null,null, null, null]" :size="5"/>
   </v-container>
 </template>
 

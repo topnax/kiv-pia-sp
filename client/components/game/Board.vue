@@ -5,9 +5,9 @@
            justify="center">
 
 
-      <div class="board" v-if="squares">
-        <div v-for="row in 3" :key="row" class="board-row">
-          <square v-for="i in 3" :key="indexByRow(i, row)"
+      <div :class="'board board-' + size" v-if="squares">
+        <div v-for="row in size" :key="row" :class="`board-` + size + `-row board-row`">
+          <square v-for="i in size" :key="indexByRow(i, row)"
                   :value="squares[indexByRow(i, row)]"
                   :disabled="!!winner"
                   :winner="!!winner && winner.includes(indexByRow(i, row))"
@@ -23,6 +23,7 @@
 export default {
   name: 'Board',
   props: {
+    size: Number,
     squares: Array,
     winner: Array
   },
@@ -41,6 +42,28 @@ export default {
 </script>
 
 <style scoped>
+
+.board-3 {
+  grid-template-rows: repeat(3, 1fr);
+}
+.board-3-row {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.board-5 {
+  grid-template-rows: repeat(5, 1fr);
+}
+.board-5-row {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.board-10 {
+  grid-template-rows: repeat(10, 1fr);
+}
+.board-10-row {
+  grid-template-columns: repeat(10, 1fr);
+}
+
 .board {
   border: 1rem solid #fff4;
   box-shadow: 2.5px 5px 25px #0004, 0 1px 6px #0006;
@@ -49,14 +72,12 @@ export default {
   height: 65vmin;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: repeat(3, 1fr);
   backdrop-filter: blur(10px);
   background-blend-mode: exclusion;
 }
 
 .board-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
   grid-template-rows: 1fr;
 }
 </style>

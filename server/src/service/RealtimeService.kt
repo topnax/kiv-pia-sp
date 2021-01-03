@@ -21,7 +21,8 @@ class RealtimeMessage(namespace: Namespace, val action: String, val data: Any) {
         USERS,
         NOTIFICATIONS,
         FRIENDS,
-        FRIENDREQUESTS
+        FRIENDREQUESTS,
+        GAME
     }
 }
 

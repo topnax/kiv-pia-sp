@@ -4,6 +4,8 @@ import com.zcu.kiv.pia.tictactoe.database.logger
 import com.zcu.kiv.pia.tictactoe.game.TicTacToeGame
 import com.zcu.kiv.pia.tictactoe.model.GameLobby
 import com.zcu.kiv.pia.tictactoe.model.User
+import com.zcu.kiv.pia.tictactoe.model.response.GameStateResponse
+import com.zcu.kiv.pia.tictactoe.model.response.PendingGameStateResponse
 
 interface GameService {
     fun playGame(): String
@@ -33,7 +35,8 @@ class GameRepository {
     fun getGame() = "Tic Tac Toe game played :)"
 }
 
-class GameServiceImpl(private val gameRepository: GameRepository, private val realtimeService: RealtimeService) : GameService {
+class GameServiceImpl(private val gameRepository: GameRepository, private val realtimeService: RealtimeService) :
+    GameService {
 
     private var availableId = 0
 
@@ -47,10 +50,21 @@ class GameServiceImpl(private val gameRepository: GameRepository, private val re
     override fun createGame(user: User, boardSize: Int, victoriousCells: Int): Boolean {
         if (isUserInAGame(user)) return false
 
-        val game = GameLobby(availableId, user, boardSize, victoriousCells)
-        games[availableId] = game
-        userToGames[user.id] = game
+        val lobby = GameLobby(availableId, user, boardSize, victoriousCells)
+        games[availableId] = lobby
+        userToGames[user.id] = lobby
         // TODO update all games list and propagate this change via websockets to all waiting players
+        realtimeService.sendMessage(
+            RealtimeMessage(
+                RealtimeMessage.Namespace.GAME,
+                "setState",
+                GameStateResponse(
+                    GameStateResponse.StateType.PENDING,
+                    PendingGameStateResponse(lobby)
+                )
+            ),
+            users = arrayOf(user)
+        )
         availableId++
 
         return true
@@ -99,19 +113,36 @@ class GameServiceImpl(private val gameRepository: GameRepository, private val re
     override fun removeUserFromAGame(user: User, gameId: Int): Boolean {
         val game = games[gameId]
         game?.let {
-            userToGames.remove(user.id)
-            if (game.opponent == user) {
-                game.opponent = null
-                // TODO notify that user has left
-            } else if (game.owner == user) {
-                // owner has left the game, remove the opponent
-                userToGames.remove(game.opponent?.id)
-                game.opponent = null
 
-                // remove the game
-                games.remove(gameId)
+            if (game.game != null) {
+                userToGames.remove(user.id)
+                if (game.opponent == user) {
+                    game.opponent = null
+                    // TODO notify that user has left
+                } else if (game.owner == user) {
+                    // owner has left the game, remove the opponent
+                    userToGames.remove(game.opponent?.id)
+                    game.opponent = null
 
-                // TODO notify that game has ended
+                    // remove the game
+                    games.remove(gameId)
+
+                    // TODO notify that game has ended
+                }
+            } else if (user == game.owner) {
+                // TODO remove pending invitations
+                userToGames.remove(user.id)
+                realtimeService.sendMessage(
+                    RealtimeMessage(
+                        RealtimeMessage.Namespace.GAME,
+                        "setState",
+                        GameStateResponse(
+                            GameStateResponse.StateType.NONE,
+                            null
+                        )
+                    ),
+                    users = arrayOf(user)
+                )
             }
             return true
         }

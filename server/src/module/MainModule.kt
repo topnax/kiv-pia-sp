@@ -7,7 +7,7 @@ import org.koin.dsl.module
 
 val mainModule = listOf(
     module {
-        single<GameService> { GameServiceImpl(get()) }
+        single<GameService> { GameServiceImpl(get(), get()) }
         single { GameRepository() }
         single<PersistentUserRepository> { SQLUserRepository() }
         single<HashService> { SHA256Hasher() }

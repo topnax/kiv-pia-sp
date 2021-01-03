@@ -22,6 +22,9 @@ export const mutations = {
 }
 
 export const actions = {
+  async newInvite(context, invite) {
+    await context.dispatch("snackbar/showInfo", `New invite to ${invite.lobbyId} by ${invite.ownerUsername}`, {root: true})
+  },
   async create(context) {
     try {
       let result = await this.$axios.$post("/game/create", {

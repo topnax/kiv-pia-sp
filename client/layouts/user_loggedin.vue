@@ -118,6 +118,15 @@
             >
               <v-list-item-title>Remove from friend list</v-list-item-title>
             </v-list-item>
+
+           <v-list-item
+           v-if="game.pending !== undefined && game.pending.owner"
+             :key="2"
+           @click="inviteToGame(item.id)"
+            >
+             <v-list-item-title>Invite to a game</v-list-item-title>
+
+           </v-list-item>
           </v-list>
         </v-menu>
 
@@ -214,7 +223,7 @@ export default {
       onlineFriends: 'friends/onlineFriends',
       offlineFriends: 'friends/offlineFriends',
     }),
-    ...mapState(["snackbar", "friends"]),
+    ...mapState(["snackbar", "friends", "game"]),
 
 
 
@@ -239,7 +248,10 @@ export default {
       await this.$store.dispatch("friend/newRequest", user.id, {root: true})
     },
     async cancelFriendship(userId) {
-      this.$store.dispatch("friends/cancel", userId)
+      await this.$store.dispatch("friends/cancel", userId)
+    },
+    async inviteToGame(userId) {
+      await this.$store.dispatch("game/invite", userId)
     }
   },
   data() {

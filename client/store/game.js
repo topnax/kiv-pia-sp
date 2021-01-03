@@ -15,10 +15,7 @@ export const state = () => ({
     victoriousCells: 0,
     ownerSeed: String,
     opponentSeed: String,
-    invitedUsers: [
-      "Pavel",
-      "Tomáš"
-    ]
+    invitedUsers: []
 
   },
 
@@ -52,6 +49,7 @@ export const mutations = {
       state.pending.owner = pendingState.owner
       state.pending.boardSize = pendingState.boardSize
       state.pending.victoriousCells = pendingState.victoriousCells
+      state.pending.invitedUsers = pendingState.invitedUsers
       state.state = "PENDING"
       state.playing = {}
     } else {
@@ -67,6 +65,19 @@ export const mutations = {
 }
 
 export const actions = {
+  async invite(context, userId) {
+    try {
+      let result = await this.$axios.$post("/game/invite", {userId: userId})
+
+      if (result.responseCode === 0) {
+        await context.dispatch("snackbar/showSuccess", "Friend invited", {root: true})
+      } else {
+        await context.dispatch("snackbar/showError", result.message, {root: true})
+      }
+    } catch (e) {
+      await context.dispatch("snackbar/showError", "Could not invite a friend", {root: true})
+    }
+  },
   async leave(context, data) {
     try {
       let result = await this.$axios.$post("/game/leave")

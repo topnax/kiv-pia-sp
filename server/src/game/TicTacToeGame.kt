@@ -1,6 +1,6 @@
 package com.zcu.kiv.pia.tictactoe.game
 
-class TicTacToeGame(boardSize: Int, startingSeed: Seed, private val victoriousCellCount: Int) {
+class TicTacToeGame(val boardSize: Int, startingSeed: Seed, private val victoriousCellCount: Int) {
 
     val turns = mutableListOf<Turn>()
 

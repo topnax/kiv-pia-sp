@@ -2,12 +2,14 @@ package com.zcu.kiv.pia.tictactoe.controller
 
 import com.zcu.kiv.pia.tictactoe.JWT_AUTH_NAME
 import com.zcu.kiv.pia.tictactoe.model.User
-import com.zcu.kiv.pia.tictactoe.model.response.ErrorResponse
-import com.zcu.kiv.pia.tictactoe.model.response.SuccessResponse
+import com.zcu.kiv.pia.tictactoe.model.response.*
 import com.zcu.kiv.pia.tictactoe.request.game.CreateGameRequest
 import com.zcu.kiv.pia.tictactoe.request.game.JoinGameRequest
 import com.zcu.kiv.pia.tictactoe.request.game.PlayGameRequest
 import com.zcu.kiv.pia.tictactoe.service.GameService
+import com.zcu.kiv.pia.tictactoe.utils.dataResponse
+import com.zcu.kiv.pia.tictactoe.utils.errorResponse
+import com.zcu.kiv.pia.tictactoe.utils.getLoggedUser
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
@@ -40,7 +42,7 @@ fun Route.gameRoutes() {
                 }
             }
 
-            post("join") {
+            post("/join") {
                 val user = User.fromJWTToken(call.principal()!!)
                 val request = call.receive<JoinGameRequest>()
 
@@ -54,7 +56,7 @@ fun Route.gameRoutes() {
             post("/start") {
                 val user = User.fromJWTToken(call.principal()!!)
 
-                service.getGameByUser(user)?.let {
+                service.getGameLobby(user)?.let {
                     if (it.owner != user) {
                         call.respond(ErrorResponse("Only the owner of the game can start the game"))
                     } else if (it.opponent == null) {
@@ -69,11 +71,35 @@ fun Route.gameRoutes() {
                 }
             }
 
+           // get("/lobby") {
+           //     val lobby = service.getGameLobby(getLoggedUser())
+
+           //     if (lobby == null) {
+           //         errorResponse("User not present in a lobby")
+           //     } else {
+
+           //     }
+           // }
+
+            get("/get") {
+                val lobby = service.getGameLobby(getLoggedUser())
+
+                if (lobby == null) {
+                    dataResponse(GameStateResponse(GameStateResponse.StateType.NONE, null))
+                } else {
+                    lobby.game?.let {
+                        dataResponse(GameStateResponse(GameStateResponse.StateType.PLAYING, PlayingGameStateResponse(it)))
+                    } ?: run {
+                        dataResponse(GameStateResponse(GameStateResponse.StateType.PENDING, PendingGameStateResponse(lobby)))
+                    }
+                }
+            }
+
             post("/play") {
                 val request = call.receive<PlayGameRequest>()
                 val user = User.fromJWTToken(call.principal()!!)
 
-                val game = service.getGameByUser(user)
+                val game = service.getGameLobby(user)
                 if (game == null) {
                     call.respond(ErrorResponse("User not present in any game"))
                 } else if (service. isItUsersTurn(user, game)) {

@@ -1,6 +1,7 @@
 package com.zcu.kiv.pia.tictactoe.service
 
 import com.zcu.kiv.pia.tictactoe.database.logger
+import com.zcu.kiv.pia.tictactoe.game.TicTacToeGame
 import com.zcu.kiv.pia.tictactoe.model.GameLobby
 import com.zcu.kiv.pia.tictactoe.model.User
 
@@ -19,11 +20,13 @@ interface GameService {
 
     fun isUserInAGame(user: User): Boolean
 
+    fun getGameState(user: User): TicTacToeGame?
+
     fun placeSeed(user: User, row: Int, column: Int): Boolean
 
     fun startGame(gameLobby: GameLobby): Boolean
 
-    fun getGameByUser(user: User): GameLobby?
+    fun getGameLobby(user: User): GameLobby?
 }
 
 class GameRepository {
@@ -115,6 +118,8 @@ class GameServiceImpl(private val gameRepository: GameRepository) : GameService 
         return false
     }
 
+    override fun getGameState(user: User): TicTacToeGame? = games[user.id]?.game
+
     override fun removeUserFromAGame(user: User): Boolean {
         val game = userToGames[user.id]
         game?.let {
@@ -123,7 +128,7 @@ class GameServiceImpl(private val gameRepository: GameRepository) : GameService 
         return false
     }
 
-    override fun getGameByUser(user: User): GameLobby? = userToGames[user.id]
+    override fun getGameLobby(user: User): GameLobby? = userToGames[user.id]
 
     override fun isUserInAGame(user: User) = userToGames.containsKey(user.id)
 

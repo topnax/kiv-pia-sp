@@ -33,7 +33,7 @@ class GameRepository {
     fun getGame() = "Tic Tac Toe game played :)"
 }
 
-class GameServiceImpl(private val gameRepository: GameRepository) : GameService {
+class GameServiceImpl(private val gameRepository: GameRepository, private val realtimeService: RealtimeService) : GameService {
 
     private var availableId = 0
 

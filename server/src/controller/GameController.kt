@@ -71,15 +71,15 @@ fun Route.gameRoutes() {
                 }
             }
 
-           // get("/lobby") {
-           //     val lobby = service.getGameLobby(getLoggedUser())
+            // get("/lobby") {
+            //     val lobby = service.getGameLobby(getLoggedUser())
 
-           //     if (lobby == null) {
-           //         errorResponse("User not present in a lobby")
-           //     } else {
+            //     if (lobby == null) {
+            //         errorResponse("User not present in a lobby")
+            //     } else {
 
-           //     }
-           // }
+            //     }
+            // }
 
             get("/get") {
                 val lobby = service.getGameLobby(getLoggedUser())
@@ -88,9 +88,19 @@ fun Route.gameRoutes() {
                     dataResponse(GameStateResponse(GameStateResponse.StateType.NONE, null))
                 } else {
                     lobby.game?.let {
-                        dataResponse(GameStateResponse(GameStateResponse.StateType.PLAYING, PlayingGameStateResponse(it)))
+                        dataResponse(
+                            GameStateResponse(
+                                GameStateResponse.StateType.PLAYING,
+                                PlayingGameStateResponse(lobby, it)
+                            )
+                        )
                     } ?: run {
-                        dataResponse(GameStateResponse(GameStateResponse.StateType.PENDING, PendingGameStateResponse(lobby)))
+                        dataResponse(
+                            GameStateResponse(
+                                GameStateResponse.StateType.PENDING,
+                                PendingGameStateResponse(lobby)
+                            )
+                        )
                     }
                 }
             }
@@ -102,7 +112,7 @@ fun Route.gameRoutes() {
                 val game = service.getGameLobby(user)
                 if (game == null) {
                     call.respond(ErrorResponse("User not present in any game"))
-                } else if (service. isItUsersTurn(user, game)) {
+                } else if (service.isItUsersTurn(user, game)) {
                     call.respond(ErrorResponse("It is not this user's turn"))
                 } else if (!service.placeSeed(user, request.row, request.column)) {
                     call.respond(ErrorResponse("Could not place the seed"))

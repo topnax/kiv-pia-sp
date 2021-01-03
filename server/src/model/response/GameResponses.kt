@@ -2,12 +2,17 @@ package com.zcu.kiv.pia.tictactoe.model.response
 
 import com.zcu.kiv.pia.tictactoe.game.TicTacToeGame
 import com.zcu.kiv.pia.tictactoe.model.GameLobby
+import com.zcu.kiv.pia.tictactoe.model.User
 
-class PendingGameStateResponse(lobby: GameLobby, val owner: Boolean = false) {
+class PendingGameStateResponse(lobby: GameLobby, val owner: Boolean = false, invitedUsers: List<User> = listOf()) {
     val id = lobby.id
     val opponent = lobby.opponent
     val boardSize = lobby.boardSize
     val victoriousCells = lobby.boardSize
+    val invitedUsers: List<Any> = invitedUsers.map {
+        // TODO might provide ID to be able to cancel an invitation
+        it.username
+    }
 }
 
 class PlayingGameStateResponse(lobby: GameLobby, game: TicTacToeGame) {

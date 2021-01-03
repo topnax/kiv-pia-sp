@@ -5,10 +5,15 @@ import com.zcu.kiv.pia.tictactoe.game.TicTacToeGame
 import com.zcu.kiv.pia.tictactoe.model.GameLobby
 import com.zcu.kiv.pia.tictactoe.model.User
 import com.zcu.kiv.pia.tictactoe.model.response.GameStateResponse
+import com.zcu.kiv.pia.tictactoe.model.response.NewInviteResponse
 import com.zcu.kiv.pia.tictactoe.model.response.PendingGameStateResponse
+import java.lang.Exception
 
 interface GameService {
     fun playGame(): String
+
+    @Throws(InviteUserException::class)
+    fun inviteUser(user: User, gameLobby: GameLobby)
 
     fun createGame(user: User, boardSize: Int, victoriousCells: Int): Boolean
 
@@ -29,6 +34,10 @@ interface GameService {
     fun startGame(gameLobby: GameLobby): Boolean
 
     fun getGameLobby(user: User): GameLobby?
+
+    fun getGameLobby(id: Int): GameLobby?
+
+    class InviteUserException(val reason: String) : Exception(reason)
 }
 
 class GameRepository {
@@ -41,11 +50,64 @@ class GameServiceImpl(private val gameRepository: GameRepository, private val re
     private var availableId = 0
 
     /**
+     * Users are being mapped to list of lobby owners
+     */
+    private var gameInvites = mutableMapOf<User, MutableList<User>>()
+
+    /**
      * User IDs to a game they participate in
      */
     private val userToGames = hashMapOf<Int, GameLobby>()
 
+    /**
+     * Game lobbied mapped by IDs
+     */
     private val games = hashMapOf<Int, GameLobby>()
+
+    override fun inviteUser(user: User, gameLobby: GameLobby) {
+        if (gameLobby.opponent != null) throw GameService.InviteUserException("This game lobby is already full.")
+
+        if (userToGames.containsKey(user.id)) throw GameService.InviteUserException("User ${user.username} already participates in a game")
+
+        if (user == gameLobby.owner) throw GameService.InviteUserException("Owner of a lobby cannot invite itself")
+
+        if (gameInvites[user]?.contains(gameLobby.owner) == true) throw GameService.InviteUserException("User already invited to this lobby")
+
+        // check whether no invites were sent to this user yet
+        val invitedUsers = gameInvites.getOrDefault(user, mutableListOf())
+
+        invitedUsers.add(user)
+
+        gameInvites[user] = invitedUsers
+
+        realtimeService.sendMessage(
+            RealtimeMessage(
+                RealtimeMessage.Namespace.NEWGAME,
+                "newInvite",
+                NewInviteResponse(
+                    gameLobby.id,
+                    gameLobby.owner.username
+                )
+            ),
+            users = arrayOf(user)
+        )
+
+        realtimeService.sendMessage(
+            RealtimeMessage(
+                RealtimeMessage.Namespace.GAME,
+                "setState",
+                GameStateResponse(
+                    GameStateResponse.StateType.PENDING,
+                    PendingGameStateResponse(
+                        gameLobby,
+                        true,
+                        invitedUsers
+                    )
+                )
+            ),
+            users = arrayOf(gameLobby.owner)
+        )
+    }
 
     override fun createGame(user: User, boardSize: Int, victoriousCells: Int): Boolean {
         if (isUserInAGame(user)) return false
@@ -160,6 +222,8 @@ class GameServiceImpl(private val gameRepository: GameRepository, private val re
     }
 
     override fun getGameLobby(user: User): GameLobby? = userToGames[user.id]
+
+    override fun getGameLobby(id: Int): GameLobby? = games[id]
 
     override fun isUserInAGame(user: User) = userToGames.containsKey(user.id)
 

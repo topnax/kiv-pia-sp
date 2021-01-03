@@ -59,6 +59,12 @@ interface UserService {
      */
     fun getLoggedInUsers(): List<User>
 
+
+    /**
+     * Returns `true` when the given user is online
+     */
+    fun isUserOnline(user: User): Boolean
+
 }
 
 private val logger = KotlinLogging.logger {}
@@ -93,6 +99,8 @@ class UserServiceImpl(
             }
         )
     }
+
+    override fun isUserOnline(user: User) = inMemoryUserRepository.getLoggedInUsers().contains(user)
 
     override suspend fun addUser(email: String, username: String, password: String) =
         persistentUserRepository.addUser(email, username, password)

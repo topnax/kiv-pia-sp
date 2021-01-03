@@ -1,6 +1,7 @@
 package com.zcu.kiv.pia.tictactoe.model.response
 
 import com.zcu.kiv.pia.tictactoe.model.FriendRequest
+import com.zcu.kiv.pia.tictactoe.model.GameLobby
 import com.zcu.kiv.pia.tictactoe.model.User
 
 class UserOnlineResponse(user: User) {
@@ -35,3 +36,5 @@ class NewFriendResponse(user: User) {
     val username = user.username
     val id = user.id
 }
+
+class NewInviteResponse(val lobbyId: Int, val ownerUsername: String)

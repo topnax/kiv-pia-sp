@@ -41,6 +41,26 @@ export const actions = {
       await context.dispatch("snackbar/showError", "Could not create a new game!", {root: true})
     }
   },
+  async fetchInvites(context, data) {
+//    context.commit("SET_INVITES_LOADING", true)
+    await new Promise(resolve => setTimeout(resolve, 200))
+    try {
+      let result = await this.$axios.$get("/game/invites")
+
+      if (result.responseCode === 0) {
+//        await context.commit("SET_INVITES", result.data)
+        console.log("loaded invites:")
+        console.log(result.data)
+      } else {
+
+        await context.dispatch("snackbar/showError", result.message, {root: true})
+      }
+    } catch (e) {
+      await context.dispatch("snackbar/showError", "Could not load game invites!", {root: true})
+    }
+
+  //  context.commit("SET_INVITES_LOADING", false)
+  },
 }
 
 export const getters = {

@@ -42,7 +42,9 @@
 import {mapGetters, mapState} from "vuex";
 
 export default {
-
+  mounted() {
+    this.$store.dispatch("newgame/fetchInvites")
+  },
   methods: {
     create() {
       this.$store.dispatch("newgame/create")

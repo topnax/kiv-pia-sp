@@ -3,8 +3,9 @@ package com.zcu.kiv.pia.tictactoe.model.response
 import com.zcu.kiv.pia.tictactoe.game.TicTacToeGame
 import com.zcu.kiv.pia.tictactoe.model.GameLobby
 
-class PendingGameStateResponse(lobby: GameLobby) {
+class PendingGameStateResponse(lobby: GameLobby, val owner: Boolean = false) {
     val id = lobby.id
+    val opponent = lobby.opponent
     val boardSize = lobby.boardSize
     val victoriousCells = lobby.boardSize
 }

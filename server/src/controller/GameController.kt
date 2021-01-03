@@ -82,7 +82,8 @@ fun Route.gameRoutes() {
             // }
 
             get("/get") {
-                val lobby = service.getGameLobby(getLoggedUser())
+                val user = getLoggedUser()
+                val lobby = service.getGameLobby(user)
 
                 if (lobby == null) {
                     dataResponse(GameStateResponse(GameStateResponse.StateType.NONE, null))
@@ -98,7 +99,7 @@ fun Route.gameRoutes() {
                         dataResponse(
                             GameStateResponse(
                                 GameStateResponse.StateType.PENDING,
-                                PendingGameStateResponse(lobby)
+                                PendingGameStateResponse(lobby, owner = user == lobby.owner)
                             )
                         )
                     }

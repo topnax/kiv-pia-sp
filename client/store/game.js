@@ -79,17 +79,7 @@ export const actions = {
 
       if (result.responseCode === 0) {
         let gameState = result.data
-        switch (gameState.stateType) {
-          case "PENDING":
-            context.commit("SET_PENDING_STATE", gameState.state)
-            break;
-          case "NONE":
-            context.commit("SET_NONE_STATE")
-            break;
-          default:
-            await context.dispatch("snackbar/showError", `Unknown game state ${gameState.stateType}`, {root: true})
-            break;
-        }
+        await context.dispatch("setState", gameState)
       } else {
         await context.dispatch("snackbar/showError", result.message, {root: true})
       }

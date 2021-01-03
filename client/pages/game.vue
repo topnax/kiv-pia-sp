@@ -7,13 +7,14 @@
 
 
 <script>
-import {mapState} from "vuex";
+import {mapGetters, mapState} from "vuex";
 
 export default {
   computed: {
     ...mapState({
       squares: state => state.game.squares
-    })
+    }),
+
   },
   layout: "user_loggedin",
   name: "game",

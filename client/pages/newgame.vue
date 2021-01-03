@@ -8,24 +8,27 @@
         <v-card-title>Create a new game</v-card-title>
         <v-card-text>
           <span class="subtitle-1">Board size:</span>
-          <v-radio-group v-model="radioGroup">
+          <v-radio-group v-model="boardSize">
             <v-radio
-              v-for="n in boardSizes"
+              v-for="n in newgame.availableBoardSizes"
               :key="n"
-              :label="`${n} x ${n}`"
               :value="n"
+              :label="`${n} x ${n}`"
             ></v-radio>
           </v-radio-group>
           <span class="subtitle-1">Winning squares:</span>
-          <v-radio-group v-model="radioGroup">
+          <v-radio-group v-model="victoriousCells">
             <v-radio
-              v-for="n in boardSizes"
+              v-for="n in availableVictoriousCells"
               :key="n"
-              :label="`${n} x ${n}`"
+              :label="`${n}`"
               :value="n"
             ></v-radio>
           </v-radio-group>
         </v-card-text>
+        <v-btn text
+               @click="create">CREATE
+        </v-btn>
 
       </v-card>
     </v-col>
@@ -33,13 +36,39 @@
 </template>
 
 <script>
+import {mapGetters, mapState} from "vuex";
+
 export default {
+  methods: {
+    create() {
+      this.$store.dispatch("newgame/create")
+    }
+  },
+  computed: {
+    ...mapGetters({
+      availableVictoriousCells: 'newgame/availableVictoriousCells',
+    }),
+
+    ...mapState(["newgame"]),
+    victoriousCells: {
+      get() {
+        return this.$store.state.victoriousCells;
+      },
+      set(value) {
+        this.$store.commit("newgame/SET_VICTORIOUS_CELLS", value);
+      }
+    },
+    boardSize: {
+      get() {
+        return this.$store.state.boardSize;
+      },
+      set(value) {
+        this.$store.commit("newgame/SET_BOARD_SIZE", value);
+      }
+    }
+  },
   layout: "user_loggedin",
-  name: "profile",
-  data: () => ({
-    radioGroup: 1,
-    boardSizes: [3, 5, 10]
-  }),
+  name: "newgame",
   middleware: ["auth"]
 }
 </script>

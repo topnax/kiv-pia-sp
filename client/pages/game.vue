@@ -1,12 +1,15 @@
 <template>
   <v-container>
-    <pending v-if="game.state === `PENDING`" :boardSize="game.pending.boardSize" :victoriousCells="game.pending.victoriousCells" :id="game.pending.id" :invitedUsers="game.pending.invitedUsers"/>
+    <pending v-if="game.state === `PENDING`" :boardSize="game.pending.boardSize"
+             :victoriousCells="game.pending.victoriousCells" :id="game.pending.id"
+             :invitedUsers="game.pending.invitedUsers"
+             :owner="game.pending.owner"
+             :opponentUsername="game.pending.opponentUsername"/>
     <board v-else-if="game.state === `PLAYING`" :squares="squares" :size="5"/>
     <span v-else-if="game.state === `NONE`">Currently not present in any game</span>
     <span v-else>Invalid state</span>
   </v-container>
 </template>
-
 
 
 <script>

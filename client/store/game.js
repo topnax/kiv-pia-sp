@@ -7,6 +7,9 @@ export const state = () => ({
   state: "NONE",
 
   pending: {
+    owner: Boolean,
+    opponentUsername: String,
+
     id: Number,
     boardSize: 0,
     victoriousCells: 0,
@@ -36,14 +39,21 @@ export const mutations = {
 
   SET_NONE_STATE(state, pendingState) {
     state.state = "NONE"
+    state.pending = undefined
+    state.playing = undefined
   },
 
   SET_PENDING_STATE(state, pendingState) {
     if (state.state === "NONE" || state.state === "PENDING") {
+      state.pending = {}
+
+      state.pending.opponentUsername = pendingState.opponentUsername
       state.pending.id = pendingState.id
+      state.pending.owner = pendingState.owner
       state.pending.boardSize = pendingState.boardSize
       state.pending.victoriousCells = pendingState.victoriousCells
       state.state = "PENDING"
+      state.playing = {}
     } else {
       console.error("received pending while playing is set")
     }

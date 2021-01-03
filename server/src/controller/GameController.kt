@@ -26,7 +26,7 @@ fun Route.gameRoutes() {
     val service: GameService by inject()
 
     authenticate(JWT_AUTH_NAME) {
-        route("/api/game") {
+        route("/game") {
             get("/play") {
                 logger.debug { "Play endpoint invoked" }
                 call.respondText(service.playGame(), contentType = ContentType.Text.Plain)

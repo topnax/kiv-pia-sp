@@ -23,8 +23,20 @@ export const mutations = {
 
 export const actions = {
   async create(context) {
-    console.log(context.state.boardSize)
-    console.log(context.state.victoriousCells)
+    try {
+      let result = await this.$axios.$post("/game/create", {
+        boardSize: context.state.boardSize,
+        victoriousCells: context.state.victoriousCells
+      })
+
+      if (result.responseCode === 0) {
+        await this.$router.push("/game")
+      } else {
+        await context.dispatch("snackbar/showError", result.message, {root: true})
+      }
+    } catch (e) {
+      await context.dispatch("snackbar/showError", "Could not create a new game!", {root: true})
+    }
   },
 }
 
@@ -33,9 +45,12 @@ export const getters = {
     console.log("setting board size")
     console.log(state.boardSize)
     switch (state.boardSize) {
-      case 3: return [3]
-      case 5: return [3, 5]
-      case 10: return [3, 5, 10]
+      case 3:
+        return [3]
+      case 5:
+        return [3, 5]
+      case 10:
+        return [3, 5, 10]
     }
   }
 }

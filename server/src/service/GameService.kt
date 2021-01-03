@@ -37,6 +37,8 @@ interface GameService {
 
     fun getGameLobby(id: Int): GameLobby?
 
+    fun getGameInvites(user: User): List<Pair<String, Int>>
+
     class InviteUserException(val reason: String) : Exception(reason)
 }
 
@@ -108,6 +110,13 @@ class GameServiceImpl(private val gameRepository: GameRepository, private val re
             users = arrayOf(gameLobby.owner)
         )
     }
+
+    override fun getGameInvites(user: User): List<Pair<String, Int>> =
+        gameInvites.getOrDefault(user, mutableListOf()).mapNotNull { userThatInvited ->
+            userToGames[userThatInvited.id]?.let { lobby ->
+                Pair(userThatInvited.username, lobby.id)
+            }
+        }.toList()
 
     override fun createGame(user: User, boardSize: Int, victoriousCells: Int): Boolean {
         if (isUserInAGame(user)) return false

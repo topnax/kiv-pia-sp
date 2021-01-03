@@ -32,3 +32,12 @@ class GameStateResponse(val stateType: StateType, val state: Any?) {
         PLAYING
     }
 }
+
+class GameInviteListResponse(invites: List<Pair<String, Int>>) {
+    val invites: List<Any> = invites.map {
+        object {
+            val ownerUsername = it.first
+            val lobbyId = it.second
+        }
+    }
+}

@@ -99,6 +99,10 @@ fun Route.gameRoutes() {
                 }
             }
 
+            get("/invites") {
+                dataResponse(GameInviteListResponse(gameService.getGameInvites(getLoggedUser())))
+            }
+
             // get("/lobby") {
             //     val lobby = service.getGameLobby(getLoggedUser())
 

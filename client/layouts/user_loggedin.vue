@@ -226,6 +226,7 @@ export default {
     console.log(`Sending token=${token}`)
     await this.$store.dispatch("websocket/sendMessage", "jwt;" + token, {root: true})
     await this.$store.dispatch("friends/fetchFriends")
+    await this.$store.dispatch("game/loadState")
   },
   methods: {
     async logout() {
@@ -249,6 +250,11 @@ export default {
       drawer: true,
       fixed: false,
       items: [
+        {
+          icon: 'mdi-gamepad',
+          title: 'New game',
+          to: '/newgame'
+        },
         {
           icon: 'mdi-gamepad-variant',
           title: 'Game',

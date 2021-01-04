@@ -51,8 +51,8 @@ class GameLobbyTest {
         val user2 = User(2, "foo@bar.cz", "foo")
 
         assert(gameService.createGame(user1, 10, 3))
-        assert(gameService.addUserToAGame(user2, 0))
-        assert(!gameService.addUserToAGame(user2, 0))
-        assert(!gameService.addUserToAGame(user1, 0))
+        assert(gameService.addUserToLobby(user2, 0))
+        assert(!gameService.addUserToLobby(user2, 0))
+        assert(!gameService.addUserToLobby(user1, 0))
     }
 }

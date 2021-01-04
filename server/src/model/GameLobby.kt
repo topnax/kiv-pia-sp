@@ -19,4 +19,6 @@ class GameLobby(val id: Int, val owner: User, val boardSize: Int, val victorious
         game = TicTacToeGame(boardSize, ownerSeed,victoriousCells)
         return true
     }
+
+    override fun equals(other: Any?) = (other is GameLobby) && other.id == id
 }

@@ -4,21 +4,18 @@ import com.zcu.kiv.pia.tictactoe.database.logger
 import com.zcu.kiv.pia.tictactoe.game.TicTacToeGame
 import com.zcu.kiv.pia.tictactoe.model.GameLobby
 import com.zcu.kiv.pia.tictactoe.model.User
-import com.zcu.kiv.pia.tictactoe.model.response.GameStateResponse
-import com.zcu.kiv.pia.tictactoe.model.response.InviteGoneResponse
-import com.zcu.kiv.pia.tictactoe.model.response.NewInviteResponse
-import com.zcu.kiv.pia.tictactoe.model.response.PendingGameStateResponse
+import com.zcu.kiv.pia.tictactoe.model.response.*
 import java.lang.Exception
 
 interface GameService {
     fun playGame(): String
 
-    @Throws(InviteUserException::class)
+    @Throws(GameServiceException::class)
     fun inviteUser(user: User, gameLobby: GameLobby)
 
     fun createGame(user: User, boardSize: Int, victoriousCells: Int): Boolean
 
-    fun addUserToAGame(user: User, gameId: Int): Boolean
+    fun addUserToLobby(user: User, lobbyId: Int): Boolean
 
     fun isItUsersTurn(user: User, gameLobby: GameLobby): Boolean
 
@@ -38,9 +35,15 @@ interface GameService {
 
     fun getGameLobby(id: Int): GameLobby?
 
+    @Throws(GameServiceException::class)
+    fun acceptGameInvite(lobbyId: Int, user: User)
+
+    @Throws(GameServiceException::class)
+    fun declineGameInvite(lobbyId: Int, user: User)
+
     fun getGameInvites(user: User): List<Pair<String, Int>>
 
-    class InviteUserException(val reason: String) : Exception(reason)
+    class GameServiceException(val reason: String) : Exception(reason)
 }
 
 class GameRepository {
@@ -55,7 +58,7 @@ class GameServiceImpl(private val gameRepository: GameRepository, private val re
     /**
      * Users are being mapped to list of lobby owners
      */
-    private var gameInvites = mutableMapOf<User, MutableList<User>>()
+    private var gameInvites = mutableMapOf<User, MutableList<GameLobby>>()
 
     /**
      * User IDs to a game they participate in
@@ -68,22 +71,22 @@ class GameServiceImpl(private val gameRepository: GameRepository, private val re
     private val games = hashMapOf<Int, GameLobby>()
 
     override fun inviteUser(user: User, gameLobby: GameLobby) {
-        if (gameLobby.opponent != null) throw GameService.InviteUserException("This game lobby is already full.")
+        if (gameLobby.opponent != null) throw GameService.GameServiceException("This game lobby is already full.")
 
-        if (userToGames.containsKey(user.id)) throw GameService.InviteUserException("User ${user.username} already participates in a game")
+        if (userToGames.containsKey(user.id)) throw GameService.GameServiceException("User ${user.username} already participates in a game")
 
-        if (user == gameLobby.owner) throw GameService.InviteUserException("Owner of a lobby cannot invite itself")
+        if (user == gameLobby.owner) throw GameService.GameServiceException("Owner of a lobby cannot invite itself")
 
-        if (gameInvites[user]?.contains(gameLobby.owner) == true) throw GameService.InviteUserException("User already invited to this lobby")
+        if (gameInvites[user]?.contains(gameLobby) == true) throw GameService.GameServiceException("User already invited to this lobby")
 
         // check whether no invites were sent to this user yet
-        val usersThatInvited = gameInvites.getOrDefault(user, mutableListOf())
+        val invitationsToGames = gameInvites.getOrDefault(user, mutableListOf())
 
-        usersThatInvited.add(gameLobby.owner)
+        invitationsToGames.add(gameLobby)
 
         gameLobby.invitedUsers.add(user)
 
-        gameInvites[user] = usersThatInvited
+        gameInvites[user] = invitationsToGames
 
         logger.debug { "added $user to invited users" }
 
@@ -99,30 +102,92 @@ class GameServiceImpl(private val gameRepository: GameRepository, private val re
             users = arrayOf(user)
         )
 
-        realtimeService.sendMessage(
-            RealtimeMessage(
-                RealtimeMessage.Namespace.GAME,
-                "setState",
-                GameStateResponse(
-                    GameStateResponse.StateType.PENDING,
-                    PendingGameStateResponse(
-                        gameLobby,
-                        true,
-                        usersThatInvited
+        listOf(gameLobby.owner, user ).forEach {
+            realtimeService.sendMessage(
+                RealtimeMessage(
+                    RealtimeMessage.Namespace.GAME,
+                    "setState",
+                    GameStateResponse(
+                        GameStateResponse.StateType.PENDING,
+                        PendingGameStateResponse(
+                            gameLobby,
+                            it == gameLobby.owner,
+                            gameLobby.invitedUsers
+                        )
                     )
-                )
-            ),
-            users = arrayOf(gameLobby.owner)
-        )
+                ),
+                users = arrayOf(gameLobby.owner)
+            )
+        }
+    }
+
+    override fun acceptGameInvite(lobbyId: Int, user: User) {
+        games[lobbyId]?.let { lobby ->
+            val invited = gameInvites[user]?.contains(lobby) ?: false
+
+            if (!invited) {
+                throw GameService.GameServiceException("User ${user.username} not invited to the lobby")
+            }
+            if (addUserToLobby(user, lobbyId)) {
+                gameInvites[user]?.remove(lobby)
+                lobby.invitedUsers.remove(user)
+            } else {
+                throw GameService.GameServiceException("Could not add user to the lobby")
+            }
+        } ?: run {
+            throw GameService.GameServiceException("Lobby not found")
+        }
+    }
+
+    override fun declineGameInvite(lobbyId: Int, user: User) {
+        games[lobbyId]?.let { lobby ->
+            if (!lobby.invitedUsers.contains(user)) {
+                throw GameService.GameServiceException("Cannot cancel an invite because user is not invited to the given lobby")
+            }
+            gameInvites[user]?.remove(lobby)
+            lobby.invitedUsers.remove(user)
+            realtimeService.sendMessage(
+                RealtimeMessage(
+                    RealtimeMessage.Namespace.NEWGAME,
+                    "inviteGone",
+                    InviteGoneResponse(
+                        lobby.id
+                    )
+                ),
+                users = arrayOf(user)
+            )
+            realtimeService.sendMessage(
+                RealtimeMessage(
+                    RealtimeMessage.Namespace.GAME,
+                    "setState",
+                    GameStateResponse(
+                        GameStateResponse.StateType.PENDING,
+                        PendingGameStateResponse(
+                            lobby,
+                            true,
+                            lobby.invitedUsers
+                        )
+                    )
+                ),
+                users = arrayOf(lobby.owner)
+            )
+            realtimeService.sendMessage(
+                RealtimeMessage(
+                    RealtimeMessage.Namespace.NOTIFICATIONS,
+                    "new",
+                    NotificationResponse("User ${user.username} has declined the invite :(")
+                ),
+                users = arrayOf(lobby.owner)
+            )
+        } ?: run {
+            throw GameService.GameServiceException("Lobby not found")
+        }
     }
 
     override fun getGameInvites(user: User): List<Pair<String, Int>> {
         logger.debug { "finding invites for $user ${gameInvites.get(user)?.size}" }
-        val mapped = gameInvites.getOrDefault(user, mutableListOf()).mapNotNull { userThatInvited ->
-            logger.debug { "Found an invite ${userThatInvited.username} ${userThatInvited.id}, userTOGames ${userToGames[userThatInvited.id]?.id}" }
-            userToGames[userThatInvited.id]?.let { lobby ->
-                return@mapNotNull Pair(userThatInvited.username, lobby.id)
-            }
+        val mapped = gameInvites.getOrDefault(user, mutableListOf()).map { gameLobby ->
+            Pair(gameLobby.owner.username, gameLobby.id)
         }.toList()
         logger.debug { "mapped ${mapped.size}" }
         return mapped
@@ -157,13 +222,27 @@ class GameServiceImpl(private val gameRepository: GameRepository, private val re
         return gameLobby.game?.currentSeed == userSeed
     }
 
-    override fun addUserToAGame(user: User, gameId: Int): Boolean {
+    override fun addUserToLobby(user: User, lobbyId: Int): Boolean {
         if (userToGames.containsKey(user.id)) return false
-        val game = games[gameId]
-        game?.let {
+        val lobby = games[lobbyId]
+        lobby?.let {
             it.opponent = user
-            userToGames[user.id] = game
-            // TODO notify that user has been added to the game
+            userToGames[user.id] = lobby
+
+            val message = RealtimeMessage(
+                RealtimeMessage.Namespace.GAME,
+                "setState",
+                GameStateResponse(
+                    GameStateResponse.StateType.PENDING,
+                    PendingGameStateResponse(lobby, true)
+                )
+            )
+
+            realtimeService.sendMessage(
+                message,
+                users = arrayOf(lobby.owner, user)
+            )
+
             return true
         }
         return false
@@ -193,55 +272,86 @@ class GameServiceImpl(private val gameRepository: GameRepository, private val re
     }
 
     override fun removeUserFromAGame(user: User, gameId: Int): Boolean {
-        val game = games[gameId]
-        game?.let {
+        games[gameId]?.let { lobby ->
 
-            if (game.game != null) {
+            if (lobby.game != null) {
                 userToGames.remove(user.id)
-                if (game.opponent == user) {
-                    game.opponent = null
+                if (lobby.opponent == user) {
+                    lobby.opponent = null
                     // TODO notify that user has left
-                } else if (game.owner == user) {
+                } else if (lobby.owner == user) {
                     // owner has left the game, remove the opponent
-                    userToGames.remove(game.opponent?.id)
-                    game.opponent = null
+                    userToGames.remove(lobby.opponent?.id)
+                    lobby.opponent = null
 
                     // remove the game
                     games.remove(gameId)
 
                     // TODO notify that game has ended
                 }
-            } else if (user == game.owner) {
-                // TODO remove pending invitations
+            } else {
+                // game has not been started yet
                 userToGames.remove(user.id)
-                realtimeService.sendMessage(
-                    RealtimeMessage(
-                        RealtimeMessage.Namespace.GAME,
-                        "setState",
-                        GameStateResponse(
-                            GameStateResponse.StateType.NONE,
-                            null
-                        )
-                    ),
-                    users = arrayOf(user)
-                )
+                if (user == lobby.owner) {
+                    // owner has left
+                    // TODO remove pending invitations
+                    realtimeService.sendMessage(
+                        RealtimeMessage(
+                            RealtimeMessage.Namespace.GAME,
+                            "setState",
+                            GameStateResponse(
+                                GameStateResponse.StateType.NONE,
+                                null
+                            )
+                        ),
+                        users = arrayOf(user)
+                    )
 
-                // iterate over users invited to this lobby
-                game.invitedUsers.forEach {  invitedUser ->
-                    // remove pending invites
-                    gameInvites[invitedUser]?.remove(game.owner)
+                    // iterate over users invited to this lobby
+                    lobby.invitedUsers.forEach { invitedUser ->
+                        // remove pending invites
+                        gameInvites[invitedUser]?.remove(lobby)
+                    }
+
+                    realtimeService.sendMessage(
+                        RealtimeMessage(
+                            RealtimeMessage.Namespace.NEWGAME,
+                            "inviteGone",
+                            InviteGoneResponse(
+                                lobby.id
+                            )
+                        ),
+                        users = lobby.invitedUsers.toTypedArray()
+                    )
+                } else if (user == lobby.opponent) {
+                    lobby.opponent = null
+                    // opponent has left
+                    realtimeService.sendMessage(
+                        RealtimeMessage(
+                            RealtimeMessage.Namespace.GAME,
+                            "setState",
+                            GameStateResponse(
+                                GameStateResponse.StateType.NONE,
+                                null
+                            )
+                        ),
+                        users = arrayOf(user)
+                    )
+                    realtimeService.sendMessage(
+                        RealtimeMessage(
+                            RealtimeMessage.Namespace.GAME,
+                            "setState",
+                            GameStateResponse(
+                                GameStateResponse.StateType.PENDING,
+                                lobby
+                            )
+                        ),
+                        users = arrayOf(lobby.owner)
+                    )
+                } else {
+                    logger.error { "Unhandled lobby leave" }
+                    return false
                 }
-
-                realtimeService.sendMessage(
-                    RealtimeMessage(
-                        RealtimeMessage.Namespace.NEWGAME,
-                        "inviteGone",
-                        InviteGoneResponse(
-                            game.id
-                        )
-                    ),
-                    users = game.invitedUsers.toTypedArray()
-                )
             }
             return true
         }

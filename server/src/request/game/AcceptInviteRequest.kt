@@ -1,3 +1,3 @@
 package com.zcu.kiv.pia.tictactoe.request.game
 
-class InviteToGameRequest (val userId: Int = -1)
+class AcceptInviteRequest(val lobbyId: Int = -1)

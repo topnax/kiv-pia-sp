@@ -37,4 +37,3 @@ class NewFriendResponse(user: User) {
     val id = user.id
 }
 
-class NewInviteResponse(val lobbyId: Int, val ownerUsername: String)

@@ -3,10 +3,7 @@ package com.zcu.kiv.pia.tictactoe.controller
 import com.zcu.kiv.pia.tictactoe.JWT_AUTH_NAME
 import com.zcu.kiv.pia.tictactoe.model.User
 import com.zcu.kiv.pia.tictactoe.model.response.*
-import com.zcu.kiv.pia.tictactoe.request.game.CreateGameRequest
-import com.zcu.kiv.pia.tictactoe.request.game.InviteToGameRequest
-import com.zcu.kiv.pia.tictactoe.request.game.JoinGameRequest
-import com.zcu.kiv.pia.tictactoe.request.game.PlayGameRequest
+import com.zcu.kiv.pia.tictactoe.request.game.*
 import com.zcu.kiv.pia.tictactoe.service.GameService
 import com.zcu.kiv.pia.tictactoe.service.UserService
 import com.zcu.kiv.pia.tictactoe.utils.dataResponse
@@ -47,7 +44,7 @@ fun Route.gameRoutes() {
                             try {
                                 gameService.inviteUser(user, gameLobby)
                                 successResponse()
-                            } catch(ex: GameService.InviteUserException) {
+                            } catch (ex: GameService.GameServiceException) {
                                 errorResponse(ex.reason)
                             }
                         } else {
@@ -74,10 +71,34 @@ fun Route.gameRoutes() {
                 val user = User.fromJWTToken(call.principal()!!)
                 val request = call.receive<JoinGameRequest>()
 
-                if (gameService.addUserToAGame(user, request.gameId)) {
+                if (gameService.addUserToLobby(user, request.gameId)) {
                     call.respond(SuccessResponse())
                 } else {
                     call.respond(ErrorResponse("Could not join the game"))
+                }
+            }
+
+            post("/acceptInvite") {
+                val user = getLoggedUser()
+                val request = call.receive<AcceptInviteRequest>()
+
+                try {
+                    gameService.acceptGameInvite(request.lobbyId, user)
+                    successResponse()
+                } catch (ex: GameService.GameServiceException) {
+                    errorResponse(ex.reason)
+                }
+            }
+
+            post("/declineInvite") {
+                val user = getLoggedUser()
+                val request = call.receive<DeclineInviteRequest>()
+
+                try {
+                    gameService.declineGameInvite(request.lobbyId, user)
+                    successResponse()
+                } catch (ex: GameService.GameServiceException) {
+                    errorResponse(ex.reason)
                 }
             }
 
@@ -131,7 +152,7 @@ fun Route.gameRoutes() {
                         dataResponse(
                             GameStateResponse(
                                 GameStateResponse.StateType.PENDING,
-                                PendingGameStateResponse(lobby, owner = user == lobby.owner)
+                                PendingGameStateResponse(lobby, owner = user == lobby.owner, lobby.invitedUsers)
                             )
                         )
                     }

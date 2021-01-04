@@ -41,5 +41,3 @@ class GameInviteListResponse(invites: List<Pair<String, Int>>) {
         }
     }
 }
-
-class InviteGoneResponse(val lobbyId: Int)

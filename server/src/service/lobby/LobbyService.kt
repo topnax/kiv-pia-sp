@@ -3,10 +3,12 @@ package com.zcu.kiv.pia.tictactoe.service
 import com.zcu.kiv.pia.tictactoe.model.Lobby
 import com.zcu.kiv.pia.tictactoe.model.User
 import com.zcu.kiv.pia.tictactoe.service.lobby.LobbyMessagingService
-import java.lang.Exception
+import mu.KotlinLogging
+
+private val logger = KotlinLogging.logger { }
 
 interface LobbyService {
-    fun inviteUser(user: User, lobby: Lobby)
+    fun inviteUser(user: User, lobby: Lobby, initiator: User)
 
     fun createLobby(user: User, boardSize: Int, victoriousCells: Int)
 
@@ -18,18 +20,25 @@ interface LobbyService {
 
     fun getLobby(user: User): Lobby?
 
+    fun getLobby(lobbyId: Int): Lobby?
+
     fun acceptInvite(lobby: Lobby, user: User)
 
     fun declineInvite(lobby: Lobby, user: User)
 
     fun getInvites(user: User): List<Pair<String, Int>>
 
+    // expections
     abstract class LobbyServiceException(val reason: String) : Exception(reason)
+
     class UserAlreadyPresentInALobby : LobbyServiceException("User is already present in a lobby")
     class UserAlreadyInvitedToThisLobby : LobbyServiceException("User already invited to this lobby")
     class CannotInviteOwner : LobbyServiceException("The owner of this lobby cannot be invited to this lobby")
     class LobbyFull : LobbyServiceException("Cannot invite a user to a full lobby")
     class UserNotInvited : LobbyServiceException("User not invited to this lobby")
+    class UserNotPresentInALobby : LobbyServiceException("User not present in a lobby")
+    class UserNotAnOwner : LobbyServiceException("Only the owner of this lobby can perform this action")
+    class LobbyNotFull : LobbyServiceException("Lobby not not full")
 }
 
 class LobbyServiceImpl(
@@ -37,26 +46,32 @@ class LobbyServiceImpl(
     private val notificationService: NotificationService
 ) : LobbyService {
 
-    val nextLobbyId = 0
+    /**
+     * The ID of the next lobby to be created
+     */
+    private var nextLobbyId = 0
 
     /**
      * List of active lobbies
      */
-    val lobbies = mutableListOf<Lobby>()
+    private val lobbies = mutableMapOf<Int, Lobby>()
 
     /**
      * A map where users are being mapped to list of lobbies to which they are invited to
      */
-    val invites = mutableMapOf<User, MutableList<Lobby>>()
+    private val invites = mutableMapOf<User, MutableList<Lobby>>()
 
     /**
      * A map where users are mapped to lobbies they participate in
      */
-    val usersToLobbies = mutableMapOf<User, Lobby>()
+    private val usersToLobbies = mutableMapOf<User, Lobby>()
 
-    override fun inviteUser(user: User, lobby: Lobby) {
+    override fun inviteUser(user: User, lobby: Lobby, initiator: User) {
         // lobby owner cannot invite himself
         if (lobby.owner == user) throw throw LobbyService.CannotInviteOwner()
+
+        // lobby owner cannot invite himself
+        if (lobby.owner == initiator) throw throw LobbyService.UserNotAnOwner()
 
         // lobby mustn't be full
         if (lobby.isFull()) throw throw LobbyService.LobbyFull()
@@ -88,10 +103,10 @@ class LobbyServiceImpl(
         if (usersToLobbies.contains(user)) throw LobbyService.UserAlreadyPresentInALobby()
 
         // create a new lobby
-        val lobby = Lobby(nextLobbyId, user, boardSize, victoriousCells)
+        val lobby = Lobby(nextLobbyId++, user, boardSize, victoriousCells)
 
         // add the lobby to the list of lobbies
-        lobbies.add(lobby)
+        lobbies[lobby.id] = lobby
 
         // assign a lobby to the owner user
         usersToLobbies[user] = lobby
@@ -102,11 +117,17 @@ class LobbyServiceImpl(
 
     override fun isUserInALobby(user: User) = usersToLobbies.containsKey(user)
 
-    override fun startLobby(lobby: Lobby): Boolean {
-        TODO("Not yet implemented")
+    override fun startLobby(lobby: Lobby, user: User) {
+        if (lobby.owner != user) throw LobbyService.UserNotAnOwner()
+
+        if (lobby.opponent == null) throw LobbyService.LobbyNotFull()
+
+        destroyLobby(lobby)
     }
 
     override fun getLobby(user: User) = usersToLobbies[user]
+
+    override fun getLobby(lobbyId: Int) = lobbies[lobbyId]
 
     override fun acceptInvite(lobby: Lobby, user: User) {
         // user cannot already be present in a lobby
@@ -151,6 +172,52 @@ class LobbyServiceImpl(
 
         // notify the user that the invite is gone
         lobbyMessagingService.sendGoneInviteNotification(lobby, user)
+    }
+
+    override fun leaveLobby(lobby: Lobby, user: User) {
+        if (!usersToLobbies.containsKey(user)) throw LobbyService.UserNotPresentInALobby()
+
+        // remove from userToLobbies
+        usersToLobbies.remove(user)
+
+        when (user) {
+            lobby.owner -> {
+                // the owner is leaving the lobby - destroy it
+                destroyLobby(lobby)
+            }
+            lobby.opponent -> {
+                lobby.opponent = null
+
+                // notify the owner
+                lobbyMessagingService.sendLobbyState(lobby, lobby.owner)
+            }
+            else -> {
+                logger.error { "User to lobbies contains a user ${user.username} that does not belong to the given lobby ${lobby.id}" }
+            }
+        }
+    }
+
+    private fun destroyLobby(lobby: Lobby) {
+        // remove users from usersToLobbies map
+        usersToLobbies.remove(lobby.owner)
+        usersToLobbies.remove(lobby.opponent)
+
+        // notify opponent
+        lobby.opponent?.let {
+            lobbyMessagingService.sendLobbyDestroyedNotification(lobby, it)
+        }
+
+        // notify owner
+        lobbyMessagingService.sendLobbyDestroyedNotification(lobby, lobby.owner)
+
+        // notify and remove pending invites
+        lobby.invitedUsers.forEach { invitedUser ->
+            invites[invitedUser]?.remove(lobby)
+            lobbyMessagingService.sendGoneInviteNotification(lobby, invitedUser)
+        }
+
+        // remove the lobby from the list
+        lobbies.remove(lobby.id)
     }
 
     override fun getInvites(user: User) = invites.getOrDefault(user, mutableListOf()).map {

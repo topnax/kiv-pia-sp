@@ -13,3 +13,7 @@ class LobbyStateResponse(lobby: Lobby, val owner: Boolean) {
         it.username
     }.toList()
 }
+
+class InviteGoneResponse(val lobbyId: Int)
+
+class LobbyDestroyedResponse(val lobbyId: Int)

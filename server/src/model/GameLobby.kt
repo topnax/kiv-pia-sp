@@ -10,6 +10,8 @@ class GameLobby(val id: Int, val owner: User, val boardSize: Int, val victorious
     val ownerSeed = Seed.CROSS
     val opponentSeed = Seed.NOUGHT
 
+    val invitedUsers = mutableListOf<User>()
+
     fun start(): Boolean {
         if (opponent == null || game != null) {
             return false

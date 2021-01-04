@@ -5,6 +5,7 @@ import com.zcu.kiv.pia.tictactoe.game.TicTacToeGame
 import com.zcu.kiv.pia.tictactoe.model.GameLobby
 import com.zcu.kiv.pia.tictactoe.model.User
 import com.zcu.kiv.pia.tictactoe.model.response.GameStateResponse
+import com.zcu.kiv.pia.tictactoe.model.response.InviteGoneResponse
 import com.zcu.kiv.pia.tictactoe.model.response.NewInviteResponse
 import com.zcu.kiv.pia.tictactoe.model.response.PendingGameStateResponse
 import java.lang.Exception
@@ -76,11 +77,13 @@ class GameServiceImpl(private val gameRepository: GameRepository, private val re
         if (gameInvites[user]?.contains(gameLobby.owner) == true) throw GameService.InviteUserException("User already invited to this lobby")
 
         // check whether no invites were sent to this user yet
-        val invitedUsers = gameInvites.getOrDefault(user, mutableListOf())
+        val usersThatInvited = gameInvites.getOrDefault(user, mutableListOf())
 
-        invitedUsers.add(user)
+        usersThatInvited.add(gameLobby.owner)
 
-        gameInvites[user] = invitedUsers
+        gameLobby.invitedUsers.add(user)
+
+        gameInvites[user] = usersThatInvited
 
         logger.debug { "added $user to invited users" }
 
@@ -105,7 +108,7 @@ class GameServiceImpl(private val gameRepository: GameRepository, private val re
                     PendingGameStateResponse(
                         gameLobby,
                         true,
-                        invitedUsers
+                        usersThatInvited
                     )
                 )
             ),
@@ -116,8 +119,9 @@ class GameServiceImpl(private val gameRepository: GameRepository, private val re
     override fun getGameInvites(user: User): List<Pair<String, Int>> {
         logger.debug { "finding invites for $user ${gameInvites.get(user)?.size}" }
         val mapped = gameInvites.getOrDefault(user, mutableListOf()).mapNotNull { userThatInvited ->
+            logger.debug { "Found an invite ${userThatInvited.username} ${userThatInvited.id}, userTOGames ${userToGames[userThatInvited.id]?.id}" }
             userToGames[userThatInvited.id]?.let { lobby ->
-                Pair(userThatInvited.username, lobby.id)
+                return@mapNotNull Pair(userThatInvited.username, lobby.id)
             }
         }.toList()
         logger.debug { "mapped ${mapped.size}" }
@@ -220,6 +224,23 @@ class GameServiceImpl(private val gameRepository: GameRepository, private val re
                         )
                     ),
                     users = arrayOf(user)
+                )
+
+                // iterate over users invited to this lobby
+                game.invitedUsers.forEach {  invitedUser ->
+                    // remove pending invites
+                    gameInvites[invitedUser]?.remove(game.owner)
+                }
+
+                realtimeService.sendMessage(
+                    RealtimeMessage(
+                        RealtimeMessage.Namespace.NEWGAME,
+                        "inviteGone",
+                        InviteGoneResponse(
+                            game.id
+                        )
+                    ),
+                    users = game.invitedUsers.toTypedArray()
                 )
             }
             return true

@@ -1,5 +1,7 @@
 export const state = () => ({
   availableBoardSizes: [3, 5, 10],
+  invites: [],
+  invitesLoading: true,
   boardSize: 1,
   victoriousCells: 3
 })
@@ -19,11 +21,31 @@ export const mutations = {
       state.boardSize = boardSize
     }
   },
+  SET_INVITES(state, invites) {
+    let lobbyIds = state.invites.map(invite => invite.lobbyId)
+    invites.filter(invite => lobbyIds.indexOf(invite.lobbyId) === -1).forEach(invite => state.invites.push(invite))
+  },
+
+  REMOVE_INVITE(state, invite) {
+    let inviteIndex = state.invites.map(invite => invite.lobbyId).indexOf(invite.lobbyId)
+
+    if (inviteIndex !== -1) {
+      state.invites.splice(inviteIndex, 1)
+    }
+  },
+
+  SET_INVITES_LOADING(state, loading) {
+    state.invitesLoading = loading
+  }
 }
 
 export const actions = {
   async newInvite(context, invite) {
     await context.dispatch("snackbar/showInfo", `New invite to ${invite.lobbyId} by ${invite.ownerUsername}`, {root: true})
+    context.commit("SET_INVITES", [invite])
+  },
+  async inviteGone(context, invite) {
+    context.commit("REMOVE_INVITE", invite)
   },
   async create(context) {
     try {
@@ -42,24 +64,22 @@ export const actions = {
     }
   },
   async fetchInvites(context, data) {
-//    context.commit("SET_INVITES_LOADING", true)
+    context.commit("SET_INVITES_LOADING", true)
     await new Promise(resolve => setTimeout(resolve, 200))
     try {
       let result = await this.$axios.$get("/game/invites")
-
       if (result.responseCode === 0) {
-//        await context.commit("SET_INVITES", result.data)
-        console.log("loaded invites:")
-        console.log(result.data)
+        await context.commit("SET_INVITES", result.data.invites)
+        console.log(context.state.invites)
       } else {
-
         await context.dispatch("snackbar/showError", result.message, {root: true})
       }
     } catch (e) {
+      console.error(e)
       await context.dispatch("snackbar/showError", "Could not load game invites!", {root: true})
     }
 
-  //  context.commit("SET_INVITES_LOADING", false)
+    context.commit("SET_INVITES_LOADING", false)
   },
 }
 

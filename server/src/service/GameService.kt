@@ -82,6 +82,8 @@ class GameServiceImpl(private val gameRepository: GameRepository, private val re
 
         gameInvites[user] = invitedUsers
 
+        logger.debug { "added $user to invited users" }
+
         realtimeService.sendMessage(
             RealtimeMessage(
                 RealtimeMessage.Namespace.NEWGAME,
@@ -111,12 +113,17 @@ class GameServiceImpl(private val gameRepository: GameRepository, private val re
         )
     }
 
-    override fun getGameInvites(user: User): List<Pair<String, Int>> =
-        gameInvites.getOrDefault(user, mutableListOf()).mapNotNull { userThatInvited ->
+    override fun getGameInvites(user: User): List<Pair<String, Int>> {
+        logger.debug { "finding invites for $user ${gameInvites.get(user)?.size}" }
+        val mapped = gameInvites.getOrDefault(user, mutableListOf()).mapNotNull { userThatInvited ->
             userToGames[userThatInvited.id]?.let { lobby ->
                 Pair(userThatInvited.username, lobby.id)
             }
         }.toList()
+        logger.debug { "mapped ${mapped.size}" }
+        return mapped
+
+    }
 
     override fun createGame(user: User, boardSize: Int, victoriousCells: Int): Boolean {
         if (isUserInAGame(user)) return false

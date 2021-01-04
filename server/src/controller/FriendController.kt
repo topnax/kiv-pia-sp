@@ -1,22 +1,14 @@
 package com.zcu.kiv.pia.tictactoe.controller
 
-import com.zcu.kiv.pia.tictactoe.JWT_AUTH_NAME
 import com.zcu.kiv.pia.tictactoe.model.FriendRequest
-import com.zcu.kiv.pia.tictactoe.model.User
-import com.zcu.kiv.pia.tictactoe.model.response.DataResponse
-import com.zcu.kiv.pia.tictactoe.model.response.ErrorResponse
 import com.zcu.kiv.pia.tictactoe.model.response.FriendRequestResponse
-import com.zcu.kiv.pia.tictactoe.model.response.SuccessResponse
 import com.zcu.kiv.pia.tictactoe.request.*
 import com.zcu.kiv.pia.tictactoe.service.FriendRequestException
 import com.zcu.kiv.pia.tictactoe.service.FriendService
 import com.zcu.kiv.pia.tictactoe.utils.*
 import io.ktor.application.*
-import io.ktor.auth.*
 import io.ktor.request.*
-import io.ktor.response.*
 import io.ktor.routing.*
-import io.ktor.util.pipeline.*
 import org.koin.ktor.ext.inject
 
 fun Route.friendRoutes() {

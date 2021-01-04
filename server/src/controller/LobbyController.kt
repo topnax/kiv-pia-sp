@@ -1,14 +1,124 @@
 package com.zcu.kiv.pia.tictactoe.controller
 
+import com.zcu.kiv.pia.tictactoe.model.response.SuccessResponse
+import com.zcu.kiv.pia.tictactoe.request.LeaveLobbyRequest
+import com.zcu.kiv.pia.tictactoe.request.StartLobbyRequest
+import com.zcu.kiv.pia.tictactoe.request.game.AcceptInviteRequest
+import com.zcu.kiv.pia.tictactoe.request.game.CreateGameRequest
+import com.zcu.kiv.pia.tictactoe.request.game.DeclineInviteRequest
+import com.zcu.kiv.pia.tictactoe.request.game.InviteToGameRequest
+import com.zcu.kiv.pia.tictactoe.service.LobbyService
+import com.zcu.kiv.pia.tictactoe.service.UserService
+import com.zcu.kiv.pia.tictactoe.utils.errorResponse
+import com.zcu.kiv.pia.tictactoe.utils.getLoggedUser
+import com.zcu.kiv.pia.tictactoe.utils.jwtAuthenticatedRoute
+import io.ktor.application.*
+import io.ktor.request.*
+import io.ktor.response.*
 import io.ktor.routing.*
+import io.ktor.util.pipeline.*
 import mu.KotlinLogging
+import org.koin.ktor.ext.inject
 
-private val logger = KotlinLogging.logger {}
+val lobbyLogger = KotlinLogging.logger {}
 
 fun Route.lobbyRoutes() {
 
     // TODO user mustn't be present in a game
 
+    jwtAuthenticatedRoute("/lobby") {
+        val lobbyService: LobbyService by inject()
+        val userService: UserService by inject()
 
+        post("/create") {
+            val request = call.receive<CreateGameRequest>()
+            tryRun {
+                lobbyService.createLobby(getLoggedUser(), request.boardSize, request.victoriousCells)
+            }
+        }
+
+        post("/invite") {
+            val request = call.receive<InviteToGameRequest>()
+            val user = getLoggedUser()
+
+            tryRun {
+                userService.getUserById(request.userId)?.let { userToBeInvited ->
+                    lobbyService.getLobby(user)?.let { lobby ->
+                        lobbyService.inviteUser(userToBeInvited, lobby, user)
+                    }?.run {
+                        errorResponse("User calling not present in any lobby")
+                    }
+                }?.run {
+                    errorResponse("User to be invited not found")
+                }
+            }
+        }
+
+        post("/accept") {
+            val request = call.receive<AcceptInviteRequest>()
+            val user = getLoggedUser()
+
+            tryRun {
+                lobbyService.getLobby(request.lobbyId)?.let {
+                    lobbyService.acceptInvite(it, user)
+                }?.run {
+                    errorResponse("Lobby not found")
+                }
+            }
+        }
+
+        post("/decline") {
+            val request = call.receive<DeclineInviteRequest>()
+            val user = getLoggedUser()
+
+            tryRun {
+                lobbyService.getLobby(request.lobbyId)?.let {
+                    lobbyService.declineInvite(it, user)
+                }?.run {
+                    errorResponse("Lobby not found")
+                }
+            }
+        }
+
+        post("/leave") {
+            val request = call.receive<LeaveLobbyRequest>()
+            val user = getLoggedUser()
+
+            tryRun {
+                lobbyService.getLobby(request.lobbyId)?.let {
+                    lobbyService.leaveLobby(it, user)
+                }?.run {
+                    errorResponse("Lobby not found")
+                }
+            }
+        }
+
+        post("/start") {
+            val request = call.receive<StartLobbyRequest>()
+            val user = getLoggedUser()
+
+            tryRun {
+                lobbyService.getLobby(request.lobbyId)?.let {
+                    lobbyService.startLobby(it, user)
+                }?.run {
+                    errorResponse("Lobby not found")
+                }
+            }
+        }
+
+        get("/getInvites") {
+            lobbyService.getInvites(getLoggedUser())
+        }
+    }
 
 }
+
+suspend inline fun PipelineContext<Unit, ApplicationCall>.tryRun(unit: () -> Unit) =
+    runCatching { unit() }.exceptionOrNull()?.also {
+        if (it !is LobbyService.LobbyServiceException) {
+            lobbyLogger.error { it }
+            errorResponse("Unknown error")
+        } else {
+            errorResponse(it.reason)
+        }
+    }

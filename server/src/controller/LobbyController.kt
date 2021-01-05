@@ -1,6 +1,7 @@
 package com.zcu.kiv.pia.tictactoe.controller
 
 import com.zcu.kiv.pia.tictactoe.model.response.SuccessResponse
+import com.zcu.kiv.pia.tictactoe.model.response.realtime.LobbyInvitesResponse
 import com.zcu.kiv.pia.tictactoe.request.LeaveLobbyRequest
 import com.zcu.kiv.pia.tictactoe.request.StartLobbyRequest
 import com.zcu.kiv.pia.tictactoe.request.game.AcceptInviteRequest
@@ -9,9 +10,7 @@ import com.zcu.kiv.pia.tictactoe.request.game.DeclineInviteRequest
 import com.zcu.kiv.pia.tictactoe.request.game.InviteToGameRequest
 import com.zcu.kiv.pia.tictactoe.service.LobbyService
 import com.zcu.kiv.pia.tictactoe.service.UserService
-import com.zcu.kiv.pia.tictactoe.utils.errorResponse
-import com.zcu.kiv.pia.tictactoe.utils.getLoggedUser
-import com.zcu.kiv.pia.tictactoe.utils.jwtAuthenticatedRoute
+import com.zcu.kiv.pia.tictactoe.utils.*
 import io.ktor.application.*
 import io.ktor.request.*
 import io.ktor.response.*
@@ -34,6 +33,7 @@ fun Route.lobbyRoutes() {
             val request = call.receive<CreateGameRequest>()
             tryRun {
                 lobbyService.createLobby(getLoggedUser(), request.boardSize, request.victoriousCells)
+                successResponse()
             }
         }
 
@@ -45,10 +45,11 @@ fun Route.lobbyRoutes() {
                 userService.getUserById(request.userId)?.let { userToBeInvited ->
                     lobbyService.getLobby(user)?.let { lobby ->
                         lobbyService.inviteUser(userToBeInvited, lobby, user)
-                    }?.run {
+                        successResponse()
+                    } ?: run {
                         errorResponse("User calling not present in any lobby")
                     }
-                }?.run {
+                } ?:run {
                     errorResponse("User to be invited not found")
                 }
             }
@@ -61,7 +62,8 @@ fun Route.lobbyRoutes() {
             tryRun {
                 lobbyService.getLobby(request.lobbyId)?.let {
                     lobbyService.acceptInvite(it, user)
-                }?.run {
+                    successResponse()
+                } ?: run {
                     errorResponse("Lobby not found")
                 }
             }
@@ -74,7 +76,8 @@ fun Route.lobbyRoutes() {
             tryRun {
                 lobbyService.getLobby(request.lobbyId)?.let {
                     lobbyService.declineInvite(it, user)
-                }?.run {
+                    successResponse()
+                } ?: run {
                     errorResponse("Lobby not found")
                 }
             }
@@ -87,8 +90,11 @@ fun Route.lobbyRoutes() {
             tryRun {
                 lobbyService.getLobby(request.lobbyId)?.let {
                     lobbyService.leaveLobby(it, user)
-                }?.run {
+                    successResponse()
+                    lobbyLogger.error { "sent response" }
+                } ?: run {
                     errorResponse("Lobby not found")
+                    lobbyLogger.error { "sent response 2" }
                 }
             }
         }
@@ -100,14 +106,15 @@ fun Route.lobbyRoutes() {
             tryRun {
                 lobbyService.getLobby(request.lobbyId)?.let {
                     lobbyService.startLobby(it, user)
-                }?.run {
+                    successResponse()
+                } ?: run {
                     errorResponse("Lobby not found")
                 }
             }
         }
 
-        get("/getInvites") {
-            lobbyService.getInvites(getLoggedUser())
+        get("/invites") {
+            dataResponse(LobbyInvitesResponse(lobbyService.getInvites(getLoggedUser())))
         }
     }
 
@@ -116,9 +123,12 @@ fun Route.lobbyRoutes() {
 suspend inline fun PipelineContext<Unit, ApplicationCall>.tryRun(unit: () -> Unit) =
     runCatching { unit() }.exceptionOrNull()?.also {
         if (it !is LobbyService.LobbyServiceException) {
+            lobbyLogger.error{"sent response 3"}
             lobbyLogger.error { it }
             errorResponse("Unknown error")
         } else {
+
+            lobbyLogger.error{"sent response 4"}
             errorResponse(it.reason)
         }
     }

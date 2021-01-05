@@ -1,21 +1,11 @@
 package com.zcu.kiv.pia.tictactoe.controller
 
-import com.zcu.kiv.pia.tictactoe.JWT_AUTH_NAME
-import com.zcu.kiv.pia.tictactoe.model.User
-import com.zcu.kiv.pia.tictactoe.model.response.*
-import com.zcu.kiv.pia.tictactoe.request.game.*
 import com.zcu.kiv.pia.tictactoe.service.GameService
+import com.zcu.kiv.pia.tictactoe.service.LobbyService
 import com.zcu.kiv.pia.tictactoe.service.UserService
-import com.zcu.kiv.pia.tictactoe.utils.dataResponse
-import com.zcu.kiv.pia.tictactoe.utils.errorResponse
 import com.zcu.kiv.pia.tictactoe.utils.getLoggedUser
+import com.zcu.kiv.pia.tictactoe.utils.jwtAuthenticatedRoute
 import com.zcu.kiv.pia.tictactoe.utils.successResponse
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.auth.jwt.*
-import io.ktor.http.*
-import io.ktor.request.*
-import io.ktor.response.*
 import io.ktor.routing.*
 import mu.KotlinLogging
 import org.koin.ktor.ext.inject
@@ -24,9 +14,16 @@ private val logger = KotlinLogging.logger {}
 
 fun Route.gameRoutes() {
     val gameService: GameService by inject()
+    val lobbyService: LobbyService by inject()
     val userService: UserService by inject()
 
-    authenticate(JWT_AUTH_NAME) {
+    jwtAuthenticatedRoute("game") {
+        post("/refresh") {
+            val user = getLoggedUser()
+            lobbyService.sendUserState(user)
+            successResponse()
+        }
+    }
 //        route("/game") {
 //            get("/play") {
 //                logger.debug { "Play endpoint invoked" }
@@ -187,5 +184,4 @@ fun Route.gameRoutes() {
 //                }
 //            }
 //        }
-    }
 }

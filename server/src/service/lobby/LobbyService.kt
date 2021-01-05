@@ -28,13 +28,15 @@ interface LobbyService {
 
     fun getInvites(user: User): List<Pair<String, Int>>
 
+    fun sendUserState(user: User)
+
     // expections
     abstract class LobbyServiceException(val reason: String) : Exception(reason)
 
     class UserAlreadyPresentInALobby : LobbyServiceException("User is already present in a lobby")
     class UserAlreadyInvitedToThisLobby : LobbyServiceException("User already invited to this lobby")
     class CannotInviteOwner : LobbyServiceException("The owner of this lobby cannot be invited to this lobby")
-    class LobbyFull : LobbyServiceException("Cannot invite a user to a full lobby")
+    class LobbyFull : LobbyServiceException("Lobby is already full")
     class UserNotInvited : LobbyServiceException("User not invited to this lobby")
     class UserNotPresentInALobby : LobbyServiceException("User not present in a lobby")
     class UserNotAnOwner : LobbyServiceException("Only the owner of this lobby can perform this action")
@@ -68,13 +70,13 @@ class LobbyServiceImpl(
 
     override fun inviteUser(user: User, lobby: Lobby, initiator: User) {
         // lobby owner cannot invite himself
-        if (lobby.owner == user) throw throw LobbyService.CannotInviteOwner()
+        if (lobby.owner != initiator) throw LobbyService.UserNotAnOwner()
 
         // lobby owner cannot invite himself
-        if (lobby.owner == initiator) throw throw LobbyService.UserNotAnOwner()
+        if (lobby.owner == user) throw LobbyService.CannotInviteOwner()
 
         // lobby mustn't be full
-        if (lobby.isFull()) throw throw LobbyService.LobbyFull()
+        if (lobby.isFull()) throw LobbyService.LobbyFull()
 
         // user mustn't already be present in a lobby
         if (usersToLobbies.containsKey(user)) throw LobbyService.UserAlreadyPresentInALobby()
@@ -87,6 +89,7 @@ class LobbyServiceImpl(
 
         // get the list of invites of the given user
         val userInvites = invites.getOrDefault(user, mutableListOf())
+        invites[user] = userInvites
 
         // add the lobby to the list of lobbies the user is invited to
         userInvites.add(lobby)
@@ -130,6 +133,9 @@ class LobbyServiceImpl(
     override fun getLobby(lobbyId: Int) = lobbies[lobbyId]
 
     override fun acceptInvite(lobby: Lobby, user: User) {
+        // lobby mustn't be already full
+        if (lobby.isFull()) throw LobbyService.LobbyFull()
+
         // user cannot already be present in a lobby
         if (usersToLobbies.containsKey(user)) throw LobbyService.UserAlreadyPresentInALobby()
 
@@ -158,7 +164,7 @@ class LobbyServiceImpl(
         val userInvites = invites.getOrDefault(user, mutableListOf())
 
         // user must be invited in order to be able to decline the invitation
-        if (userInvites.contains(lobby)) throw LobbyService.UserNotInvited()
+        if (!userInvites.contains(lobby)) throw LobbyService.UserNotInvited()
 
         // remove the user from the invite list of the lobby
         lobby.invitedUsers.remove(user)
@@ -184,6 +190,9 @@ class LobbyServiceImpl(
             lobby.owner -> {
                 // the owner is leaving the lobby - destroy it
                 destroyLobby(lobby)
+                lobby.opponent?.let {
+                    notificationService.sendNotification("Owner left the lobby", it)
+                }
             }
             lobby.opponent -> {
                 lobby.opponent = null
@@ -221,6 +230,12 @@ class LobbyServiceImpl(
     }
 
     override fun getInvites(user: User) = invites.getOrDefault(user, mutableListOf()).map {
-        Pair(it.owner.username, it.owner.id)
+        Pair(it.owner.username, it.id)
+    }
+
+    override fun sendUserState(user: User) {
+        usersToLobbies[user]?.let { lobby ->
+            lobbyMessagingService.sendLobbyState(lobby, user)
+        }
     }
 }

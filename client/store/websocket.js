@@ -27,7 +27,6 @@ export const mutations = {
       console.log(`Sending token=${token}`)
       Vue.prototype.$socket.send("jwt;" + token)
       state.tokenSent = true
-      this.$store.dispatch("game/loadState")
     }
   },
 

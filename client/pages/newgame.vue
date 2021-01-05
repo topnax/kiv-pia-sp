@@ -83,9 +83,20 @@
 import {mapGetters, mapState} from "vuex";
 
 export default {
-  mounted() {
-    this.$store.dispatch("lobby/fetchInvites")
-    this.$store.dispatch("game/refresh")
+  async mounted() {
+    await this.$store.dispatch("lobby/fetchInvites")
+    if (this.$store.state.websocket.socket.isConnected === false) {
+      await new Promise(resolve => {
+        const watcher = this.$root.$watch(() => this.$store.state.websocket.socket.isConnected, (newVal) => {
+          if (newVal === true) {
+            resolve(newVal);
+            watcher(); // cleanup;
+          }
+
+        });
+      })
+    }
+    await this.$store.dispatch("game/refresh")
   },
   methods: {
     create() {

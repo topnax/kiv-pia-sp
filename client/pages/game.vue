@@ -16,12 +16,11 @@
 import {mapGetters, mapState} from "vuex";
 
 export default {
-  mounted() {
-    this.$store.dispatch("game/loadState")
+  async mounted() {
   },
   computed: {
 
-    ...mapState(["game"]),
+    ...mapState(["game", "websocket"]),
     ...mapState({
       squares: state => state.game.squares
     }),

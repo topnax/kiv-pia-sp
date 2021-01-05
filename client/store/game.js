@@ -65,30 +65,11 @@ export const mutations = {
 }
 
 export const actions = {
-  async invite(context, userId) {
-    try {
-      let result = await this.$axios.$post("/game/invite", {userId: userId})
 
-      if (result.responseCode === 0) {
-        await context.dispatch("snackbar/showSuccess", "Friend invited", {root: true})
-      } else {
-        await context.dispatch("snackbar/showError", result.message, {root: true})
-      }
-    } catch (e) {
-      await context.dispatch("snackbar/showError", "Could not invite a friend", {root: true})
-    }
-  },
-  async leave(context, data) {
-    try {
-      let result = await this.$axios.$post("/game/leave")
-
-      if (result.responseCode === 0) {
-        await this.$router.push("/dashboard")
-      } else {
-        await context.dispatch("snackbar/showError", result.message, {root: true})
-      }
-    } catch (e) {
-      await context.dispatch("snackbar/showError", "Could not leave game", {root: true})
+  async refresh(context, data) {
+    let result = await this.$axios.$post("/game/refresh")
+    if (result.responseCode !== 0) {
+      await context.dispatch("snackbar/showError", "Could not refresh state", {root: true})
     }
   },
   async move(context, data) {

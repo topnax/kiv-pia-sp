@@ -232,10 +232,8 @@ export default {
   async mounted() {
     let token = this.$auth.strategy.token.get()
     token = token.substring(7, token.length)
-    console.log(`Sending token=${token}`)
-    await this.$store.dispatch("websocket/sendMessage", "jwt;" + token, {root: true})
     await this.$store.dispatch("friends/fetchFriends")
-    await this.$store.dispatch("game/loadState")
+    await this.$store.dispatch("websocket/sendToken")
   },
   methods: {
     async logout() {
@@ -251,7 +249,7 @@ export default {
       await this.$store.dispatch("friends/cancel", userId)
     },
     async inviteToGame(userId) {
-      await this.$store.dispatch("game/invite", userId)
+      await this.$store.dispatch("lobby/invite", userId)
     }
   },
   data() {
@@ -290,3 +288,4 @@ export default {
   }
 }
 </script>
+

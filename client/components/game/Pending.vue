@@ -6,16 +6,22 @@
           Game lobby #{{ id }}
         </v-card-title>
 
-        <v-card-subtitle v-if="opponentUsername !== undefined">
-          Please invite a user to play the game!
+        <v-card-subtitle >
+          <span v-if="opponentUsername === undefined">
+            Please invite a user to play the game!
+          </span>
+          <span v-else-if="owner">
+            About to play against <strong>{{opponentUsername}}</strong>
+          </span>
+          <span v-else>
+            About to play against <strong>{{ownerUsername}}</strong>
+          </span>
         </v-card-subtitle>
-        <v-card-subtitle v-else>
-          {{opponentUsername}}
-        </v-card-subtitle>
+
         <v-card-text>
           <strong>Board size:</strong> {{ boardSize }}<br>
           <strong>Victorious cells:</strong> {{ victoriousCells }}<br>
-          <div v-if="invitedUsers !== undefined && invitedUsers.length > 0">
+          <div v-if="owner && invitedUsers !== undefined && invitedUsers.length > 0">
             <strong>Invited users:</strong><br>
             <ul v-for="user in invitedUsers">
              <li><span >{{user}}<br></span></li>
@@ -43,11 +49,12 @@ export default {
     victoriousCells: Number,
     invitedUsers: Array,
     owner: Boolean,
-    opponentUsername: String
+    opponentUsername: String,
+    ownerUsername: String
   },
   methods: {
     async leave() {
-      await this.$store.dispatch("game/leave")
+      await this.$store.dispatch("lobby/leave")
     }
   }
 

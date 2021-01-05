@@ -7,8 +7,9 @@ export const state = () => ({
   socket: {
     isConnected: false,
     message: '',
-    reconnectError: false
+    reconnectError: false,
   },
+  tokenSent: false
 })
 
 export const mutations = {
@@ -17,7 +18,32 @@ export const mutations = {
     console.log(">>>>>>Socket open")
     Vue.prototype.$socket = event.currentTarget
     state.socket.isConnected = true
+    console.log(`tokenSent ${state.tokenSent}`)
+    let token = this.$auth.strategy.token.get()
+
+    console.log(token)
+    if (token !== false && state.tokenSent === false) {
+      token = token.substring(7, token.length)
+      console.log(`Sending token=${token}`)
+      Vue.prototype.$socket.send("jwt;" + token)
+      state.tokenSent = true
+      this.$store.dispatch("game/loadState")
+    }
   },
+
+  SEND_TOKEN(state) {
+    if (state.socket.isConnected) {
+      console.log(`tokenSent ${state.tokenSent}`)
+      let token = this.$auth.strategy.token.get()
+      if (token !== false && state.tokenSent === false) {
+        token = token.substring(7, token.length)
+        console.log(`Sending token=${token}`)
+        Vue.prototype.$socket.send("jwt;" + token)
+        state.tokenSent = true
+      }
+    }
+  },
+
   SOCKET_ONCLOSE (state, event) {
     console.log(">>>>>>Socket close")
     state.socket.isConnected = false
@@ -44,5 +70,8 @@ export const mutations = {
 export const actions = {
   sendMessage: function(context, message) {
     Vue.prototype.$socket.send(message)
+  },
+  sendToken(context) {
+    context.commit("SEND_TOKEN")
   }
 }

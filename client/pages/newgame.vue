@@ -4,7 +4,13 @@
     fluid
   >
     <v-row justify="center">
-      <v-col md="4" class="">
+        <pending v-if="lobby.lobbySet" :boardSize="lobby.lobby.boardSize"
+                 :victoriousCells="lobby.lobby.victoriousCells" :id="lobby.lobby.id"
+                 :invitedUsers="lobby.lobby.invitedUsers"
+                 :owner="lobby.lobby.owner"
+                 :ownerUsername="lobby.lobby.ownerUsername"
+                 :opponentUsername="lobby.lobby.opponentUsername"/>
+      <v-col md="4" class="" v-else>
         <v-card>
           <v-card-title>Create a new game</v-card-title>
           <v-card-text>
@@ -37,17 +43,35 @@
         </v-card>
       </v-col>
 
-      <v-col md="4" v-if="newgame.invites.length > 0">
+      <v-col md="4" v-if="lobby.invites.length > 0">
         <v-card>
           <v-card-title>Game invitations</v-card-title>
           <v-card-text>
-            <v-list>
-              <v-list-item
-                v-for="(invite) in newgame.invites"
-              >
-                <v-list-item-title>{{ invite.ownerUsername }} #{{ invite.lobbyId }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
+            <v-simple-table>
+              <template v-slot:default>
+                <thead>
+                <tr>
+                  <th class="text-left">
+                    Lobby owner
+                  </th>
+                  <th class="text-right">
+                  </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr
+                  v-for="invite in lobby.invites"
+                  :key="invite.lobbyId"
+                >
+                  <td>{{ invite.ownerUsername }}</td>
+                  <td class="text-right">
+                    <v-icon @click="acceptInvite(invite.lobbyId)">mdi-check</v-icon>
+                    <v-icon @click="declineInvite(invite.lobbyId)">mdi-cancel</v-icon>
+                  </td>
+                </tr>
+                </tbody>
+              </template>
+            </v-simple-table>
           </v-card-text>
         </v-card>
       </v-col>
@@ -60,11 +84,18 @@ import {mapGetters, mapState} from "vuex";
 
 export default {
   mounted() {
-    this.$store.dispatch("newgame/fetchInvites")
+    this.$store.dispatch("lobby/fetchInvites")
+    this.$store.dispatch("game/refresh")
   },
   methods: {
     create() {
       this.$store.dispatch("newgame/create")
+    },
+    acceptInvite(lobbyId) {
+      this.$store.dispatch("lobby/acceptInvite", lobbyId)
+    },
+    declineInvite(lobbyId) {
+      this.$store.dispatch("lobby/declineInvite", lobbyId)
     }
   },
   computed: {
@@ -72,7 +103,7 @@ export default {
       availableVictoriousCells: 'newgame/availableVictoriousCells',
     }),
 
-    ...mapState(["newgame"]),
+    ...mapState(["newgame", "lobby"]),
     victoriousCells: {
       get() {
         return this.$store.state.victoriousCells;

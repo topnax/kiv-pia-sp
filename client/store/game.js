@@ -5,6 +5,9 @@ export const state = () => ({
   seed: String,
   squares: Array(25).fill(null),
   state: "NONE",
+  draw: false,
+  finished: false,
+  won: false,
 
   pending: {
     owner: Boolean,
@@ -24,11 +27,11 @@ export const state = () => ({
     boardSize: Number,
     ownerSeed: String,
     opponentSeed: String,
+    playerSeed: String,
     opponentUsername: String,
     winner: String,
-    victoriousCells: Array
-  }
-
+  },
+  in_game: false
 })
 
 export const mutations = {
@@ -61,11 +64,46 @@ export const mutations = {
     Vue.set(state.squares, index, seed)
     console.log(`at index=${index}`)
     console.log(state.squares[index])
+  },
+
+  SET_GAME_STATE(state, gameState) {
+    state.draw = false
+    state.finished = false
+    state.won = false
+    state.in_game = true;
+    state.playing.turns = gameState.turns
+    console.log("received turns:")
+    console.log(gameState.turns)
+    state.playing.opponentSeed = gameState.opponentSeed
+    state.playing.opponentUsername = gameState.opponentUsername
+    state.playing.boardSize = gameState.boardSize
+    state.playing.victoriousCells = gameState.victoriousCells
+    state.playing.playerSeed = gameState.playerSeed
+  },
+
+  ADD_TURN(state, turn) {
+    state.playing.turns.push(turn)
+    console.log("turn added:")
+    console.log(turn)
+  },
+  SET_DRAW(state) {
+    state.draw = true
+    state.finished = true
+    state.in_game = false
+  },
+
+  SET_FINISHED(state, data) {
+    state.draw = false
+    state.won = data
+    state.playing.victoriousCells = data.victoriousCells
+    state.playing.winner = data.winnerSeed
   }
 }
 
 export const actions = {
+  async gameDraw(context) {
 
+  },
   async refresh(context, data) {
     let result = await this.$axios.$post("/game/refresh")
     if (result.responseCode !== 0) {
@@ -91,17 +129,69 @@ export const actions = {
     }
 
   },
-  async setState(context, gameState) {
-    switch (gameState.stateType) {
-      case "PENDING":
-        context.commit("SET_PENDING_STATE", gameState.state)
-        break;
-      case "NONE":
-        context.commit("SET_NONE_STATE")
-        break;
-      default:
-        await context.dispatch("snackbar/showError", `Unknown game state ${gameState.stateType}`, {root: true})
-        break;
+  async play(context, {row, column}) {
+    try {
+      let result = await this.$axios.$post("/game/play", {row: row, column: column})
+
+      if (result.responseCode === 0) {
+      } else {
+        await context.dispatch("snackbar/showError", result.message, {root: true})
+      }
+    } catch (e) {
+      console.log(e)
+      await context.dispatch("snackbar/showError", "Could not place the seed.", {root: true})
     }
+  },
+  async setState(context, gameState) {
+    await context.commit("SET_GAME_STATE", gameState)
+  },
+  async newTurn(context, turn) {
+    context.commit("ADD_TURN", turn)
+  },
+
+  async gameWon(context, data) {
+    context.commit("SET_FINISHED", data)
   }
+}
+
+export const getters = {
+  cells: (state, getters, rootState, rootGetters) => {
+
+    let boardSize = state.playing.boardSize
+    let cells = Array(state.playing.boardSize * state.playing.boardSize).fill(null)
+    state.playing.turns.forEach(
+      turn => {
+
+        console.log(`setting index ${indexByRow(turn.column, turn.row, boardSize)} with ${turn.seed}`)
+
+        cells[indexByRow(turn.column, turn.row, boardSize)] = turn.seed
+      }
+    )
+
+
+    console.log("dsaadas")
+    console.log(cells)
+    return cells
+  },
+  victoriousCells: (state, getters, rootState, rootGetters) => {
+
+    let boardSize = state.playing.boardSize
+    let cells = Array(state.playing.boardSize * state.playing.boardSize).fill(false)
+    state.playing.victoriousCells.forEach(
+      turn => {
+        cells[indexByRow(turn.column, turn.row, boardSize)] = true
+      }
+    )
+
+
+    console.log("dsaadas")
+    console.log(cells)
+    return cells
+  }
+}
+
+function indexByRow(column, row, max = 3) {
+  let index = row * max + column
+  console.log(`got ${index} for ${row}:${column}@${max}`)
+  return ((row*max) + column)
 }

@@ -72,6 +72,20 @@ export const actions = {
   async goneInvite(context, invite) {
     context.commit("REMOVE_INVITE", invite)
   },
+
+  async start(context, lobbyId) {
+    try {
+      let result = await this.$axios.$post("/lobby/start", {
+        lobbyId: context.state.lobby.id
+      })
+
+      if (result.responseCode !== 0) {
+        await context.dispatch("snackbar/showError", result.message, {root: true})
+      }
+    } catch (e) {
+      await context.dispatch("snackbar/showError", "Could not start the lobby", {root: true})
+    }
+  },
   async acceptInvite(context, lobbyId) {
     try {
       let result = await this.$axios.$post("/lobby/accept", {

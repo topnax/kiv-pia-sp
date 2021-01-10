@@ -29,7 +29,7 @@
           </div>
         </v-card-text>
         <v-card-actions>
-          <v-btn text v-if="owner">START</v-btn>
+          <v-btn text v-if="owner" @click="start">START</v-btn>
           <v-btn text
                  @click="leave">LEAVE
           </v-btn>
@@ -55,6 +55,9 @@ export default {
   methods: {
     async leave() {
       await this.$store.dispatch("lobby/leave")
+    },
+    async start() {
+      await this.$store.dispatch("lobby/start")
     }
   }
 

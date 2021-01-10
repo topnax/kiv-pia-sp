@@ -10,7 +10,9 @@
                  :owner="lobby.lobby.owner"
                  :ownerUsername="lobby.lobby.ownerUsername"
                  :opponentUsername="lobby.lobby.opponentUsername"/>
-      <v-col md="4" class="" v-else>
+        <board v-else-if="game.in_game" :squares="cells" :size="game.playing.boardSize" :victoriousCells="victoriousCells"/>
+
+        <v-col md="4" class="" v-else>
         <v-card>
           <v-card-title>Create a new game</v-card-title>
           <v-card-text>
@@ -112,9 +114,11 @@ export default {
   computed: {
     ...mapGetters({
       availableVictoriousCells: 'newgame/availableVictoriousCells',
+      cells: 'game/cells',
+      victoriousCells: 'game/victoriousCells',
     }),
 
-    ...mapState(["newgame", "lobby"]),
+    ...mapState(["newgame", "lobby", "game"]),
     victoriousCells: {
       get() {
         return this.$store.state.victoriousCells;

@@ -3,13 +3,14 @@
   <v-container fill-height fluid>
     <v-row align="center"
            justify="center">
+      GAMEMEM {{size}}
       <div :class="'board board-' + size" v-if="squares">
         <div v-for="row in size" :key="row" :class="`board-` + size + `-row board-row`">
           <square v-for="i in size" :key="indexByRow(i, row, size)"
                   :value="squares[indexByRow(i, row, size)]"
                   :disabled="!!winner"
-                  :winner="!!winner && winner.includes(indexByRow(i, row, size))"
-                  @click="click(i, row)"/>
+                  :winner="victoriousCells[indexByRow(i, row, size)]"
+                  @click="click(i-1, row-1)"/>
         </div>
       </div>
     </v-row>
@@ -23,7 +24,8 @@ export default {
   props: {
     size: Number,
     squares: Array,
-    winner: Array
+    winner: Array,
+    victoriousCells: Array
   },
   components: {
     Square: () => import('./Cell')
@@ -34,7 +36,8 @@ export default {
     },
     click(index, row) {
       console.log(`${index}, ${row} index and row ${this.indexByRow(index, row, this.size)}`)
-      this.$store.dispatch("game/move", {index: this.indexByRow(index, row, this.size), seed: "O"})
+      //this.$store.dispatch("game/move", {index: this.indexByRow(index, row, this.size), seed: "O"})
+      this.$store.dispatch("game/play", {row: row, column: index})
 //      this.$emit('click', this.indexByRow(index, row));
     }
   }

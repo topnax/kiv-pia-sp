@@ -10,23 +10,26 @@ class GameStateResponse(gameWrapper: GameWrapper, opponent: User) {
        object {
            val row = it.row
            val column = it.column
-           val seed = it.seed
+           val seed = it.seed.toString()
        }
     }.toList()
 
     val opponentSeed = if (gameWrapper.cross == opponent) "X" else "O"
+    val playerSeed = if (opponentSeed == "X") "0" else "X"
     val opponentUsername = opponent.username
     val boardSize = gameWrapper.game.boardSize
     val victoriousCells = gameWrapper.game.victoriousCells
 
 }
 
-class NewTurnResponse(val row: Int, val column: Int, val seed: Seed)
+class NewTurnResponse(val row: Int, val column: Int, seed: Seed) {
+   val seed = seed.toString()
+}
 
 class GameDrawResponse()
 
 class GameWonResponse(game: TicTacToeGame) {
-    val winnerSeed = game.winner
+    val winnerSeed = game.winner.toString()
     val victoriousCells: List<Any> = game.victoriousCells.map {
         object {
             val row = it.row

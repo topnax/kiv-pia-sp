@@ -53,9 +53,9 @@ class GameServiceImpl(
             }
 
             override fun onDisconnected(user: User) {
-                userToGames[user]?.let {
-                    removeUser(user, it)
-                }
+//                userToGames[user]?.let {
+//                    removeUser(user, it)
+//                }
             }
         })
     }
@@ -126,12 +126,15 @@ class GameServiceImpl(
         if (gameWrapper.game.state == TicTacToeGame.State.DRAW) {
             gameMessagingService.sendGameDraw(gameWrapper, gameWrapper.cross)
             gameMessagingService.sendGameDraw(gameWrapper, gameWrapper.nought)
+
+            removeGame(gameWrapper)
         } else if (gameWrapper.game.state == TicTacToeGame.State.WON) {
             gameMessagingService.sendGameWon(gameWrapper, gameWrapper.cross)
             gameMessagingService.sendGameWon(gameWrapper, gameWrapper.nought)
+
+            removeGame(gameWrapper)
         }
 
-        removeGame(gameWrapper)
     }
 
 
@@ -143,6 +146,8 @@ class GameServiceImpl(
             if (gameWrapper.game.winner == Seed.CROSS) gameWrapper.cross else gameWrapper.nought
         )
 
+
+        gameLogger.info { "Removing user ${user.username}..." }
         removeGame(gameWrapper)
     }
 
@@ -150,6 +155,7 @@ class GameServiceImpl(
         userToGames.remove(gameWrapper.cross)
         userToGames.remove(gameWrapper.nought)
         games.remove(gameWrapper.id)
+        gameLogger.info { "Removing game..." }
     }
 
     override fun getGame(user: User) = userToGames[user] ?: run {

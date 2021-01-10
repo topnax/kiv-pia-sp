@@ -25,6 +25,7 @@ fun Route.gameRoutes() {
         post("/refresh") {
             val user = getLoggedUser()
             lobbyService.sendUserState(user)
+            gameService.sendUserState(user)
             successResponse()
         }
         post("/play") {
@@ -36,6 +37,7 @@ fun Route.gameRoutes() {
 
                 if (gameService.isItUsersTurn(user, game)) {
                     gameService.placeSeed(user, request.row, request.column, game)
+                    successResponse()
                 } else {
                     errorResponse("It is not user's turn!")
                 }
@@ -49,6 +51,7 @@ fun Route.gameRoutes() {
                 val wrapper = gameService.getGame(user)
 
                 gameService.removeUser(user, wrapper)
+                successResponse()
             }
         }
     }

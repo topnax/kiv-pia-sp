@@ -7,5 +7,11 @@ class Cell(val row: Int, val column: Int, var value: Seed = Seed.EMPTY) {
 }
 
 enum class Seed {
-    CROSS, NOUGHT, EMPTY
+    CROSS, NOUGHT, EMPTY;
+
+    override fun toString() = when (this) {
+        CROSS -> "X"
+        EMPTY -> "-"
+        NOUGHT -> "0"
+    }
 }

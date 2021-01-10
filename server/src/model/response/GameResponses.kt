@@ -1,43 +1,36 @@
 package com.zcu.kiv.pia.tictactoe.model.response
 
+import com.zcu.kiv.pia.tictactoe.game.Seed
 import com.zcu.kiv.pia.tictactoe.game.TicTacToeGame
-import com.zcu.kiv.pia.tictactoe.model.GameLobby
 import com.zcu.kiv.pia.tictactoe.model.User
+import com.zcu.kiv.pia.tictactoe.service.GameWrapper
 
-class PendingGameStateResponse(lobby: GameLobby, val owner: Boolean = false, invitedUsers: List<User> = listOf()) {
-    val id = lobby.id
-    val opponent = lobby.opponent
-    val boardSize = lobby.boardSize
-    val victoriousCells = lobby.boardSize
-    val invitedUsers: List<Any> = invitedUsers.map {
-        // TODO might provide ID to be able to cancel an invitation
-        it.username
-    }
+class GameStateResponse(gameWrapper: GameWrapper, opponent: User) {
+    val turns: List<Any> = gameWrapper.game.turns.map {
+       object {
+           val row = it.row
+           val column = it.column
+           val seed = it.seed
+       }
+    }.toList()
+
+    val opponentSeed = if (gameWrapper.cross == opponent) "X" else "O"
+    val opponentUsername = opponent.username
+    val boardSize = gameWrapper.game.boardSize
+    val victoriousCells = gameWrapper.game.victoriousCells
+
 }
 
-class PlayingGameStateResponse(lobby: GameLobby, game: TicTacToeGame) {
-    val turns = game.turns
-    val boardSize = game.boardSize
-    val ownerSeed = lobby.ownerSeed
-    val opponentSeed = lobby.opponentSeed
-    val opponentName = lobby.opponent!!.username
-    val winner = game.winner
-    val victoriousTurns = game.victoriousCells.toList()
-}
+class NewTurnResponse(val row: Int, val column: Int, val seed: Seed)
 
-class GameStateResponse(val stateType: StateType, val state: Any?) {
-    enum class StateType {
-        NONE,
-        PENDING,
-        PLAYING
-    }
-}
+class GameDrawResponse()
 
-class GameInviteListResponse(invites: List<Pair<String, Int>>) {
-    val invites: List<Any> = invites.map {
+class GameWonResponse(game: TicTacToeGame) {
+    val winnerSeed = game.winner
+    val victoriousCells: List<Any> = game.victoriousCells.map {
         object {
-            val ownerUsername = it.first
-            val lobbyId = it.second
+            val row = it.row
+            val column = it.column
         }
-    }
+    }.toList()
 }

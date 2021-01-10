@@ -1,6 +1,5 @@
 package com.zcu.kiv.pia.tictactoe.controller
 
-import com.zcu.kiv.pia.tictactoe.model.response.SuccessResponse
 import com.zcu.kiv.pia.tictactoe.model.response.realtime.LobbyInvitesResponse
 import com.zcu.kiv.pia.tictactoe.request.LeaveLobbyRequest
 import com.zcu.kiv.pia.tictactoe.request.StartLobbyRequest
@@ -8,12 +7,13 @@ import com.zcu.kiv.pia.tictactoe.request.game.AcceptInviteRequest
 import com.zcu.kiv.pia.tictactoe.request.game.CreateGameRequest
 import com.zcu.kiv.pia.tictactoe.request.game.DeclineInviteRequest
 import com.zcu.kiv.pia.tictactoe.request.game.InviteToGameRequest
+import com.zcu.kiv.pia.tictactoe.service.GameService
 import com.zcu.kiv.pia.tictactoe.service.LobbyService
 import com.zcu.kiv.pia.tictactoe.service.UserService
+import com.zcu.kiv.pia.tictactoe.service.gameLogger
 import com.zcu.kiv.pia.tictactoe.utils.*
 import io.ktor.application.*
 import io.ktor.request.*
-import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.util.pipeline.*
 import mu.KotlinLogging
@@ -27,11 +27,13 @@ fun Route.lobbyRoutes() {
 
     jwtAuthenticatedRoute("/lobby") {
         val lobbyService: LobbyService by inject()
+        val gameService: GameService by inject()
         val userService: UserService by inject()
 
         post("/create") {
             val request = call.receive<CreateGameRequest>()
             tryRun {
+                // TODO check boardSize and victoriousCells
                 lobbyService.createLobby(getLoggedUser(), request.boardSize, request.victoriousCells)
                 successResponse()
             }
@@ -42,14 +44,19 @@ fun Route.lobbyRoutes() {
             val user = getLoggedUser()
 
             tryRun {
+                // TODO check whether invited user is not playing a game
                 userService.getUserById(request.userId)?.let { userToBeInvited ->
-                    lobbyService.getLobby(user)?.let { lobby ->
-                        lobbyService.inviteUser(userToBeInvited, lobby, user)
-                        successResponse()
-                    } ?: run {
-                        errorResponse("User calling not present in any lobby")
+                    if (!gameService.isUserPlaying(userToBeInvited)) {
+                        lobbyService.getLobby(user)?.let { lobby ->
+                            lobbyService.inviteUser(userToBeInvited, lobby, user)
+                            successResponse()
+                        } ?: run {
+                            errorResponse("User calling not present in any lobby")
+                        }
+                    } else {
+                        errorResponse("Invited user is already playing a game")
                     }
-                } ?:run {
+                } ?: run {
                     errorResponse("User to be invited not found")
                 }
             }
@@ -60,11 +67,15 @@ fun Route.lobbyRoutes() {
             val user = getLoggedUser()
 
             tryRun {
-                lobbyService.getLobby(request.lobbyId)?.let {
-                    lobbyService.acceptInvite(it, user)
-                    successResponse()
-                } ?: run {
-                    errorResponse("Lobby not found")
+                if (!gameService.isUserPlaying(user)) {
+                    lobbyService.getLobby(request.lobbyId)?.let {
+                        lobbyService.acceptInvite(it, user)
+                        successResponse()
+                    } ?: run {
+                        errorResponse("Lobby not found")
+                    }
+                } else {
+                    errorResponse("User already playing a game")
                 }
             }
         }
@@ -106,6 +117,7 @@ fun Route.lobbyRoutes() {
             tryRun {
                 lobbyService.getLobby(request.lobbyId)?.let {
                     lobbyService.startLobby(it, user)
+                    gameService.createGame(it.owner, it.opponent!!, it.boardSize, it.victoriousCells)
                     successResponse()
                 } ?: run {
                     errorResponse("Lobby not found")
@@ -122,13 +134,17 @@ fun Route.lobbyRoutes() {
 
 suspend inline fun PipelineContext<Unit, ApplicationCall>.tryRun(unit: () -> Unit) =
     runCatching { unit() }.exceptionOrNull()?.also {
-        if (it !is LobbyService.LobbyServiceException) {
-            lobbyLogger.error{"sent response 3"}
-            lobbyLogger.error { it }
-            errorResponse("Unknown error")
-        } else {
-
-            lobbyLogger.error{"sent response 4"}
-            errorResponse(it.reason)
+        // TODO generalize this
+        when (it) {
+            is LobbyService.LobbyServiceException -> {
+                errorResponse(it.reason)
+            }
+            is GameService.GameServiceException -> {
+                errorResponse(it.reason)
+            }
+            else -> {
+                lobbyLogger.error { it }
+                errorResponse("Unknown error")
+            }
         }
     }

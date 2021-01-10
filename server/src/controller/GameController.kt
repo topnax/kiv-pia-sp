@@ -1,17 +1,21 @@
 package com.zcu.kiv.pia.tictactoe.controller
 
+import com.zcu.kiv.pia.tictactoe.request.game.PlayGameRequest
 import com.zcu.kiv.pia.tictactoe.service.GameService
 import com.zcu.kiv.pia.tictactoe.service.LobbyService
 import com.zcu.kiv.pia.tictactoe.service.UserService
+import com.zcu.kiv.pia.tictactoe.utils.errorResponse
 import com.zcu.kiv.pia.tictactoe.utils.getLoggedUser
 import com.zcu.kiv.pia.tictactoe.utils.jwtAuthenticatedRoute
 import com.zcu.kiv.pia.tictactoe.utils.successResponse
+import io.ktor.application.*
+import io.ktor.request.*
 import io.ktor.routing.*
 import mu.KotlinLogging
 import org.koin.ktor.ext.inject
 
 private val logger = KotlinLogging.logger {}
-
+// TODO invalid JSON?
 fun Route.gameRoutes() {
     val gameService: GameService by inject()
     val lobbyService: LobbyService by inject()
@@ -23,165 +27,29 @@ fun Route.gameRoutes() {
             lobbyService.sendUserState(user)
             successResponse()
         }
+        post("/play") {
+            val request = call.receive<PlayGameRequest>()
+            val user = getLoggedUser()
+            tryRun {
+
+                val game = gameService.getGame(user)
+
+                if (gameService.isItUsersTurn(user, game)) {
+                    gameService.placeSeed(user, request.row, request.column, game)
+                } else {
+                    errorResponse("It is not user's turn!")
+                }
+            }
+        }
+
+        post("/leave") {
+           val user = getLoggedUser()
+
+            tryRun {
+                val wrapper = gameService.getGame(user)
+
+                gameService.removeUser(user, wrapper)
+            }
+        }
     }
-//        route("/game") {
-//            get("/play") {
-//                logger.debug { "Play endpoint invoked" }
-//                call.respondText(gameService.playGame(), contentType = ContentType.Text.Plain)
-//            }
-//
-//            post("/invite") {
-//                val request = call.receive<InviteToGameRequest>()
-//                val lobbyOwner = getLoggedUser()
-//
-//                gameService.getGameLobby(lobbyOwner)?.let { gameLobby ->
-//                    userService.getUserById(request.userId)?.let { user ->
-//                        // user to be invited must be online
-//                        if (userService.isUserOnline(user)) {
-//                            try {
-//                                gameService.inviteUser(user, gameLobby)
-//                                successResponse()
-//                            } catch (ex: GameService.GameServiceException) {
-//                                errorResponse(ex.reason)
-//                            }
-//                        } else {
-//                            errorResponse("User to be invited not online")
-//                        }
-//                    } ?: run {
-//                        errorResponse("User to be invited not found")
-//                    }
-//                }
-//            }
-//
-//            post("/create") {
-//                val request = call.receive<CreateGameRequest>()
-//                val user = User.fromJWTToken(call.principal()!!)
-//
-//                if (gameService.createGame(user, request.boardSize, request.victoriousCells)) {
-//                    call.respond(SuccessResponse())
-//                } else {
-//                    call.respond(ErrorResponse("User has already created a game"))
-//                }
-//            }
-//
-//            post("/join") {
-//                val user = User.fromJWTToken(call.principal()!!)
-//                val request = call.receive<JoinGameRequest>()
-//
-//                if (gameService.addUserToLobby(user, request.gameId)) {
-//                    call.respond(SuccessResponse())
-//                } else {
-//                    call.respond(ErrorResponse("Could not join the game"))
-//                }
-//            }
-//
-//            post("/acceptInvite") {
-//                val user = getLoggedUser()
-//                val request = call.receive<AcceptInviteRequest>()
-//
-//                try {
-//                    gameService.acceptGameInvite(request.lobbyId, user)
-//                    successResponse()
-//                } catch (ex: GameService.GameServiceException) {
-//                    errorResponse(ex.reason)
-//                }
-//            }
-//
-//            post("/declineInvite") {
-//                val user = getLoggedUser()
-//                val request = call.receive<DeclineInviteRequest>()
-//
-//                try {
-//                    gameService.declineGameInvite(request.lobbyId, user)
-//                    successResponse()
-//                } catch (ex: GameService.GameServiceException) {
-//                    errorResponse(ex.reason)
-//                }
-//            }
-//
-//            post("/start") {
-//                val user = User.fromJWTToken(call.principal()!!)
-//
-//                gameService.getGameLobby(user)?.let {
-//                    if (it.owner != user) {
-//                        call.respond(ErrorResponse("Only the owner of the game can start the game"))
-//                    } else if (it.opponent == null) {
-//                        call.respond(ErrorResponse("No opponent present, cannot start the game."))
-//                    } else if (!it.start()) {
-//                        call.respond(ErrorResponse("Failed to start the game"))
-//                    } else {
-//                        call.respond(SuccessResponse())
-//                    }
-//                } ?: run {
-//                    call.respond("Current user is not present in a game lobby")
-//                }
-//            }
-//
-//            get("/invites") {
-//                dataResponse(GameInviteListResponse(gameService.getGameInvites(getLoggedUser())))
-//            }
-//
-//            // get("/lobby") {
-//            //     val lobby = service.getGameLobby(getLoggedUser())
-//
-//            //     if (lobby == null) {
-//            //         errorResponse("User not present in a lobby")
-//            //     } else {
-//
-//            //     }
-//            // }
-//
-//            get("/get") {
-//                val user = getLoggedUser()
-//                val lobby = gameService.getGameLobby(user)
-//
-//                if (lobby == null) {
-//                    dataResponse(GameStateResponse(GameStateResponse.StateType.NONE, null))
-//                } else {
-//                    lobby.game?.let {
-//                        dataResponse(
-//                            GameStateResponse(
-//                                GameStateResponse.StateType.PLAYING,
-//                                PlayingGameStateResponse(lobby, it)
-//                            )
-//                        )
-//                    } ?: run {
-//                        dataResponse(
-//                            GameStateResponse(
-//                                GameStateResponse.StateType.PENDING,
-//                                PendingGameStateResponse(lobby, owner = user == lobby.owner, lobby.invitedUsers)
-//                            )
-//                        )
-//                    }
-//                }
-//            }
-//
-//            post("/play") {
-//                val request = call.receive<PlayGameRequest>()
-//                val user = User.fromJWTToken(call.principal()!!)
-//
-//                val game = gameService.getGameLobby(user)
-//                if (game == null) {
-//                    call.respond(ErrorResponse("User not present in any game"))
-//                } else if (gameService.isItUsersTurn(user, game)) {
-//                    call.respond(ErrorResponse("It is not this user's turn"))
-//                } else if (!gameService.placeSeed(user, request.row, request.column)) {
-//                    call.respond(ErrorResponse("Could not place the seed"))
-//                } else {
-//                    call.respond(SuccessResponse())
-//                }
-//            }
-//
-//            post("/leave") {
-//                val principal = call.principal<JWTPrincipal>()
-//                logger.debug { "got principal" }
-//                val user = User.fromJWTToken(principal!!)
-//                logger.debug { "got past user" }
-//                if (gameService.removeUserFromAGame(user)) {
-//                    call.respond(SuccessResponse())
-//                } else {
-//                    call.respond(ErrorResponse("User not present in a game"))
-//                }
-//            }
-//        }
 }

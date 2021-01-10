@@ -1,7 +1,5 @@
 package com.zcu.kiv.pia.tictactoe.model.response
 
-import com.zcu.kiv.pia.tictactoe.model.FriendRequest
-import com.zcu.kiv.pia.tictactoe.model.GameLobby
 import com.zcu.kiv.pia.tictactoe.model.User
 
 class UserOnlineResponse(user: User) {

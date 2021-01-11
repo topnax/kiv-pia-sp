@@ -38,7 +38,9 @@ class SimpleBoardChecker(board: Board, victoriousCells: Int) : BoardChecker(boar
                 // get all cells with the same cell
                 val cellSet1 = getCellsWithSameSeed(cell, direction.first.first, direction.first.second)
                 val cellSet2 = getCellsWithSameSeed(cell, direction.second.first, direction.second.second)
-                if (cellSet1.size + cellSet2.size + 1 == victoriousCells) {
+                println("cellset1 size: ${cellSet1.size}")
+                println("cellset2 size: ${cellSet2.size}")
+                if (cellSet1.size + cellSet2.size + 1 >= victoriousCells) {
                     winningCells.clear()
                     winningCells.add(it)
                     winningCells += cellSet1 + cellSet2

@@ -45,4 +45,5 @@ object GameTurns: IntIdTable(name = "game_turns") {
     val row = integer("row")
     val column = integer("column")
     val seed = char("seed")
+    val victorious = bool("victorious")
 }

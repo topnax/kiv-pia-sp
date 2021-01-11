@@ -1,6 +1,7 @@
 package com.zcu.kiv.pia.tictactoe.service.game
 
 import com.zcu.kiv.pia.tictactoe.game.Seed
+import com.zcu.kiv.pia.tictactoe.game.TicTacToeGame
 import com.zcu.kiv.pia.tictactoe.model.GameResult
 import com.zcu.kiv.pia.tictactoe.model.GameTurn
 import com.zcu.kiv.pia.tictactoe.model.User
@@ -28,7 +29,10 @@ class GameResultsServiceImpl(
             gameWrapper.cross.id,
             gameWrapper.nought.id,
             gameWrapper.game.turns,
-            gameWrapper.game.boardSize
+            gameWrapper.game.boardSize,
+            gameWrapper.game.victoriousCells.map {
+                TicTacToeGame.Turn(it.value, it.row, it.column)
+            }
         )
     }
 

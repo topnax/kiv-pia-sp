@@ -4,6 +4,7 @@ import com.zcu.kiv.pia.tictactoe.database.DatabaseFactory.dbQuery
 import com.zcu.kiv.pia.tictactoe.database.GameResults
 import com.zcu.kiv.pia.tictactoe.database.GameTurns
 import com.zcu.kiv.pia.tictactoe.database.Users
+import com.zcu.kiv.pia.tictactoe.game.Cell
 import com.zcu.kiv.pia.tictactoe.game.TicTacToeGame
 import com.zcu.kiv.pia.tictactoe.model.GameResult
 import com.zcu.kiv.pia.tictactoe.model.GameTurn
@@ -12,7 +13,7 @@ import mu.KotlinLogging
 import org.jetbrains.exposed.sql.*
 
 interface GameResultRepository {
-    suspend fun addResult(crossWon: Boolean, crossUserId: Int, noughtUserId: Int, turns: List<TicTacToeGame.Turn>, boardSize: Int)
+    suspend fun addResult(crossWon: Boolean, crossUserId: Int, noughtUserId: Int, turns: List<TicTacToeGame.Turn>, boardSize: Int, victoriousTurns: List<TicTacToeGame.Turn>)
 
     suspend fun getResultsByUserId(userId: Int): List<GameResult>
 
@@ -38,7 +39,8 @@ class SQLGameResultRepository : GameResultRepository {
             row[GameTurns.id].value,
             row[GameTurns.row],
             row[GameTurns.column],
-            row[GameTurns.seed]
+            row[GameTurns.seed],
+            row[GameTurns.victorious]
         )
 
     override suspend fun addResult(
@@ -46,7 +48,8 @@ class SQLGameResultRepository : GameResultRepository {
         crossUserId: Int,
         noughtUserId: Int,
         turns: List<TicTacToeGame.Turn>,
-        boardSize: Int
+        boardSize: Int,
+        victoriousTurns: List<TicTacToeGame.Turn>
     ): Unit = dbQuery {
 
         val id = GameResults.insert {
@@ -62,6 +65,7 @@ class SQLGameResultRepository : GameResultRepository {
                 it[GameTurns.column] = turn.column
                 it[GameTurns.seed] = turn.seed.toString()[0]
                 it[GameTurns.gameId] = id.value
+                it[GameTurns.victorious] = victoriousTurns.contains(turn)
             }
         }
 

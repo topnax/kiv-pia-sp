@@ -58,7 +58,7 @@ class TicTacToeGame(val boardSize: Int, startingSeed: Seed, private val victorio
         return true
     }
 
-    class Turn(val seed: Seed, val row: Int, val column: Int)
+    data class Turn(val seed: Seed, val row: Int, val column: Int)
 
     enum class State {
         IN_PROGRESS,

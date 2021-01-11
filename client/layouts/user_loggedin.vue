@@ -262,13 +262,13 @@ export default {
       items: [
         {
           icon: 'mdi-gamepad',
-          title: 'New game',
+          title: 'Game',
           to: '/newgame'
         },
         {
-          icon: 'mdi-gamepad-variant',
-          title: 'Game',
-          to: '/game'
+          icon: 'mdi-format-list-bulleted',
+          title: 'Game history',
+          to: '/history'
         },
         {
           icon: 'mdi-account',

@@ -14,7 +14,7 @@
         <v-row v-if="game.finished">
           <v-col align="center">
             <h3 v-if="game.draw">It's a draw!</h3>
-            <h3 v-if="userWon" class="success--text">You have won!</h3>
+            <h3 v-else-if="userWon" class="success--text">You have won!</h3>
             <h3 v-else class="error--text">You have lost :(</h3>
             <v-btn class="mt-2" @click="finishedGameClose">Close</v-btn>
           </v-col>
@@ -29,7 +29,7 @@
             <v-chip
               class="ma-2"
               color="primary"
-              :outlined="noughtsTurn"
+              :outlined="noughtsTurn || game.finished"
             >
               <strong class="title me-3">X</strong> {{ crossSeedUsername }}
             </v-chip>
@@ -49,7 +49,7 @@
             <v-chip
               class="ma-2"
               color="primary"
-              :outlined="crossTurn"
+              :outlined="crossTurn || game.finished"
             >
               <strong class="title me-3">O</strong> {{ noughtSeedUsername }}
             </v-chip>
@@ -91,7 +91,7 @@
         </v-card>
       </v-col>
 
-      <v-col md="4" v-if="lobby.invites.length > 0">
+      <v-col md="4" v-if="lobby.invites.length > 0 && !game.in_game">
         <v-card>
           <v-card-title>Game invitations</v-card-title>
           <v-card-text>

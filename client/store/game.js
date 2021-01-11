@@ -92,7 +92,6 @@ export const mutations = {
   SET_DRAW(state) {
     state.draw = true
     state.finished = true
-    state.in_game = false
   },
 
 
@@ -117,7 +116,7 @@ export const mutations = {
 
 export const actions = {
   async gameDraw(context) {
-
+    await context.commit("SET_DRAW")
   },
   async refresh(context, data) {
     let result = await this.$axios.$post("/game/refresh")

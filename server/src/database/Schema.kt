@@ -1,6 +1,8 @@
 package com.zcu.kiv.pia.tictactoe.database
 
 import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.sql.`java-time`.CurrentDateTime
+import org.jetbrains.exposed.sql.`java-time`.datetime
 
 object Users: IntIdTable(name = "users") {
     val email = varchar("email", 50)
@@ -22,4 +24,25 @@ object FriendRequests: IntIdTable(name = "friend_requests") {
 
     val requested = integer("requested")
         .references(Users.id)
+}
+
+object GameResults: IntIdTable(name = "game_results") {
+    val crossWon = bool("cross_won")
+    val crossUserId = integer("cross_user")
+        .references(Users.id)
+    val noughtUserId = integer("nought_user")
+        .references(Users.id)
+
+    val boardSize = integer("board_size")
+
+    val dateCreated = datetime("date_played").defaultExpression(CurrentDateTime())
+}
+
+object GameTurns: IntIdTable(name = "game_turns") {
+   val gameId = integer("game_id")
+       .references(GameResults.id)
+
+    val row = integer("row")
+    val column = integer("column")
+    val seed = char("seed")
 }

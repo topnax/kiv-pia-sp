@@ -3,7 +3,11 @@ package com.zcu.kiv.pia.tictactoe.service
 import com.zcu.kiv.pia.tictactoe.game.Seed
 import com.zcu.kiv.pia.tictactoe.game.TicTacToeGame
 import com.zcu.kiv.pia.tictactoe.model.User
+import com.zcu.kiv.pia.tictactoe.repository.GameResultRepository
 import com.zcu.kiv.pia.tictactoe.service.game.GameMessagingService
+import com.zcu.kiv.pia.tictactoe.service.game.GameResultsService
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import java.util.*
 
@@ -43,7 +47,8 @@ class GameServiceImpl(
     private val gameRepository: GameRepository,
     private val gameMessagingService: GameMessagingService,
     private val notificationService: NotificationService,
-    private val realtimeService: RealtimeService
+    private val realtimeService: RealtimeService,
+    private val gameResultService: GameResultsService
 ) :
     GameService {
 
@@ -157,6 +162,9 @@ class GameServiceImpl(
     }
 
     override fun removeGame(gameWrapper: GameWrapper) {
+        GlobalScope.launch {
+            gameResultService.addGameResult(gameWrapper)
+        }
         userToGames.remove(gameWrapper.cross)
         userToGames.remove(gameWrapper.nought)
         games.remove(gameWrapper.id)

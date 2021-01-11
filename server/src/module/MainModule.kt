@@ -5,6 +5,8 @@ import com.zcu.kiv.pia.tictactoe.repository.*
 import com.zcu.kiv.pia.tictactoe.service.*
 import com.zcu.kiv.pia.tictactoe.service.game.GameMessagingService
 import com.zcu.kiv.pia.tictactoe.service.game.GameMessagingServiceImpl
+import com.zcu.kiv.pia.tictactoe.service.game.GameResultsService
+import com.zcu.kiv.pia.tictactoe.service.game.GameResultsServiceImpl
 import com.zcu.kiv.pia.tictactoe.service.lobby.LobbyMessagingService
 import com.zcu.kiv.pia.tictactoe.service.lobby.LobbyMessagingServiceImpl
 import org.koin.dsl.module
@@ -12,8 +14,11 @@ import org.koin.dsl.module
 val mainModule = listOf(
     module {
 
+        single<GameResultRepository> { SQLGameResultRepository() }
+        single<GameResultsService> { GameResultsServiceImpl(get()) }
+
         single<GameMessagingService> { GameMessagingServiceImpl(get()) }
-        single<GameService> { GameServiceImpl(get(), get(), get(), get()) }
+        single<GameService> { GameServiceImpl(get(), get(), get(), get(), get()) }
         single { GameRepository() }
         single<PersistentUserRepository> { SQLUserRepository() }
         single<HashService> { SHA256Hasher() }

@@ -37,6 +37,8 @@ object DatabaseFactory {
             SchemaUtils.create(Users)
             SchemaUtils.create(FriendRequests)
             SchemaUtils.create(UsersFriendList)
+            SchemaUtils.create(GameResults)
+            SchemaUtils.create(GameTurns)
         }
     }
 

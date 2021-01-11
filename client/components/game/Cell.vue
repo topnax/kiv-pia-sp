@@ -1,12 +1,19 @@
 <template>
   <button class="square" :class="[ value, { 'winner': winner } ]"
-          :disabled="disabled" @click="click">{{ value }}
+          :disabled="disabled" @click="click">
+      <v-icon v-if="value === 'O'" color="yellow" class="square-icon">mdi-circle-outline</v-icon>
+    <v-icon v-if="value === 'X'" color="red" class="square-icon">mdi-close</v-icon>
   </button>
 </template>
 
 <script>
 export default {
   name: 'Square',
+  computed: {
+    icon_value() {
+      return value === "O" ? "<v-icon>mdi-close</v-icon>" : "<v-icon>mdi-circle-outline</v-icon>"
+    }
+  },
   props: {
     value: String,
     winner: Boolean,
@@ -21,6 +28,9 @@ export default {
 </script>
 
 <style scoped>
+.square-icon {
+  font-size: 5vmin;
+}
 .square {
   border: 1px solid #fffc;
   font-size: 5vmin;

@@ -12,6 +12,6 @@ enum class Seed {
     override fun toString() = when (this) {
         CROSS -> "X"
         EMPTY -> "-"
-        NOUGHT -> "0"
+        NOUGHT -> "O"
     }
 }

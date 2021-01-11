@@ -7,7 +7,7 @@ import com.zcu.kiv.pia.tictactoe.service.game.GameMessagingService
 import mu.KotlinLogging
 import java.util.*
 
-val gameLogger = KotlinLogging.logger {  }
+val gameLogger = KotlinLogging.logger { }
 
 interface GameService {
     fun isItUsersTurn(user: User, gameWrapper: GameWrapper): Boolean
@@ -143,9 +143,14 @@ class GameServiceImpl(
 
         gameMessagingService.sendGameWon(
             gameWrapper,
-            if (gameWrapper.game.winner == Seed.CROSS) gameWrapper.cross else gameWrapper.nought
+            gameWrapper.nought
+        )
+        gameMessagingService.sendGameWon(
+            gameWrapper,
+            gameWrapper.cross
         )
 
+        notificationService.sendNotification("Opponent has surrendered", if (gameWrapper.cross == user) gameWrapper.nought else gameWrapper.cross)
 
         gameLogger.info { "Removing user ${user.username}..." }
         removeGame(gameWrapper)

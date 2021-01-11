@@ -6,6 +6,7 @@
     :loading="loading"
     loading-text="Loading... Please wait"
     class="elevation-1"
+    @click:row="onRowClick"
   >
     <template v-slot:item.won="{ item }">
       <v-icon v-if="item.won" color="yellow">
@@ -33,6 +34,7 @@ export default {
   props: {
     games: null,
     loading: true,
+    onRowClick: null
   },
   data: () => ({
     headers: [

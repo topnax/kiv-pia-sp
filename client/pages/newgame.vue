@@ -4,15 +4,61 @@
     fluid
   >
     <v-row justify="center">
-        <pending v-if="lobby.lobbySet" :boardSize="lobby.lobby.boardSize"
-                 :victoriousCells="lobby.lobby.victoriousCells" :id="lobby.lobby.id"
-                 :invitedUsers="lobby.lobby.invitedUsers"
-                 :owner="lobby.lobby.owner"
-                 :ownerUsername="lobby.lobby.ownerUsername"
-                 :opponentUsername="lobby.lobby.opponentUsername"/>
-        <board v-else-if="game.in_game" :squares="cells" :size="game.playing.boardSize" :victoriousCells="victoriousCells"/>
+      <pending v-if="lobby.lobbySet" :boardSize="lobby.lobby.boardSize"
+               :victoriousCells="lobby.lobby.victoriousCells" :id="lobby.lobby.id"
+               :invitedUsers="lobby.lobby.invitedUsers"
+               :owner="lobby.lobby.owner"
+               :ownerUsername="lobby.lobby.ownerUsername"
+               :opponentUsername="lobby.lobby.opponentUsername"/>
+      <div v-else-if="game.in_game">
+        <v-row v-if="game.finished">
+          <v-col align="center">
+            <h3 v-if="game.draw">It's a draw!</h3>
+            <h3 v-if="userWon" class="success--text">You have won!</h3>
+            <h3 v-else class="error--text">You have lost :(</h3>
+            <v-btn class="mt-2" @click="finishedGameClose">Close</v-btn>
+          </v-col>
+        </v-row>
+        <v-row v-else>
+          <v-col align="center">
+              <v-btn text @click="surrender">SURRENDER</v-btn>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col md="4">
+            <v-chip
+              class="ma-2"
+              color="primary"
+              :outlined="noughtsTurn"
+            >
+              <strong class="title me-3">X</strong> {{ crossSeedUsername }}
+            </v-chip>
+          </v-col>
 
-        <v-col md="4" class="" v-else>
+          <v-col md="4" class="text-center" justify="center">
+            <v-chip
+              v-if="usersTurn && !game.finished"
+              class="ma-2"
+              color="green"
+              text-color="white"
+            >
+              You are playing...
+            </v-chip>
+          </v-col>
+          <v-col md="4" class="text-right">
+            <v-chip
+              class="ma-2"
+              color="primary"
+              :outlined="crossTurn"
+            >
+              <strong class="title me-3">O</strong> {{ noughtSeedUsername }}
+            </v-chip>
+          </v-col>
+        </v-row>
+        <board :squares="cells" :size="game.playing.boardSize" :victoriousCells="victoriousCellsGame"/>
+      </div>
+
+      <v-col md="4" class="" v-else>
         <v-card>
           <v-card-title>Create a new game</v-card-title>
           <v-card-text>
@@ -101,6 +147,12 @@ export default {
     await this.$store.dispatch("game/refresh")
   },
   methods: {
+    surrender(){
+      this.$store.dispatch("game/surrender")
+    },
+    finishedGameClose() {
+      this.$store.dispatch("game/finishedGameClose")
+    },
     create() {
       this.$store.dispatch("newgame/create")
     },
@@ -115,7 +167,13 @@ export default {
     ...mapGetters({
       availableVictoriousCells: 'newgame/availableVictoriousCells',
       cells: 'game/cells',
-      victoriousCells: 'game/victoriousCells',
+      victoriousCellsGame: 'game/victoriousCells',
+      noughtSeedUsername: 'game/noughtSeedUsername',
+      crossSeedUsername: 'game/crossSeedUsername',
+      usersTurn: 'game/usersTurn',
+      noughtsTurn: 'game/noughtsTurn',
+      crossTurn: 'game/crossTurn',
+      userWon: 'game/userWon',
     }),
 
     ...mapState(["newgame", "lobby", "game"]),

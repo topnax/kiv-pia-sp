@@ -3,7 +3,6 @@
   <v-container fill-height fluid>
     <v-row align="center"
            justify="center">
-      GAMEMEM {{size}}
       <div :class="'board board-' + size" v-if="squares">
         <div v-for="row in size" :key="row" :class="`board-` + size + `-row board-row`">
           <square v-for="i in size" :key="indexByRow(i, row, size)"

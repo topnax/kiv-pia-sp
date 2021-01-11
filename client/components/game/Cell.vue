@@ -35,7 +35,7 @@ export default {
 }
 
 .square.winner {
-  background: #8885;
+  background: #00AA33;
 }
 
 .square:not([disabled]):empty:hover,

@@ -28,6 +28,7 @@ export const state = () => ({
     ownerSeed: String,
     opponentSeed: String,
     playerSeed: String,
+    victoriousCells: Array,
     opponentUsername: String,
     winner: String,
   },
@@ -78,11 +79,13 @@ export const mutations = {
     state.playing.opponentUsername = gameState.opponentUsername
     state.playing.boardSize = gameState.boardSize
     state.playing.victoriousCells = gameState.victoriousCells
+    Vue.set(state.playing.victoriousCells, gameState.victoriousCells)
     state.playing.playerSeed = gameState.playerSeed
   },
 
   ADD_TURN(state, turn) {
     state.playing.turns.push(turn)
+    Vue.set(state.squares, state.squares.length - 1, turn)
     console.log("turn added:")
     console.log(turn)
   },
@@ -92,10 +95,22 @@ export const mutations = {
     state.in_game = false
   },
 
-  SET_FINISHED(state, data) {
+
+  FINISHED_GAME_CLOSE(state, data) {
+    state.in_game = false
+    state.finished = false
+    state.won = false
     state.draw = false
-    state.won = data
+  },
+
+  SET_FINISHED(state, data) {
+    state.finished = true
+    state.draw = false
+    state.won = data.won
     state.playing.victoriousCells = data.victoriousCells
+    Vue.set(state.playing.victoriousCells, data.victoriousCells)
+    console.log("setting victorious:")
+    console.log(data.victoriousCells)
     state.playing.winner = data.winnerSeed
   }
 }
@@ -150,7 +165,25 @@ export const actions = {
   },
 
   async gameWon(context, data) {
-    context.commit("SET_FINISHED", data)
+    console.log("set finished")
+    await context.commit("SET_FINISHED", data)
+  },
+
+  async finishedGameClose(context, data) {
+    await context.commit("FINISHED_GAME_CLOSE")
+  },
+  async surrender(context) {
+    try {
+      let result = await this.$axios.$post("/game/leave")
+
+      if (result.responseCode === 0) {
+      } else {
+        await context.dispatch("snackbar/showError", result.message, {root: true})
+      }
+    } catch (e) {
+      console.log(e)
+      await context.dispatch("snackbar/showError", "Could not leave the game.", {root: true})
+    }
   }
 }
 
@@ -174,7 +207,7 @@ export const getters = {
     return cells
   },
   victoriousCells: (state, getters, rootState, rootGetters) => {
-
+    console.log("victirous getter")
     let boardSize = state.playing.boardSize
     let cells = Array(state.playing.boardSize * state.playing.boardSize).fill(false)
     state.playing.victoriousCells.forEach(
@@ -183,15 +216,34 @@ export const getters = {
       }
     )
 
-
-    console.log("dsaadas")
-    console.log(cells)
     return cells
+  },
+  noughtSeedUsername: (state, getters, rootState, rootGetters) => {
+    if (state.playing.opponentSeed === "O") return state.playing.opponentUsername
+    else return rootState.auth.user.username
+  },
+  crossSeedUsername: (state, getters, rootState, rootGetters) => {
+    if (state.playing.opponentSeed === "X") return state.playing.opponentUsername
+    else return rootState.auth.user.username
+  },
+  noughtsTurn: (state, getters, rootState, rootGetters) => {
+    return state.playing.turns.length % 2 !== 0
+  },
+  crossTurn: (state, getters, rootState, rootGetters) => {
+    return state.playing.turns.length % 2 === 0
+  },
+  usersTurn: (state, getters, rootState, rootGetters) => {
+    if (state.playing.opponentSeed === "X") return state.playing.turns.length % 2 !== 0
+    if (state.playing.opponentSeed === "O") return state.playing.turns.length % 2 === 0
+  },
+  userWon: (state, getters, rootState, rootGetters) => {
+    if (state.playing.opponentSeed === "X") return state.playing.winner === "O"
+    if (state.playing.opponentSeed === "O") return state.playing.winner === "X"
   }
+
 }
 
 function indexByRow(column, row, max = 3) {
   let index = row * max + column
-  console.log(`got ${index} for ${row}:${column}@${max}`)
-  return ((row*max) + column)
+  return ((row * max) + column)
 }

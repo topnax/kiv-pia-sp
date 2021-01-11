@@ -15,7 +15,7 @@ val mainModule = listOf(
     module {
 
         single<GameResultRepository> { SQLGameResultRepository() }
-        single<GameResultsService> { GameResultsServiceImpl(get()) }
+        single<GameResultsService> { GameResultsServiceImpl(get(), get()) }
 
         single<GameMessagingService> { GameMessagingServiceImpl(get()) }
         single<GameService> { GameServiceImpl(get(), get(), get(), get(), get()) }

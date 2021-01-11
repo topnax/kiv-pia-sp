@@ -19,12 +19,12 @@ fun Route.gameHistoryRoutes() {
         route("/history") {
             get {
                 val user = getLoggedUser()
-                dataResponse(gameResultsService.getTurnsByGameResultId(user.id))
+                dataResponse(gameResultsService.getGameResultsByUser(user))
             }
             get("/turns/{id}") {
                 val user = getLoggedUser()
                 call.parameters["id"]?.toIntOrNull()?.let { gameResultId ->
-                    gameResultsService.getGameResultById(user.id)?.let { result ->
+                    gameResultsService.getGameResultById(gameResultId)?.let { result ->
                         if (result.crossUserId == user.id || result.noughtUserId == user.id) {
                             dataResponse(gameResultsService.getTurnsByGameResultId(gameResultId))
                         } else {

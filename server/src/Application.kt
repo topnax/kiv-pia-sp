@@ -105,7 +105,7 @@ fun Application.module(testing: Boolean = false) {
 
             route("/api") {
                 gameRoutes()
-
+                gameHistoryRoutes()
                 lobbyRoutes()
 
                 loginRoutes(jwtConfig)

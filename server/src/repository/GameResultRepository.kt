@@ -76,7 +76,7 @@ class SQLGameResultRepository : GameResultRepository {
     override suspend fun getResultsByUserId(userId: Int) = dbQuery {
         GameResults.select {
             (GameResults.crossUserId eq userId) or (GameResults.noughtUserId eq userId)
-        }.mapNotNull { toGameResult(it) }
+        }.orderBy(GameResults.dateCreated to SortOrder.DESC).mapNotNull { toGameResult(it) }
     }
 
     override suspend fun getTurnsByGameResultId(gameResultId: Int) = dbQuery {

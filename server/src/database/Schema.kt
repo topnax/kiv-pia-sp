@@ -8,6 +8,7 @@ object Users: IntIdTable(name = "users") {
     val email = varchar("email", 50)
     val username = varchar("username", 50)
     val password = text("password")
+    val admin = bool("admin").default(false)
 }
 
 object UsersFriendList: IntIdTable(name = "users_friend_list") {

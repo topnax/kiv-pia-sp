@@ -22,6 +22,7 @@ class JwtConfig(val issuer: String, val secret: String, val validityInMInutes: I
         .withClaim("id", user.id)
         .withClaim("email", user.email)
         .withClaim("username", user.username)
+        .withClaim("admin", user.admin)
         .withExpiresAt(getExpiration())
         .sign(algorithm)
 

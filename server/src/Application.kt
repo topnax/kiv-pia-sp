@@ -8,6 +8,7 @@ import com.zcu.kiv.pia.tictactoe.database.DatabaseFactory
 import com.zcu.kiv.pia.tictactoe.module.mainModule
 import com.zcu.kiv.pia.tictactoe.service.ConfigurationService
 import com.zcu.kiv.pia.tictactoe.service.ConfigurationServiceImpl
+import com.zcu.kiv.pia.tictactoe.service.HashService
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
@@ -79,7 +80,9 @@ fun Application.module(testing: Boolean = false) {
 
     if (!testing) {
         logger.debug { "not testing" }
-        DatabaseFactory.init()
+
+        val hashService: HashService by inject()
+        DatabaseFactory.init(hashService)
         val configurationService: ConfigurationService by inject()
         val jwtConfig = JwtConfig(configurationService.jwtIssuer, configurationService.jwtSecret, 10 * 60)
 
@@ -105,6 +108,7 @@ fun Application.module(testing: Boolean = false) {
 
             route("/api") {
                 gameRoutes()
+                userAdministrationRoutes()
                 gameHistoryRoutes()
                 lobbyRoutes()
 

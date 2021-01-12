@@ -61,7 +61,8 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
                                 UserPrincipal(
                                     user.id,
                                     user.email,
-                                    user.username
+                                    user.username,
+                                    user.admin
                                 )
                             )
                         )

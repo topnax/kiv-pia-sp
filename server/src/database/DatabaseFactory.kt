@@ -1,11 +1,8 @@
 package com.zcu.kiv.pia.tictactoe.database
 
-import com.zcu.kiv.pia.tictactoe.repository.FriendListRepository
+import com.zcu.kiv.pia.tictactoe.service.HashService
 import mu.KotlinLogging
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.StdOutSqlLogger
-import org.jetbrains.exposed.sql.addLogger
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.mariadb.jdbc.Driver
@@ -14,7 +11,7 @@ val logger = KotlinLogging.logger {}
 
 object DatabaseFactory {
 
-    fun init() {
+    fun init(hashService: HashService) {
 
         val address = System.getenv("TTT_DB_ADDRESS")
         val user = System.getenv("TTT_DB_USER")
@@ -40,6 +37,16 @@ object DatabaseFactory {
             SchemaUtils.create(GameResults)
             SchemaUtils.create(GameTurns)
             SchemaUtils.createMissingTablesAndColumns(GameResults)
+            SchemaUtils.createMissingTablesAndColumns(Users)
+            if (Users.select { Users.username eq "admin" }.singleOrNull() == null) {
+                logger.info { "Creating admin user" }
+                Users.insert {
+                    it[Users.username] = "admin"
+                    it[Users.password] = hashService.hashPassword("admin")
+                    it[Users.admin] = true
+                    it[Users.email] = "admin@ttt-game.com"
+                }
+            }
         }
     }
 

@@ -7,7 +7,7 @@
         class="mb-5"
       >
       <blockquote class="blockquote">
-        Dashboard :)
+        Welcome to a Tic Tac Toe game made as a <a href="https://github.com/osvetlik/pia2020/tree/master/semester-project">KIV/PIA semester project</a>.
       </blockquote>
     </v-col>
   </v-row>

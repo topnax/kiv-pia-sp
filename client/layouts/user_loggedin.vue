@@ -76,28 +76,6 @@
       <v-container fill-height>
         <nuxt/>
         <snackbar :snackbars="snackbar.snackbars"/>
-        <v-snackbar
-          v-for="(snackbar, index) in snackbar.snackbars.filter(s => s.showing)"
-          :key="snackbar.text + Math.random()"
-          v-model="snackbar.showing"
-          :timeout="snackbar.timeout"
-          :color="snackbar.color"
-        >
-          <v-container>
-            <v-row align="center">
-              {{ snackbar.text }}
-              <v-spacer/>
-              <v-btn
-                color="white"
-                text
-                @click="snackbar.showing = false"
-                align-end
-              >
-                Close
-              </v-btn>
-            </v-row>
-          </v-container>
-        </v-snackbar>
       </v-container>
     </v-main>
     <v-navigation-drawer
@@ -235,22 +213,12 @@ import Snackbar from "@/components/Snackbar";
 export default {
   components: {Snackbar},
   computed: {
-    showing: {
-      get() {
-        return this.$store.state.snackbar.showing
-      },
-      set(v) {
-        this.$store.commit('snackbar/SET_SNACKBAR', {showing: v})
-      }
-    },
     ...mapGetters({
       onlineUsers: 'users/otherOnlineUsers',
       onlineFriends: 'friends/onlineFriends',
       offlineFriends: 'friends/offlineFriends',
     }),
     ...mapState(["snackbar", "friends", "game"]),
-
-
   },
   async mounted() {
     let token = this.$auth.strategy.token.get()

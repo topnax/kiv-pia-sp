@@ -60,29 +60,7 @@
     <v-main>
       <v-container>
         <nuxt/>
-        <v-snackbar
-          v-for="(snack, index) in snackbar.snackbars.filter(s => s.showing)"
-          :key="snack.text + Math.random()"
-          v-model="snack.showing"
-          timeout="2000"
-          :color="snack.color"
-          :style="{'padding-bottom': `${index * 100 + 80}px`}"
-        >
-          <v-container>
-            <v-row align="center">
-              {{ snack.text }}
-              <v-spacer/>
-              <v-btn
-                color="white"
-                text
-                @click="snack.showing = false"
-                align-end
-              >
-                Close
-              </v-btn>
-            </v-row>
-          </v-container>
-        </v-snackbar>
+        <snackbar :snackbars="snackbar.snackbars"/>
       </v-container>
     </v-main>
     <v-navigation-drawer
@@ -109,20 +87,12 @@
 <script>
 import {mapState} from 'vuex'
 import Footer from "@/components/Footer";
+import Snackbar from "@/components/Snackbar";
 
 export default {
-  components: {Footer},
+  components: {Snackbar, Footer},
   computed: {
-    showing: {
-      get() {
-        return this.$store.state.snackbar.showing
-      },
-      set(v) {
-        this.$store.commit('snackbar/SET_SNACKBAR', {showing: v})
-      }
-    },
     ...mapState(["snackbar"])
-
   },
   data() {
     return {

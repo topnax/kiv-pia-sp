@@ -65,6 +65,16 @@ interface UserService {
      */
     fun isUserOnline(user: User): Boolean
 
+    /**
+     * Promotes the given user to admin
+     */
+    suspend fun promoteUserToAdmin(user: User)
+
+    /**
+     * Demotes the given admin to user
+     */
+    suspend fun demoteAdminToUser(user: User)
+
 }
 
 private val logger = KotlinLogging.logger {}
@@ -72,7 +82,8 @@ private val logger = KotlinLogging.logger {}
 class UserServiceImpl(
     private val persistentUserRepository: PersistentUserRepository,
     private val inMemoryUserRepository: InMemoryUserRepository,
-    private val realtimeService: RealtimeService
+    private val realtimeService: RealtimeService,
+    private val notificationService: NotificationService
 ) : UserService {
 
     init {
@@ -88,7 +99,7 @@ class UserServiceImpl(
                             UsersOnlineResponse(inMemoryUserRepository.getLoggedInUsers()),
                         ),
                         users = arrayOf(user)
-                        )
+                    )
                 }
 
                 override fun onDisconnected(user: User) {
@@ -145,4 +156,13 @@ class UserServiceImpl(
 
     override fun getLoggedInUsers() = inMemoryUserRepository.getLoggedInUsers()
 
+    override suspend fun promoteUserToAdmin(user: User) =
+        persistentUserRepository.updateUserAdminStatus(user, true).also {
+            notificationService.sendNotification("Your role has been changed, please refresh the page.", user)
+        }
+
+    override suspend fun demoteAdminToUser(user: User) =
+        persistentUserRepository.updateUserAdminStatus(user, false).also {
+            notificationService.sendNotification("Your role has been changed, please refresh the page.", user)
+        }
 }

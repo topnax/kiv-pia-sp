@@ -44,7 +44,6 @@ class GameRepository {
 class GameWrapper(val id: Int, val cross: User, val nought: User, val game: TicTacToeGame)
 
 class GameServiceImpl(
-    private val gameRepository: GameRepository,
     private val gameMessagingService: GameMessagingService,
     private val notificationService: NotificationService,
     private val realtimeService: RealtimeService,

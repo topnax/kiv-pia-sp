@@ -1,6 +1,7 @@
 package com.zcu.kiv.pia.tictactoe.controller
 
 import com.zcu.kiv.pia.tictactoe.request.ChangeUserPasswordRequest
+import com.zcu.kiv.pia.tictactoe.request.ChangeUserRoleRequest
 import com.zcu.kiv.pia.tictactoe.service.HashService
 import com.zcu.kiv.pia.tictactoe.service.UserService
 import com.zcu.kiv.pia.tictactoe.utils.*
@@ -16,8 +17,7 @@ fun Route.userAdministrationRoutes() {
         val userService: UserService by inject()
         val hashService: HashService by inject()
         get("/list") {
-            val user = getLoggedUser()
-            if (user.admin) {
+            if (isUserAdmin(userService)) {
                 dataResponse(userService.getUsers())
             } else {
                 call.respond(HttpStatusCode.Unauthorized)
@@ -25,16 +25,55 @@ fun Route.userAdministrationRoutes() {
         }
         post("/changepassword") {
             val request = call.receive<ChangeUserPasswordRequest>()
-            val user = getLoggedUser()
-            if (request.password.isEmpty()) {
-                errorResponse("Password mustn't be empty")
-            } else if (user.admin) {
+            when {
+                request.password.isEmpty() -> {
+                    errorResponse("Password mustn't be empty")
+                }
+                isUserAdmin(userService) -> {
+                    userService.getUserById(request.userId)?.let {
+                        if (!it.admin || it.id == getLoggedUser().id) {
+                            userService.changeUserPassword(it, hashService.hashPassword(request.password))
+                            successResponse()
+                        } else {
+                            errorResponse("Cannot change other admin's password")
+                        }
+                    } ?: run {
+                        errorResponse("User not found by ID")
+                    }
+                }
+                else -> {
+                    call.respond(HttpStatusCode.Unauthorized)
+                }
+            }
+        }
+
+        post("/promote") {
+            val request = call.receive<ChangeUserRoleRequest>()
+            if (isUserAdmin(userService)) {
                 userService.getUserById(request.userId)?.let {
-                    if (!it.admin || it.id == user.id) {
-                        userService.changeUserPassword(it, hashService.hashPassword(request.password))
+                    if (it.username != "admin") {
+                        userService.promoteUserToAdmin(it)
                         successResponse()
                     } else {
-                        errorResponse("Cannot change other admin's password")
+                        errorResponse("Cannot promote the 'admin' user.")
+                    }
+                } ?: run {
+                    errorResponse("User not found by ID")
+                }
+            } else {
+                call.respond(HttpStatusCode.Unauthorized)
+            }
+        }
+
+        post("/demote") {
+            val request = call.receive<ChangeUserRoleRequest>()
+            if (isUserAdmin(userService)) {
+                userService.getUserById(request.userId)?.let {
+                    if (it.username != "admin") {
+                        userService.demoteAdminToUser(it)
+                        successResponse()
+                    } else {
+                        errorResponse("Cannot promote the 'admin' user.")
                     }
                 } ?: run {
                     errorResponse("User not found by ID")

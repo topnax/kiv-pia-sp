@@ -18,15 +18,14 @@ val mainModule = listOf(
         single<GameResultsService> { GameResultsServiceImpl(get(), get()) }
 
         single<GameMessagingService> { GameMessagingServiceImpl(get()) }
-        single<GameService> { GameServiceImpl(get(), get(), get(), get(), get()) }
-        single { GameRepository() }
+        single<GameService> { GameServiceImpl(get(), get(), get(), get()) }
         single<PersistentUserRepository> { SQLUserRepository() }
         single<HashService> { SHA256Hasher() }
 
         single { RedisDatabase() }
         single<InMemoryUserRepository> { RedisUserRepository(get()) }
         single<RealtimeService> { WebsocketService(get()) }
-        single<UserService> { UserServiceImpl(get(), get(), get()) }
+        single<UserService> { UserServiceImpl(get(), get(), get(), get()) }
 
         single<NotificationService> { NotificationServiceImpl(get()) }
 

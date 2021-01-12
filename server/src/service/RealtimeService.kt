@@ -63,7 +63,7 @@ interface RealtimeService {
 
 class WebsocketService(private val configurationService: ConfigurationService) : RealtimeService {
     private val connections = Collections.synchronizedSet(mutableSetOf<DefaultWebSocketServerSession>())
-    private val usersToConnections = Collections.synchronizedMap(mutableMapOf<User, DefaultWebSocketServerSession>())
+    private val usersToConnections = Collections.synchronizedMap(mutableMapOf<Int, DefaultWebSocketServerSession>())
     private val connectionsToUsers = Collections.synchronizedMap(mutableMapOf<DefaultWebSocketServerSession, User>())
     private val onConnectionStoppedListeners =
         Collections.synchronizedSet(mutableSetOf<RealtimeService.ConnectionStatusListener>())
@@ -75,16 +75,16 @@ class WebsocketService(private val configurationService: ConfigurationService) :
     private val jsonMapper = ObjectMapper().registerModule(KotlinModule())
     val messageParser = SimpleMessageParser()
 
-    override fun isConnected(user: User) = usersToConnections.containsKey(user)
+    override fun isConnected(user: User) = usersToConnections.containsKey(user.id)
 
     override fun addConnection(connection: DefaultWebSocketServerSession, user: User?) {
         user?.let {
             logger.info { "User ${it.username} authenticated via WS" }
-            if (usersToConnections.containsKey(it)) {
+            if (usersToConnections.containsKey(it.id)) {
                 logger.error { "Trying to add connection that already belongs to user ${it.username}" }
             }
             connectionsToUsers[connection] = user
-            usersToConnections[it] = connection
+            usersToConnections[it.id] = connection
             onConnectionStartedListeners.forEach { listener -> listener.onConnected(it) }
         }
         if (connections.contains(connection)) {
@@ -96,17 +96,17 @@ class WebsocketService(private val configurationService: ConfigurationService) :
 
     override fun removeConnection(connection: DefaultWebSocketServerSession, user: User?) {
         user?.let {
-            if (!usersToConnections.containsKey(it)) {
+            if (!usersToConnections.containsKey(it.id)) {
                 logger.error { "Trying to remove a connection that has no user assigned to" }
             }
-            usersToConnections.remove(it)
+            usersToConnections.remove(it.id)
         }
         connectionsToUsers[connection]?.let { connUser ->
             logger.info { "Notifying that user ${connUser.username} disconnected" }
-            onConnectionStartedListeners.forEach{ listener ->
+            onConnectionStartedListeners.forEach { listener ->
                 listener.onDisconnected(connUser)
             }
-            usersToConnections.remove(connUser)
+            usersToConnections.remove(connUser.id)
         }
         connectionsToUsers.remove(connection)
         connections.remove(connection)
@@ -149,14 +149,13 @@ class WebsocketService(private val configurationService: ConfigurationService) :
         GlobalScope.launch {
             if (allUsers) {
                 logger.info { "Sending to all users..." }
-                usersToConnections.filter { it.key != exclude }.forEach {
-                    logger.info { "[WS] ${it.key.username} => $json" }
+                usersToConnections.filter { it.key != exclude?.id }.forEach {
                     it.value.send(Frame.Text(json))
                 }
             } else {
-                logger.info { "Sending to specific users..." }
+                logger.info { "Sending to specific users [${users.joinToString { it.id.toString() + "#" + it.username }}]..." }
                 users.forEach {
-                    usersToConnections[it]?.send(frame)
+                    usersToConnections[it.id]?.send(frame)
                 }
             }
         }

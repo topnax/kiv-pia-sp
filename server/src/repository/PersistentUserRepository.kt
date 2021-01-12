@@ -22,6 +22,8 @@ interface PersistentUserRepository {
     suspend fun userByCredentials(email: String, passwordHash: String): User?
 
     suspend fun updateUserPassword(user: User, passwordHash: String)
+
+    suspend fun updateUserAdminStatus(user: User, admin: Boolean)
 }
 
 class SQLUserRepository : PersistentUserRepository {
@@ -73,5 +75,11 @@ class SQLUserRepository : PersistentUserRepository {
         Users.update({ Users.email eq user.email }) {
             it[password] = passwordHash
         }
+    }
+
+    override suspend fun updateUserAdminStatus(user: User, admin: Boolean): Unit = dbQuery {
+       Users.update ({Users.id eq user.id} ) {
+           it[Users.admin] = admin
+       }
     }
 }

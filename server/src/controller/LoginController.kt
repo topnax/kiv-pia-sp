@@ -13,6 +13,8 @@ import com.zcu.kiv.pia.tictactoe.request.game.RegisterRequest
 import com.zcu.kiv.pia.tictactoe.service.UserService
 import com.zcu.kiv.pia.tictactoe.service.HashService
 import com.zcu.kiv.pia.tictactoe.utils.PasswordRuleVerifier
+import com.zcu.kiv.pia.tictactoe.utils.dataResponse
+import com.zcu.kiv.pia.tictactoe.utils.getLoggedUser
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.*
@@ -33,7 +35,11 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
     route("/auth") {
         authenticate(JWT_AUTH_NAME) {
             get("/user") {
-                call.respond(DataResponse(User.fromJWTToken(call.principal()!!)))
+                userService.getUserById(getLoggedUser().id)?.let {
+                    dataResponse(it)
+                } ?: run {
+                    call.respond(HttpStatusCode.Unauthorized)
+                }
             }
             post("/logout") {
                 userService.removeLoggedInUser(User.fromJWTToken(call.principal()!!))

@@ -61,19 +61,27 @@
       <v-container>
         <nuxt/>
         <v-snackbar
-          v-model="showing"
-          :timeout="timeout"
-          :color="snackbar.color"
+          v-for="(snack, index) in snackbar.snackbars.filter(s => s.showing)"
+          :key="snack.text + Math.random()"
+          v-model="snack.showing"
+          timeout="2000"
+          :color="snack.color"
+          :style="{'padding-bottom': `${index * 100 + 80}px`}"
         >
-          {{ snackbar.text }}
-          <v-btn
-            color="white"
-            text
-            @click="showing = false"
-            align-end
-          >
-            Close
-          </v-btn>
+          <v-container>
+            <v-row align="center">
+              {{ snack.text }}
+              <v-spacer/>
+              <v-btn
+                color="white"
+                text
+                @click="snack.showing = false"
+                align-end
+              >
+                Close
+              </v-btn>
+            </v-row>
+          </v-container>
         </v-snackbar>
       </v-container>
     </v-main>

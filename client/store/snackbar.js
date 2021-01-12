@@ -1,14 +1,16 @@
 export const state = () => ({
-  showing: false,
-  color: "success",
-  text: ""
+  snackbars: [],
 })
 
 export const mutations = {
   SET_SNACKBAR(state, payload) {
-    state.showing = payload.showing
-    state.color = payload.color
-    state.text = payload.text
+    console.log(payload)
+    state.snackbars = state.snackbars.concat({
+      showing: payload.showing,
+      color: payload.color,
+      text: payload.text
+    })
+    console.log(state.snackbars)
   }
 }
 

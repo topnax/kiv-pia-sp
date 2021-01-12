@@ -75,9 +75,12 @@
     <v-main>
       <v-container fill-height>
         <nuxt/>
+        <snackbar :snackbars="snackbar.snackbars"/>
         <v-snackbar
-          v-model="showing"
-          :timeout="timeout"
+          v-for="(snackbar, index) in snackbar.snackbars.filter(s => s.showing)"
+          :key="snackbar.text + Math.random()"
+          v-model="snackbar.showing"
+          :timeout="snackbar.timeout"
           :color="snackbar.color"
         >
           <v-container>
@@ -87,7 +90,7 @@
               <v-btn
                 color="white"
                 text
-                @click="showing = false"
+                @click="snackbar.showing = false"
                 align-end
               >
                 Close
@@ -227,8 +230,10 @@
 <script>
 import {mapState} from 'vuex'
 import {mapGetters} from 'vuex'
+import Snackbar from "@/components/Snackbar";
 
 export default {
+  components: {Snackbar},
   computed: {
     showing: {
       get() {

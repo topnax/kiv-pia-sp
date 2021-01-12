@@ -27,6 +27,7 @@ object FriendRequests: IntIdTable(name = "friend_requests") {
 }
 
 object GameResults: IntIdTable(name = "game_results") {
+    val draw = bool("draw").default(false)
     val crossWon = bool("cross_won")
     val crossUserId = integer("cross_user")
         .references(Users.id)

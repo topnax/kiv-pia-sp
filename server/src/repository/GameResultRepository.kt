@@ -13,7 +13,7 @@ import mu.KotlinLogging
 import org.jetbrains.exposed.sql.*
 
 interface GameResultRepository {
-    suspend fun addResult(crossWon: Boolean, crossUserId: Int, noughtUserId: Int, turns: List<TicTacToeGame.Turn>, boardSize: Int, victoriousTurns: List<TicTacToeGame.Turn>)
+    suspend fun addResult(draw: Boolean, crossWon: Boolean, crossUserId: Int, noughtUserId: Int, turns: List<TicTacToeGame.Turn>, boardSize: Int, victoriousTurns: List<TicTacToeGame.Turn>)
 
     suspend fun getResultsByUserId(userId: Int): List<GameResult>
 
@@ -27,6 +27,7 @@ class SQLGameResultRepository : GameResultRepository {
     private fun toGameResult(row: ResultRow): GameResult =
         GameResult(
             row[GameResults.id].value,
+            row[GameResults.draw],
             row[GameResults.crossWon],
             row[GameResults.crossUserId],
             row[GameResults.noughtUserId],
@@ -44,6 +45,7 @@ class SQLGameResultRepository : GameResultRepository {
         )
 
     override suspend fun addResult(
+        draw: Boolean,
         crossWon: Boolean,
         crossUserId: Int,
         noughtUserId: Int,
@@ -53,6 +55,7 @@ class SQLGameResultRepository : GameResultRepository {
     ): Unit = dbQuery {
 
         val id = GameResults.insert {
+            it[GameResults.draw] = draw
             it[GameResults.crossWon] = crossWon
             it[GameResults.crossUserId] = crossUserId
             it[GameResults.noughtUserId] = noughtUserId

@@ -25,7 +25,8 @@ class GameResultsServiceImpl(
 ) : GameResultsService {
     override suspend fun addGameResult(gameWrapper: GameWrapper) {
         gameResultRepository.addResult(
-            gameWrapper.game.winner == Seed.CROSS,
+            gameWrapper.game.state == TicTacToeGame.State.DRAW,
+            gameWrapper.game.state !== TicTacToeGame.State.DRAW && gameWrapper.game.winner == Seed.CROSS,
             gameWrapper.cross.id,
             gameWrapper.nought.id,
             gameWrapper.game.turns,

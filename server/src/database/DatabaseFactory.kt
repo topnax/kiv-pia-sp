@@ -39,6 +39,7 @@ object DatabaseFactory {
             SchemaUtils.create(UsersFriendList)
             SchemaUtils.create(GameResults)
             SchemaUtils.create(GameTurns)
+            SchemaUtils.createMissingTablesAndColumns(GameResults)
         }
     }
 

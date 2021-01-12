@@ -1,6 +1,6 @@
 <template>
   <v-row>
-    <v-col md="4">
+    <v-col md="4" class="text-center">
       <v-chip
         class="ma-2"
         :color="crossWon ? 'green' : 'primary'"
@@ -19,6 +19,33 @@
       >
         You are playing...
       </v-chip>
+      <v-chip
+        v-if="draw && finished"
+        class="ma-2"
+        color="information"
+        text-color="white"
+      >
+        <v-icon class="me-2">mdi-handshake</v-icon> It's a draw
+      </v-chip>
+      <v-chip
+        v-if="noughtWon && finished"
+        class="ma-2"
+        color="green"
+        outlined
+      >
+        <v-icon class="me-2">mdi-party-popper</v-icon><strong>{{noughtSeedUsername}}</strong>&nbsphas won the game!
+      </v-chip>
+
+      <v-chip
+        v-if="crossWon && finished"
+        class="ma-2"
+        color="green"
+        outlined
+      >
+        <v-icon class="me-2">mdi-party-popper</v-icon><strong>{{crossSeedUsername}}</strong>&nbsphas won the game!
+      </v-chip>
+
+
     </v-col>
     <v-col md="4" class="text-center">
       <v-chip
@@ -36,6 +63,7 @@
 export default {
   name: 'GameHeader',
   props: {
+    draw: false,
     noughtsTurn: false,
     crossTurn: false,
     usersTurn: false,

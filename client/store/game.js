@@ -99,10 +99,12 @@ export const mutations = {
     state.in_game = false
     state.finished = false
     state.won = false
+    state.playing.winner = false
     state.draw = false
   },
 
   SET_FINISHED(state, data) {
+    state.playing.winner = false
     state.finished = true
     state.draw = false
     state.won = data.won
@@ -238,6 +240,13 @@ export const getters = {
   userWon: (state, getters, rootState, rootGetters) => {
     if (state.playing.opponentSeed === "X") return state.playing.winner === "O"
     if (state.playing.opponentSeed === "O") return state.playing.winner === "X"
+  },
+  noughtWon: (state, getters, rootState, rootGetters) => {
+    return state.playing.winner === "O"
+
+  },
+  crossWon: (state, getters, rootState, rootGetters) => {
+    return state.playing.winner === "X"
   }
 
 }

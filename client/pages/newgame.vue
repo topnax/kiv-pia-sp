@@ -13,9 +13,8 @@
       <div v-else-if="game.in_game">
         <v-row v-if="game.finished">
           <v-col align="center">
-            <h3 v-if="game.draw">It's a draw!</h3>
-            <h3 v-else-if="userWon" class="success--text">You have won!</h3>
-            <h3 v-else class="error--text">You have lost :(</h3>
+            <h3 v-if="userWon" class="success--text">You have won!</h3>
+            <h3 v-else-if="!game.draw" class="error--text">You have lost :(</h3>
             <v-btn class="mt-2" @click="finishedGameClose">Close</v-btn>
           </v-col>
         </v-row>
@@ -24,37 +23,8 @@
               <v-btn text @click="surrender">SURRENDER</v-btn>
           </v-col>
         </v-row>
-        <v-row>
-          <v-col md="4">
-            <v-chip
-              class="ma-2"
-              color="primary"
-              :outlined="noughtsTurn || game.finished"
-            >
-              <strong class="title me-3">X</strong> {{ crossSeedUsername }}
-            </v-chip>
-          </v-col>
-
-          <v-col md="4" class="text-center" justify="center">
-            <v-chip
-              v-if="usersTurn && !game.finished"
-              class="ma-2"
-              color="green"
-              text-color="white"
-            >
-              You are playing...
-            </v-chip>
-          </v-col>
-          <v-col md="4" class="text-right">
-            <v-chip
-              class="ma-2"
-              color="primary"
-              :outlined="crossTurn || game.finished"
-            >
-              <strong class="title me-3">O</strong> {{ noughtSeedUsername }}
-            </v-chip>
-          </v-col>
-        </v-row>
+        <game-header  :noughtsTurn="noughtsTurn" :crossTurn="crossTurn" :finished="game.finished"
+                     :noughtSeedUsername="noughtSeedUsername" :crossSeedUsername="crossSeedUsername" :winner="game.playing.winner" :usersTurn="usersTurn && !game.finished" :draw="game.draw"/>
         <board :squares="cells" :size="game.playing.boardSize" :victoriousCells="victoriousCellsGame"/>
       </div>
 
@@ -174,6 +144,8 @@ export default {
       noughtsTurn: 'game/noughtsTurn',
       crossTurn: 'game/crossTurn',
       userWon: 'game/userWon',
+      crossWon: 'game/crossWon',
+      noughtWon: 'game/noughtWon'
     }),
 
     ...mapState(["newgame", "lobby", "game"]),

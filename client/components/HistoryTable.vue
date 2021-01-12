@@ -8,19 +8,23 @@
     class="elevation-1"
     @click:row="onRowClick"
   >
-    <template v-slot:item.won="{ item }">
-      <v-icon v-if="item.won" color="yellow">
+    <template v-slot:item.result="{ item }">
+      <v-icon v-if="item.result === 1" color="yellow">
         mdi-trophy-variant
       </v-icon>
-      <v-icon v-else color="error">
+      <v-icon v-else-if="item.result === 2" color="error">
         mdi-cancel
+      </v-icon>
+      <v-icon v-else
+      color="gray">
+        mdi-handshake
       </v-icon>
     </template>
     <template v-slot:item.winner="{ item }">
       <v-icon v-if="item.winner === 'X'">
         mdi-close
       </v-icon>
-      <v-icon v-else>
+      <v-icon v-else-if="item.winner === 'O'">
         mdi-circle-outline
       </v-icon>
     </template>
@@ -38,7 +42,7 @@ export default {
   },
   data: () => ({
     headers: [
-      {text: 'Won', value: 'won'},
+      {text: 'Result', value: 'result'},
       {text: 'Opponent username', value: 'opponentUsername'},
       {text: 'Winner', value: 'winner'},
       {text: 'Board size', value: 'boardSize'},

@@ -6,9 +6,9 @@
       </v-col>
     </v-row>
 
-    <v-row>
+    <v-row justify="center">
 
-      <v-col align="center" md="3" >
+      <v-col align="center" md="6"  >
         <v-btn icon @click="back">
           <v-icon>mdi-arrow-left</v-icon>
         </v-btn>
@@ -21,7 +21,7 @@
           indeterminate
           color="teal"/>
           <game-header v-if="!loading" :noughtsTurn="currentTurn % 2 === 0" :crossTurn="currentTurn % 2 !== 0" :finished="isFinished"
-                       :noughtSeedUsername="game.noughtUsername" :crossSeedUsername="game.crossUsername" :winner="game.winner"/>
+                       :noughtSeedUsername="game.noughtUsername" :crossSeedUsername="game.crossUsername" :winner="game.winner" :draw="game.draw"/>
           <board v-if="!loading" :squares="getCells" :size="boardSize" :victoriousCells="getVictoriousCells"/>
       </v-col>
     </v-row>
@@ -101,7 +101,7 @@ export default {
       this.$props.turns.filter(turn => turn.victorious).forEach(
         turn => {
           let index = indexByRow(turn.column, turn.row, boardSize)
-          cells[index] = turn.seed
+          cells[index] = true
         }
       )
       return cells

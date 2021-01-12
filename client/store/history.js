@@ -72,10 +72,12 @@ export const getters = {
       game => {
         console.log("inside getter")
         console.log(game.crossWon)
-        game.winner = game.crossWon ? "X" : "O"
+        game.winner = game.draw ? "" : game.crossWon ? "X" : "O"
         let username = rootState.auth.user.username
         game.opponentUsername = game.crossUsername === username ? game.noughtUsername : game.crossUsername
-        game.won = game.crossWon ? (game.crossUsername === username) : (game.noughtUsername === username)
+        let won = game.draw === false ? (game.crossWon ? (game.crossUsername === username) : (game.noughtUsername === username)) : ""
+        game.result = game.draw ? 0 : (won ? 1 : 2)
+
         return game
       }
     )

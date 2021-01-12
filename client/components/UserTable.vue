@@ -77,6 +77,34 @@
         </template>
         <span>Change user's password</span>
       </v-tooltip>
+
+      <v-tooltip bottom v-if="!item.admin && item.username !== 'admin'">
+        <template v-slot:activator="{ on, attrs }">
+          <v-icon
+            @click="promoteUser(item)"
+            dark
+            v-bind="attrs"
+            v-on="on"
+          >
+            mdi-account-cowboy-hat
+          </v-icon>
+        </template>
+        <span>Promote to admin</span>
+      </v-tooltip>
+
+      <v-tooltip bottom v-if="item.admin && item.username !== 'admin'">
+        <template v-slot:activator="{ on, attrs }">
+          <v-icon
+            @click="demoteUser(item)"
+            dark
+            v-bind="attrs"
+            v-on="on"
+          >
+            mdi-baby-carriage
+          </v-icon>
+        </template>
+        <span>Demote from admin</span>
+      </v-tooltip>
     </template>
 
   </v-data-table>
@@ -91,6 +119,12 @@ export default {
   },
 
   methods: {
+    demoteUser(user) {
+      this.$store.dispatch("useradministration/changeUserRole", {userId: user.id, promote: false})
+    },
+    promoteUser(user) {
+      this.$store.dispatch("useradministration/changeUserRole", {userId: user.id, promote: true})
+    },
     openChangePasswordDialog(user) {
       this.userEdit = user
       this.dialog = true
@@ -101,7 +135,7 @@ export default {
     },
     async save() {
       this.dialog = false;
-      this.$store.dispatch("useradministration/changePassword", {
+      await this.$store.dispatch("useradministration/changePassword", {
         userId: this.userEdit.id,
         password: this.newPassword
       })

@@ -36,18 +36,32 @@ export const actions = {
     context.commit("SET_LOADING", false)
   },
 
-
   async changePassword(context, data) {
     try {
       let result = await this.$axios.$post("/administration/users/changepassword", data)
 
       if (result.responseCode === 0) {
-        await context.dispatch("snackbar/showSuccess", `User's changed successfully`, {root: true})
+        await context.dispatch("snackbar/showSuccess", `User's password changed successfully`, {root: true})
       } else {
         await context.dispatch("snackbar/showError", result.message, {root: true})
       }
     } catch (e) {
       await context.dispatch("snackbar/showError", "Could not change user's password", {root: true})
+    }
+  },
+
+  async changeUserRole(context, data) {
+    try {
+      let result = await this.$axios.$post("/administration/users/" + (data.promote ? "promote" : "demote"), {userId: data.userId})
+
+      if (result.responseCode === 0) {
+        await context.dispatch("snackbar/showSuccess", `User's role changed successfully`, {root: true})
+        await context.dispatch("fetchUsers")
+      } else {
+        await context.dispatch("snackbar/showError", result.message, {root: true})
+      }
+    } catch (e) {
+      await context.dispatch("snackbar/showError", "Could not change user's role", {root: true})
     }
   },
 }

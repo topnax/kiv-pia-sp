@@ -25,7 +25,7 @@
         </v-row>
         <game-header  :noughtsTurn="noughtsTurn" :crossTurn="crossTurn" :finished="game.finished"
                      :noughtSeedUsername="noughtSeedUsername" :crossSeedUsername="crossSeedUsername" :winner="game.playing.winner" :usersTurn="usersTurn && !game.finished" :draw="game.draw"/>
-        <board :squares="cells" :size="game.playing.boardSize" :victoriousCells="victoriousCellsGame"/>
+        <board :squares="cells" :size="game.playing.boardSize" :victoriousCells="victoriousCellsGame" :onCellClick="click"/>
       </div>
 
       <v-col md="4" class="" v-else>
@@ -131,6 +131,11 @@ export default {
     },
     declineInvite(lobbyId) {
       this.$store.dispatch("lobby/declineInvite", lobbyId)
+    },
+    click(index, row) {
+      //this.$store.dispatch("game/move", {index: this.indexByRow(index, row, this.size), seed: "O"})
+      this.$store.dispatch("game/play", {row: row, column: index})
+//      this.$emit('click', this.indexByRow(index, row));
     }
   },
   computed: {

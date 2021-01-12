@@ -9,7 +9,7 @@
                   :value="squares[indexByRow(i, row, size)]"
                   :disabled="!!winner"
                   :winner="victoriousCells[indexByRow(i, row, size)]"
-                  @click="click(i-1, row-1)"/>
+                  @click="onCellClick && onCellClick(i-1, row-1)"/>
         </div>
       </div>
     </v-row>
@@ -24,7 +24,8 @@ export default {
     size: Number,
     squares: Array,
     winner: Array,
-    victoriousCells: Array
+    victoriousCells: Array,
+    onCellClick: null
   },
   components: {
     Square: () => import('./Cell')
@@ -33,12 +34,7 @@ export default {
     indexByRow(index, row, max = 3) {
       return (row * max + index) - (max + 1)
     },
-    click(index, row) {
-      console.log(`${index}, ${row} index and row ${this.indexByRow(index, row, this.size)}`)
-      //this.$store.dispatch("game/move", {index: this.indexByRow(index, row, this.size), seed: "O"})
-      this.$store.dispatch("game/play", {row: row, column: index})
-//      this.$emit('click', this.indexByRow(index, row));
-    }
+
   }
 }
 </script>

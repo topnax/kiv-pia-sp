@@ -35,6 +35,21 @@
             <v-list-item-title>Logout</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <div v-if="$store.$auth.user.admin">
+          <hr>
+          <v-list-item
+            :key="100"
+            to="/user-administration"
+            exact
+          >
+            <v-list-item-action>
+              <v-icon>mdi-account-group</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>User administration</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </div>
       </v-list>
     </v-navigation-drawer>
     <v-app-bar
@@ -119,14 +134,14 @@
               <v-list-item-title>Remove from friend list</v-list-item-title>
             </v-list-item>
 
-           <v-list-item
-           v-if="game.pending !== undefined && game.pending.owner"
-             :key="2"
-           @click="inviteToGame(item.id)"
+            <v-list-item
+              v-if="game.pending !== undefined && game.pending.owner"
+              :key="2"
+              @click="inviteToGame(item.id)"
             >
-             <v-list-item-title>Invite to a game</v-list-item-title>
+              <v-list-item-title>Invite to a game</v-list-item-title>
 
-           </v-list-item>
+            </v-list-item>
           </v-list>
         </v-menu>
 
@@ -226,8 +241,6 @@ export default {
     ...mapState(["snackbar", "friends", "game"]),
 
 
-
-
   },
   async mounted() {
     let token = this.$auth.strategy.token.get()
@@ -269,16 +282,17 @@ export default {
           icon: 'mdi-format-list-bulleted',
           title: 'Game history',
           to: '/history'
-        },
-        {
-          icon: 'mdi-account',
-          title: 'Profile',
-          to: '/profile'
+
         },
         {
           icon: 'mdi-account-multiple',
           title: 'Friends',
           to: '/friends'
+        },
+        {
+          icon: 'mdi-account',
+          title: 'Profile',
+          to: '/profile'
         }
       ],
       rightDrawer: true,

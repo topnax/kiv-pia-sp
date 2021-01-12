@@ -80,15 +80,20 @@
           :timeout="timeout"
           :color="snackbar.color"
         >
-          {{ snackbar.text }}
-          <v-btn
-            color="white"
-            text
-            @click="showing = false"
-            align-end
-          >
-            Close
-          </v-btn>
+          <v-container>
+            <v-row align="center">
+              {{ snackbar.text }}
+              <v-spacer/>
+              <v-btn
+                color="white"
+                text
+                @click="showing = false"
+                align-end
+              >
+                Close
+              </v-btn>
+            </v-row>
+          </v-container>
         </v-snackbar>
       </v-container>
     </v-main>

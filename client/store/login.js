@@ -28,6 +28,7 @@ export const actions = {
         data
       })
       await context.dispatch("snackbar/showSuccess", "Logged in!", {root: true})
+      await this.$router.push('/dashboard')
     } catch (e) {
       if (e.response && e.response.status && e.response.status === 401){
         await context.dispatch("snackbar/showError", "Invalid credentials", {root: true})

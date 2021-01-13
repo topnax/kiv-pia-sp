@@ -64,7 +64,6 @@ export default {
       },
     },
     redirect: {
-      home: '/dashboard',
       login: '/',
       logout: '/',
       callback: false,

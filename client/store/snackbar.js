@@ -5,7 +5,7 @@ export const state = () => ({
 
 export const mutations = {
   SET_SNACKBAR(state, payload) {
-    console.log(payload)
+    // assign an unique ID
     state.snackbars = state.snackbars.concat({
       id: state.nextSnackbarId,
       showing: payload.showing,
@@ -15,16 +15,16 @@ export const mutations = {
     state.nextSnackbarId++
   },
   REMOVE_SNACKBAR(state, id) {
+    // remove a snackbar using an ID
     let index = state.snackbars.map(snackbar => snackbar.id).indexOf(id)
     if (index !== -1) {
-      console.log("removing")
+      // snackbar with the given ID found
       state.snackbars.splice(index, 1)
     }
   }
 }
 
 export const actions = {
-
   removeSnackbar: (context, id) => {
    context.commit("REMOVE_SNACKBAR", id)
   },

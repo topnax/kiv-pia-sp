@@ -17,7 +17,7 @@
             <v-btn
               color="white"
               text
-              @click="snack.showing = false"
+              @click="hideSnack(snack.id)"
               align-end
             >
               Close

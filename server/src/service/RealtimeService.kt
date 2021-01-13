@@ -79,7 +79,7 @@ class WebsocketService(private val configurationService: ConfigurationService) :
 
     override fun addConnection(connection: DefaultWebSocketServerSession, user: User?) {
         user?.let {
-            logger.info { "User ${it.username} authenticated via WS" }
+            logger.info { "User #${it.id}-${it.username} authenticated via WS" }
             if (usersToConnections.containsKey(it.id)) {
                 logger.error { "Trying to add connection that already belongs to user ${it.username}" }
             }
@@ -102,7 +102,7 @@ class WebsocketService(private val configurationService: ConfigurationService) :
             usersToConnections.remove(it.id)
         }
         connectionsToUsers[connection]?.let { connUser ->
-            logger.info { "Notifying that user ${connUser.username} disconnected" }
+            logger.info { "Notifying that user #${connUser.id}-${connUser.username} disconnected" }
             onConnectionStartedListeners.forEach { listener ->
                 listener.onDisconnected(connUser)
             }

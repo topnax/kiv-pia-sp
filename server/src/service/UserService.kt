@@ -144,6 +144,7 @@ class UserServiceImpl(
     }
 
     override fun removeLoggedInUser(user: User) {
+        // TODO should remove connection :thinking-emoji:
         realtimeService.sendMessage(
             RealtimeMessage(
                 RealtimeMessage.Namespace.USERS,

@@ -15,8 +15,7 @@ import io.ktor.websocket.*
 
 fun PipelineContext<Unit, ApplicationCall>.getLoggedUser() = User.fromJWTToken(this.call.principal()!!)
 suspend fun PipelineContext<Unit, ApplicationCall>.isUserAdmin(userService: UserService): Boolean =
-    User.fromJWTToken(this.call.principal()!!).let {
-        if (!it.admin) return false
+    getLoggedUser().let {
         userService.getUserById(it.id)?.let { dbUser ->
             return dbUser.admin
         } ?: run {

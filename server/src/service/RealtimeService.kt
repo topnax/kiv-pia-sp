@@ -150,6 +150,7 @@ class WebsocketService(private val configurationService: ConfigurationService) :
             if (allUsers) {
                 logger.info { "Sending to all users..." }
                 usersToConnections.filter { it.key != exclude?.id }.forEach {
+                    logger.info { "Sending to id ${it.key}..." }
                     it.value.send(Frame.Text(json))
                 }
             } else {

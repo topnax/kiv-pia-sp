@@ -22,7 +22,7 @@ export const mutations = {
     let token = this.$auth.strategy.token.get()
 
     console.log(token)
-    if (token !== false && state.tokenSent === false) {
+    if (token !== false && state.tokenSent === false && token !== undefined) {
       token = token.substring(7, token.length)
       console.log(`Sending token=${token}`)
       Vue.prototype.$socket.send("jwt;" + token)
@@ -34,7 +34,7 @@ export const mutations = {
     if (state.socket.isConnected) {
       console.log(`tokenSent ${state.tokenSent}`)
       let token = this.$auth.strategy.token.get()
-      if (token !== false && state.tokenSent === false) {
+      if (token !== false && state.tokenSent === false && token !== undefined) {
         token = token.substring(7, token.length)
         console.log(`Sending token=${token}`)
         Vue.prototype.$socket.send("jwt;" + token)

@@ -221,8 +221,6 @@ export default {
     ...mapState(["snackbar", "friends", "game"]),
   },
   async mounted() {
-    let token = this.$auth.strategy.token.get()
-    token = token.substring(7, token.length)
     await this.$store.dispatch("friends/fetchFriends")
     await this.$store.dispatch("websocket/sendToken")
   },

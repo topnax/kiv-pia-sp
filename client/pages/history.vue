@@ -25,9 +25,6 @@ export default {
   },
   methods: {
     onRowClick(row) {
-      console.log("inside hiustory")
-      alert(`row #${row.id} clicked`)
-      console.log(row)
       this.$store.dispatch("history/setGame", row)
     },
     onReplayClose() {

@@ -7,6 +7,9 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.mariadb.jdbc.Driver
 
+private const val DATABASE_CONNECT_MAX_ATTEMPT_COUNT = 5
+private const val DATABASE_CONNECT_ATTEMPT_TIMEOUT = 5000L
+
 val logger = KotlinLogging.logger {}
 
 object DatabaseFactory {
@@ -29,24 +32,41 @@ object DatabaseFactory {
             password = password
         )
 
-        transaction {
-            addLogger(StdOutSqlLogger)
-            SchemaUtils.create(Users)
-            SchemaUtils.create(FriendRequests)
-            SchemaUtils.create(UsersFriendList)
-            SchemaUtils.create(GameResults)
-            SchemaUtils.create(GameTurns)
-            SchemaUtils.createMissingTablesAndColumns(GameResults)
-            SchemaUtils.createMissingTablesAndColumns(Users)
-            if (Users.select { Users.username eq "admin" }.singleOrNull() == null) {
-                logger.info { "Creating admin user" }
-                Users.insert {
-                    it[Users.username] = "admin"
-                    it[Users.password] = hashService.hashPassword("admin")
-                    it[Users.admin] = true
-                    it[Users.email] = "admin@ttt-game.com"
+        var initialized = false
+        var attempt = 0
+        while (!initialized && attempt < DATABASE_CONNECT_MAX_ATTEMPT_COUNT) {
+            logger.info { "Trying to initialize db" }
+            try {
+                transaction {
+                    addLogger(StdOutSqlLogger)
+                    SchemaUtils.create(Users)
+                    SchemaUtils.create(FriendRequests)
+                    SchemaUtils.create(UsersFriendList)
+                    SchemaUtils.create(GameResults)
+                    SchemaUtils.create(GameTurns)
+                    SchemaUtils.createMissingTablesAndColumns(GameResults)
+                    SchemaUtils.createMissingTablesAndColumns(Users)
+                    if (Users.select { Users.username eq "admin" }.singleOrNull() == null) {
+                        logger.info { "Creating admin user" }
+                        Users.insert {
+                            it[Users.username] = "admin"
+                            it[Users.password] = hashService.hashPassword("admin")
+                            it[Users.admin] = true
+                            it[Users.email] = "admin@ttt-game.com"
+                        }
+                    }
                 }
+                initialized = true
+            } catch (ex: Exception) {;
+                logger.error { "Database initialization attempt #${attempt + 1} has failed..." }
+                logger.error { ex }
+                attempt++
+                Thread.sleep(DATABASE_CONNECT_ATTEMPT_TIMEOUT)
             }
+            logger.info { "DB initialized" }
+        }
+        if (!initialized) {
+            throw Exception("Could not initialize the database")
         }
     }
 

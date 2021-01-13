@@ -14,6 +14,8 @@ import com.zcu.kiv.pia.tictactoe.service.UserService
 import com.zcu.kiv.pia.tictactoe.service.HashService
 import com.zcu.kiv.pia.tictactoe.utils.PasswordRuleVerifier
 import com.zcu.kiv.pia.tictactoe.utils.dataResponse
+import com.zcu.kiv.pia.tictactoe.utils.errorResponse
+
 import com.zcu.kiv.pia.tictactoe.utils.getLoggedUser
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -83,10 +85,14 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
     post("/register") {
         val request = call.receive<RegisterRequest>()
 
+        // verify password strength
         with(PasswordRuleVerifier.verifyPassword(request.password).joinToString(separator = "\n") {
             it.violationMessage
         }) {
             when {
+                request.password != request.confirmPassword -> {
+                    errorResponse("Passwords do not match")
+                }
                 isNotEmpty() -> {
                     call.respond(ErrorResponse(this))
                 }

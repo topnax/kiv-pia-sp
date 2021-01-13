@@ -80,6 +80,7 @@ import Vue from 'vue'
 import VueNativeSock from 'vue-native-websocket'
 
 export default {
+  middleware: ["not-authenticated"],
   computed: {
     passwordConfirmationRule() {
       return () => (this.passwordR === this.passwordRConfirm) || 'Passwords must match'

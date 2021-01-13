@@ -13,57 +13,64 @@
               <v-tab>Register</v-tab>
 
               <v-tab-item class="pa-5" align="center">
-                <span class="subtitle-1 font-weight-light">Already have an account? Sign in!</span>
-                <v-text-field
-                  v-model="email"
-                  :rules="emailRules"
-                  label="E-mail"
-                  required
-                ></v-text-field>
+                <v-form v-model="signInFormValid">
+                  <span class="subtitle-1 font-weight-light">Already have an account? Sign in!</span>
+                  <v-text-field
+                    v-model="email"
+                    :rules="emailRules"
+                    label="E-mail"
+                    required
+                  ></v-text-field>
 
-                <v-text-field
-                  v-model="password"
-                  label="Password"
-                  :type="showPassword ? 'text' : 'password'"
-                  :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                  @click:append="showPassword = !showPassword"/>
+                  <v-text-field
+                    v-model="password"
+                    label="Password"
+                    :type="showPassword ? 'text' : 'password'"
+                    :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                    @click:append="showPassword = !showPassword"
+                    required
+                  />
 
-                <v-btn text @click="loginUser">SIGN IN</v-btn>
+                  <v-btn text :disabled="!signInFormValid" @click="loginUser">SIGN IN</v-btn>
+                </v-form>
               </v-tab-item>
 
               <v-tab-item class="pa-5" align="center">
-                <span class="subtitle-1 font-weight-light">Do not have an account yet? Sign up, it's free!</span>
-                <v-text-field
-                  v-model="emailR"
-                  :rules="emailRules"
-                  label="E-mail"
-                  required
-                ></v-text-field>
+                <v-form v-model="registerFormValid">
+                  <span class="subtitle-1 font-weight-light">Do not have an account yet? Sign up, it's free!</span>
+                  <v-text-field
+                    v-model="emailR"
+                    :rules="emailRules"
+                    label="E-mail"
+                    required
+                  ></v-text-field>
 
-                <v-text-field
-                  v-model="username"
-                  :rules="nameRules"
-                  :counter="16"
-                  label="Username"
-                  required
-                ></v-text-field>
-                <v-text-field
-                  v-model="passwordR"
-                  label="Password"
-                  :rules="passwordRules"
-                  :counter="20"
-                  :type="showPassword ? 'text' : 'password'"
-                  :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                  @click:append="showPassword = !showPassword"/>
-                <v-text-field
-                  label="Repeat password"
-                  v-model="passwordRConfirm"
-                  :rules="[passwordConfirmationRule]"
-                  :type="showPassword ? 'text' : 'password'"
-                />
-                <v-btn text
-                       @click="register">SIGN UP
-                </v-btn>
+                  <v-text-field
+                    v-model="username"
+                    :rules="nameRules"
+                    :counter="16"
+                    label="Username"
+                    required
+                  ></v-text-field>
+                  <v-text-field
+                    v-model="passwordR"
+                    label="Password"
+                    :rules="passwordRules"
+                    :counter="20"
+                    :type="showPassword ? 'text' : 'password'"
+                    :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                    @click:append="showPassword = !showPassword"/>
+                  <v-text-field
+                    label="Repeat password"
+                    v-model="passwordRConfirm"
+                    :rules="[passwordConfirmationRule]"
+                    :type="showPassword ? 'text' : 'password'"
+                  />
+                  <v-btn text
+                         :disabled="!registerFormValid"
+                         @click="register">SIGN UP
+                  </v-btn>
+                </v-form>
               </v-tab-item>
             </v-tabs>
           </v-card>
@@ -76,26 +83,20 @@
 <script>
 import Logo from '~/components/Logo.vue'
 import VuetifyLogo from '~/components/VuetifyLogo.vue'
-import Vue from 'vue'
-import VueNativeSock from 'vue-native-websocket'
 
 export default {
   middleware: ["not-authenticated"],
   computed: {
     passwordConfirmationRule() {
-      return () => (this.passwordR === this.passwordRConfirm) || 'Passwords must match'
+      return () => (this.passwordRConfirm.length > 0 && this.passwordR === this.passwordRConfirm) || 'Passwords must match'
     }
   },
-  mounted() {
-
-//    console.log("ws!")
-//    Vue.use(VueNativeSock, 'ws://localhost:8080/api/ws', { store: this.$store.websocket })
-  },
   data: () => ({
-
     showLogin: true,
     showPassword: false,
     valid: false,
+    signInFormValid: false,
+    registerFormValid: false,
     password: "",
     passwordR: "",
     passwordRConfirm: "",

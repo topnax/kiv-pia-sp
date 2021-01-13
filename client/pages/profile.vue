@@ -6,29 +6,35 @@
       <v-card class="mx-auto mt-9" align="center">
         <v-card-title>Change password</v-card-title>
         <div class="pa-5">
-          <v-text-field
-            v-model="password"
-            label="Current password"
-            :type="showPassword ? 'text' : 'password'"
-            :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-            @click:append="showPassword = !showPassword"/>
-          <v-text-field
-            v-model="passwordR"
-            label="Password"
-            :rules="passwordRules"
-            :counter="20"
-            :type="showCurrentPassword ? 'text' : 'password'"
-            :append-icon="showCurrentPassword ? 'mdi-eye' : 'mdi-eye-off'"
-            @click:append="showCurrentPassword = !showCurrentPassword"/>
-          <v-text-field
-            label="Repeat password"
-            v-model="passwordRConfirm"
-            :rules="[passwordConfirmationRule]"
-            :type="showCurrentPassword ? 'text' : 'password'"
-          />
-          <v-btn text
-                 @click="change">CHANGE
-          </v-btn>
+          <v-form v-model="changePasswordFormValid">
+            <v-text-field
+              v-model="password"
+              label="Current password"
+              :type="showPassword ? 'text' : 'password'"
+              :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+              required
+              @click:append="showPassword = !showPassword"/>
+            <v-text-field
+              v-model="passwordR"
+              label="Password"
+              :rules="passwordRules"
+              :counter="20"
+              :type="showCurrentPassword ? 'text' : 'password'"
+              :append-icon="showCurrentPassword ? 'mdi-eye' : 'mdi-eye-off'"
+              required
+              @click:append="showCurrentPassword = !showCurrentPassword"/>
+            <v-text-field
+              label="Repeat password"
+              v-model="passwordRConfirm"
+              :rules="[passwordConfirmationRule]"
+              required
+              :type="showCurrentPassword ? 'text' : 'password'"
+            />
+            <v-btn text
+                   :disabled="!changePasswordFormValid"
+                   @click="change">CHANGE
+            </v-btn>
+          </v-form>
         </div>
       </v-card>
     </v-col>
@@ -39,13 +45,14 @@
 export default {
   computed: {
     passwordConfirmationRule() {
-      return () => (this.passwordR === this.passwordRConfirm) || 'Passwords must match'
+      return () => (this.passwordRConfirm.length > 0 && this.passwordR === this.passwordRConfirm) || 'Passwords must match'
     }
   },
   layout: "user_loggedin",
   name: "profile",
   middleware: ["auth"],
   data: () => ({
+    changePasswordFormValid: false,
     showPassword: false,
     showCurrentPassword: false,
     password: "",

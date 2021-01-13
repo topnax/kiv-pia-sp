@@ -43,6 +43,10 @@ export const mutations = {
     }
   },
 
+  RESET_TOKEN(state) {
+    state.tokenSent = false
+  },
+
   SOCKET_ONCLOSE (state, event) {
     console.log(">>>>>>Socket close")
     state.socket.isConnected = false
@@ -72,5 +76,8 @@ export const actions = {
   },
   sendToken(context) {
     context.commit("SEND_TOKEN")
+  },
+  resetToken(context) {
+    context.commit("RESET_TOKEN")
   }
 }

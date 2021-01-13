@@ -39,7 +39,7 @@
 export default {
   computed: {
     passwordConfirmationRule() {
-      return () => (this.passwordR === this.passwordRConfirm) || 'Password must match'
+      return () => (this.passwordR === this.passwordRConfirm) || 'Passwords must match'
     }
   },
   layout: "user_loggedin",

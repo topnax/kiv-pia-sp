@@ -6,10 +6,10 @@ export const actions = {
       let result = await this.$axios.$post("/register", {
         email: data.email,
         username: data.username,
-        password: data.password
+        password: data.password,
+        confirmPassword: data.confirmPassword
       })
       if (result.responseCode === 0) {
-        await context.dispatch("snackbar/showSuccess", "Logged in!", {root: true})
         if (data.login) {
           await context.dispatch("login", {email: data.email, password: data.password})
         }
@@ -27,7 +27,6 @@ export const actions = {
       let result = await this.$auth.loginWith("local", {
         data
       })
-      console.log(result)
       await context.dispatch("snackbar/showSuccess", "Logged in!", {root: true})
     } catch (e) {
       if (e.response && e.response.status && e.response.status === 401){

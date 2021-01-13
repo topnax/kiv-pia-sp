@@ -23,6 +23,10 @@ export const mutations = {
       console.log(user)
       state.onlineUsers.splice(i, 1);
     }
+  },
+  RESET_ONLINE_USERS(state) {
+    state.onlineUsers = []
+    console.log("reset users")
   }
 }
 
@@ -36,7 +40,9 @@ export const actions = {
   async onlineUsers(context, data) {
     await context.commit("SET_ONLINE_USERS", data.users)
   },
-
+  async reset(context) {
+    await context.commit("RESET_ONLINE_USERS")
+  }
 }
 
 export const getters = {

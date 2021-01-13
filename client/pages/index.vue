@@ -134,10 +134,12 @@ export default {
     },
 
     async register() {
+      // TODO =check whether form is valid
       await this.$store.dispatch("login/register", {
         email: this.emailR,
         username: this.username,
         password: this.passwordR,
+        confirmPassword: this.passwordRConfirm,
         login: true
       })
     }

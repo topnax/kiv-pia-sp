@@ -26,11 +26,15 @@
             <v-card-text>
               <v-container>
                 <v-row>
+                  <v-form v-model="changePasswordFormValid">
                     <v-text-field
                       v-model="newPassword"
                       type="password"
                       label="New password"
+                      :rules="passwordRules"
+                      required
                     ></v-text-field>
+                  </v-form>
                 </v-row>
               </v-container>
             </v-card-text>
@@ -46,6 +50,7 @@
               <v-btn
                 color="blue darken-1"
                 text
+                :disabled="!changePasswordFormValid"
                 @click="save">
                 Save
               </v-btn>
@@ -144,12 +149,16 @@ export default {
   },
   data: () => ({
     dialog: false,
+    changePasswordFormValid: false,
     userEdit: {
       username: String,
       id: Number
     },
     newPassword: "",
-
+    passwordRules: [
+      v => !!v || 'Password is required',
+      v => v.length > 0 || 'Password must be longer than one character',
+    ],
     headers: [
       {text: 'ID', value: 'id'},
       {text: 'Username', value: 'username'},

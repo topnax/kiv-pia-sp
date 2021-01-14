@@ -10,8 +10,6 @@ import io.ktor.routing.*
 import mu.KotlinLogging
 import org.koin.ktor.ext.inject
 
-private val logger = KotlinLogging.logger {}
-
 fun Route.gameHistoryRoutes() {
     val gameResultsService: GameResultsService by inject()
 

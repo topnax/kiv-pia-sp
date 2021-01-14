@@ -7,9 +7,9 @@ import com.zcu.kiv.pia.tictactoe.request.game.AcceptInviteRequest
 import com.zcu.kiv.pia.tictactoe.request.game.CreateGameRequest
 import com.zcu.kiv.pia.tictactoe.request.game.DeclineInviteRequest
 import com.zcu.kiv.pia.tictactoe.request.game.InviteToGameRequest
-import com.zcu.kiv.pia.tictactoe.service.game.GameService
 import com.zcu.kiv.pia.tictactoe.service.LobbyService
 import com.zcu.kiv.pia.tictactoe.service.UserService
+import com.zcu.kiv.pia.tictactoe.service.game.GameService
 import com.zcu.kiv.pia.tictactoe.utils.*
 import io.ktor.application.*
 import io.ktor.request.*

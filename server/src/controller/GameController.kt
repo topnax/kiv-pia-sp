@@ -1,9 +1,8 @@
 package com.zcu.kiv.pia.tictactoe.controller
 
 import com.zcu.kiv.pia.tictactoe.request.game.PlayGameRequest
-import com.zcu.kiv.pia.tictactoe.service.game.GameService
 import com.zcu.kiv.pia.tictactoe.service.LobbyService
-import com.zcu.kiv.pia.tictactoe.service.UserService
+import com.zcu.kiv.pia.tictactoe.service.game.GameService
 import com.zcu.kiv.pia.tictactoe.utils.errorResponse
 import com.zcu.kiv.pia.tictactoe.utils.getLoggedUser
 import com.zcu.kiv.pia.tictactoe.utils.jwtAuthenticatedRoute
@@ -15,11 +14,10 @@ import mu.KotlinLogging
 import org.koin.ktor.ext.inject
 
 private val logger = KotlinLogging.logger {}
-// TODO invalid JSON?
+
 fun Route.gameRoutes() {
     val gameService: GameService by inject()
     val lobbyService: LobbyService by inject()
-    val userService: UserService by inject()
 
     jwtAuthenticatedRoute("game") {
         post("/refresh") {
@@ -45,7 +43,7 @@ fun Route.gameRoutes() {
         }
 
         post("/leave") {
-           val user = getLoggedUser()
+            val user = getLoggedUser()
 
             tryRun {
                 val wrapper = gameService.getGame(user)

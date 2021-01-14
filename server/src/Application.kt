@@ -58,7 +58,7 @@ fun Application.module(testing: Boolean = false) {
         method(HttpMethod.Options)
         header(HttpHeaders.XForwardedProto)
 
-        // TODO change
+        // TODO change based on your environment
         anyHost()
         header("Authorization")
         allowCredentials = true
@@ -129,22 +129,6 @@ fun Application.module(testing: Boolean = false) {
         }
     } else {
         logger.debug { "testing!!!" }
-    }
-
-
-//    install(io.ktor.websocket.WebSockets) {
-//        pingPeriod = Duration.ofSeconds(15)
-//        timeout = Duration.ofSeconds(15)
-//        maxFrameSize = Long.MAX_VALUE
-//        masking = false
-//    }
-
-    routing {
-        get("/") {
-            call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
-        }
-
-
     }
 
 }

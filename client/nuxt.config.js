@@ -9,7 +9,7 @@ export default {
 
   // Global page headers (https://go.nuxtjs.dev/config-head)
   head: {
-    titleTemplate: '%s - client',
+    titleTemplate: 'Tic Tac Toe Game',
     title: 'client',
     meta: [
       {charset: 'utf-8'},

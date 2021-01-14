@@ -58,7 +58,6 @@ export default {
     password: "",
     passwordRConfirm: "",
     passwordR: "",
-    // TODO reuse password rules between registration and this screen
     passwordRules: [
       p => p.length >= 8 || "Password must consist of at least 8 characters",
       p => p.length <= 20 || "Password must consist of 20 characters at most",

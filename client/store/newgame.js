@@ -2,7 +2,7 @@ export const state = () => ({
   availableBoardSizes: [3, 5, 10],
   invites: [],
   invitesLoading: true,
-  boardSize: 1,
+  boardSize: 3,
   victoriousCells: 3
 })
 

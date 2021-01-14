@@ -20,41 +20,48 @@
         </v-row>
         <v-row v-else>
           <v-col align="center">
-              <v-btn text @click="surrender">SURRENDER</v-btn>
+            <v-btn text @click="surrender">SURRENDER</v-btn>
           </v-col>
         </v-row>
-        <game-header  :noughtsTurn="noughtsTurn" :crossTurn="crossTurn" :finished="game.finished"
-                     :noughtSeedUsername="noughtSeedUsername" :crossSeedUsername="crossSeedUsername" :winner="game.playing.winner" :usersTurn="usersTurn && !game.finished" :draw="game.draw"/>
-        <board :squares="cells" :size="game.playing.boardSize" :victoriousCells="victoriousCellsGame" :onCellClick="click"/>
+        <game-header :noughtsTurn="noughtsTurn" :crossTurn="crossTurn" :finished="game.finished"
+                     :noughtSeedUsername="noughtSeedUsername" :crossSeedUsername="crossSeedUsername"
+                     :winner="game.playing.winner" :usersTurn="usersTurn && !game.finished" :draw="game.draw"/>
+        <board :squares="cells" :size="game.playing.boardSize" :victoriousCells="victoriousCellsGame"
+               :onCellClick="click"/>
       </div>
 
       <v-col md="4" class="" v-else>
         <v-card>
           <v-card-title>Create a new game</v-card-title>
           <v-card-text>
-            <span class="subtitle-1">Board size:</span>
-            <v-radio-group v-model="boardSize">
-              <v-radio
-                v-for="n in newgame.availableBoardSizes"
-                :key="n"
-                :value="n"
-                :label="`${n} x ${n}`"
-              ></v-radio>
-            </v-radio-group>
-            <div v-if="availableVictoriousCells !== undefined && availableVictoriousCells.length > 0">
-              <span class="subtitle-1">Winning squares:</span>
-              <v-radio-group v-model="victoriousCells">
+            <v-form v-model="newGameFormValid">
+              <span class="subtitle-1">Board size:</span>
+              <v-radio-group v-model="boardSize">
                 <v-radio
-                  v-for="n in availableVictoriousCells"
+                  v-for="n in newgame.availableBoardSizes"
                   :key="n"
-                  :label="`${n}`"
                   :value="n"
+                  :label="`${n} x ${n}`"
+                  required
                 ></v-radio>
               </v-radio-group>
-            </div>
+              <div v-if="availableVictoriousCells !== undefined && availableVictoriousCells.length > 0">
+                <span class="subtitle-1">Winning squares:</span>
+                <v-radio-group v-model="victoriousCells">
+                  <v-radio
+                    v-for="n in availableVictoriousCells"
+                    :key="n"
+                    :label="`${n}`"
+                    :value="n"
+                    required
+                  ></v-radio>
+                </v-radio-group>
+              </div>
+            </v-form>
           </v-card-text>
           <v-card-actions>
             <v-btn text
+                   :disabled="!newGameFormValid"
                    @click="create">CREATE
             </v-btn>
           </v-card-actions>
@@ -116,8 +123,11 @@ export default {
     }
     await this.$store.dispatch("game/refresh")
   },
+  data: () => ({
+    newGameFormValid: false
+  }),
   methods: {
-    surrender(){
+    surrender() {
       this.$store.dispatch("game/surrender")
     },
     finishedGameClose() {
@@ -156,7 +166,7 @@ export default {
     ...mapState(["newgame", "lobby", "game"]),
     victoriousCells: {
       get() {
-        return this.$store.state.victoriousCells;
+        return this.$store.state.newgame.victoriousCells;
       },
       set(value) {
         this.$store.commit("newgame/SET_VICTORIOUS_CELLS", value);
@@ -164,7 +174,7 @@ export default {
     },
     boardSize: {
       get() {
-        return this.$store.state.boardSize;
+        return this.$store.state.newgame.boardSize;
       },
       set(value) {
         this.$store.commit("newgame/SET_BOARD_SIZE", value);

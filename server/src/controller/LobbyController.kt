@@ -22,8 +22,6 @@ val lobbyLogger = KotlinLogging.logger {}
 
 fun Route.lobbyRoutes() {
 
-    // TODO user mustn't be present in a game
-
     jwtAuthenticatedRoute("/lobby") {
         val lobbyService: LobbyService by inject()
         val gameService: GameService by inject()
@@ -31,10 +29,15 @@ fun Route.lobbyRoutes() {
 
         post("/create") {
             val request = call.receive<CreateGameRequest>()
-            tryRun {
-                // TODO check boardSize and victoriousCells
-                lobbyService.createLobby(getLoggedUser(), request.boardSize, request.victoriousCells)
-                successResponse()
+            val user = getLoggedUser()
+            if (!gameService.isUserPlaying(user)) {
+                tryRun {
+                    // TODO check boardSize and victoriousCells
+                    lobbyService.createLobby(getLoggedUser(), request.boardSize, request.victoriousCells)
+                    successResponse()
+                }
+            } else {
+                errorResponse("User is already participating in a game")
             }
         }
 
@@ -43,20 +46,24 @@ fun Route.lobbyRoutes() {
             val user = getLoggedUser()
 
             tryRun {
-                // TODO check whether invited user is not playing a game
-                userService.getUserById(request.userId)?.let { userToBeInvited ->
-                    if (!gameService.isUserPlaying(userToBeInvited)) {
-                        lobbyService.getLobby(user)?.let { lobby ->
-                            lobbyService.inviteUser(userToBeInvited, lobby, user)
-                            successResponse()
-                        } ?: run {
-                            errorResponse("User calling not present in any lobby")
+                if (!gameService.isUserPlaying(user)) {
+                    // TODO check whether invited user is not playing a game
+                    userService.getUserById(request.userId)?.let { userToBeInvited ->
+                        if (!gameService.isUserPlaying(userToBeInvited)) {
+                            lobbyService.getLobby(user)?.let { lobby ->
+                                lobbyService.inviteUser(userToBeInvited, lobby, user)
+                                successResponse()
+                            } ?: run {
+                                errorResponse("User calling not present in any lobby")
+                            }
+                        } else {
+                            errorResponse("Invited user is already playing a game")
                         }
-                    } else {
-                        errorResponse("Invited user is already playing a game")
+                    } ?: run {
+                        errorResponse("User to be invited not found")
                     }
-                } ?: run {
-                    errorResponse("User to be invited not found")
+                } else {
+                    errorResponse("Cannot send an invite when participating in a game")
                 }
             }
         }

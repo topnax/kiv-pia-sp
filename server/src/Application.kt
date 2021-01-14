@@ -130,7 +130,4 @@ fun Application.module(testing: Boolean = false) {
     } else {
         logger.debug { "testing!!!" }
     }
-
 }
-
-

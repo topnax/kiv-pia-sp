@@ -22,8 +22,7 @@ object DatabaseFactory {
         val port = System.getenv("TTT_DB_PORT")
         val db = System.getenv("TTT_DB")
 
-        // TODO remove
-        logger.debug { "got credentials $address, $user, $password, $port, $db" }
+        logger.debug { "got db credentials $address, $user, $port, $db" }
 
         Database.connect(
             url = "jdbc:mysql://$address:$port/$db",

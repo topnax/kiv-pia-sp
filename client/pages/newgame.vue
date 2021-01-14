@@ -30,7 +30,7 @@
                :onCellClick="click"/>
       </div>
 
-      <v-col md="4" class="" v-else>
+      <v-col md="4" sm="12" cols="12" class="" v-else>
         <v-card>
           <v-card-title>Create a new game</v-card-title>
           <v-card-text>
@@ -68,7 +68,7 @@
         </v-card>
       </v-col>
 
-      <v-col md="4" v-if="lobby.invites.length > 0 && !game.in_game">
+      <v-col md="4" sm="12" cols="12" v-if="lobby.invites.length > 0 && !game.in_game">
         <v-card>
           <v-card-title>Game invitations</v-card-title>
           <v-card-text>

@@ -1,6 +1,6 @@
 <template>
   <v-row class="pt-10" justify="center">
-    <v-col md="4">
+    <v-col md="4" sm="12" cols="12">
      <v-card
        v-if="friendsLoading"
      >
@@ -42,7 +42,7 @@
         </v-simple-table>
       </div>
     </v-col>
-    <v-col class="text-center " md="4" v-if="requests.length !== 0">
+    <v-col class="text-center" md="4" sm="12" cols="12" v-if="requests.length !== 0">
       <v-card
         v-for="(request, i) in requests"
         color="#385F73"

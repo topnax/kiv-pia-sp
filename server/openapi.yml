@@ -1,0 +1,1112 @@
+openapi: 3.0.1
+info:
+  title: Tic Tac Toe server
+  description: This is a API specification for the Tic Tac Toe server created within
+    the KIV/PIA subject.
+  version: 1.0.0
+externalDocs:
+  description: See the KIV/PIA semester project assignment
+  url: https://github.com/osvetlik/pia2020/tree/master/semester-project
+servers:
+- url: http://<deployment-address>/api
+paths:
+  /friends/new:
+    post:
+      tags:
+      - friends
+      summary: Create a new friend request
+      description: Creates a new friend request and sends it to the given user
+      requestBody:
+        description: Specify a user using it's ID to which a friend request should
+          be sent
+        content:
+          application/json:
+            schema:
+              required:
+              - id
+              type: object
+              properties:
+                id:
+                  type: integer
+        required: true
+      responses:
+        200:
+          description: Result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Success'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                success:
+                  summary: Example of a successful response
+                  value:
+                    responseCode: 0
+                    message: ""
+                error:
+                  summary: Example of an error response
+                  value:
+                    responseCode: 100
+                    message: "Could not create a new friend request"
+        400:
+          description: Invalid request body.
+        401:
+          description: Authorization information is missing or invalid.
+  /friends/cancelRequest:
+    post:
+      tags:
+      - friends
+      summary: Cancels a friend request
+      description: Cancels a previously created friend request
+      requestBody:
+        description: Specify a friend request using it's ID
+        content:
+          application/json:
+            schema:
+              required:
+              - id
+              type: object
+              properties:
+                id:
+                  type: integer
+        required: true
+      responses:
+        200:
+          description: Result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Success'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                success:
+                  summary: Example of a successful response
+                  value:
+                    responseCode: 0
+                    message: ""
+                error:
+                  summary: Example of an error response
+                  value:
+                    responseCode: 100
+                    message: "Could not cancel the friend request!"
+        400:
+          description: Invalid request body.
+        401:
+          description: Authorization information is missing or invalid.
+  /friends/acceptRequest:
+    post:
+      tags:
+      - friends
+      summary: Accepts a friend request
+      description: Accepts a previously received friend request
+      requestBody:
+        description: Specify a friend request using it's ID
+        content:
+          application/json:
+            schema:
+              required:
+              - id
+              type: object
+              properties:
+                id:
+                  type: integer
+        required: true
+      responses:
+        200:
+          description: Result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Success'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                success:
+                  summary: Example of a successful response
+                  value:
+                    responseCode: 0
+                    message: ""
+                error:
+                  summary: Example of an error response
+                  value:
+                    responseCode: 100
+                    message: "Could not accept the friend request."
+        400:
+          description: Invalid request body.
+        401:
+          description: Authorization information is missing or invalid.
+  /friends/declineRequest:
+    post:
+      tags:
+      - friends
+      summary: Declines a friend request
+      description: Declines a previously received friend request
+      requestBody:
+        description: Specify a friend request using it's ID
+        content:
+          application/json:
+            schema:
+              required:
+              - id
+              type: object
+              properties:
+                id:
+                  type: integer
+        required: true
+      responses:
+        200:
+          description: Result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Success'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                success:
+                  summary: Example of a successful response
+                  value:
+                    responseCode: 0
+                    message: ""
+                error:
+                  summary: Example of an error response
+                  value:
+                    responseCode: 100
+                    message: "Could not decline the friend request."
+        400:
+          description: Invalid request body
+        401:
+          description: Authorization information is missing or invalid.
+  /friends/requests:
+    get:
+      tags:
+      - friends
+      summary: Returns pending friend requests
+      description: Returns a list of all incoming friend requests of the authenticated user
+      responses:
+        200:
+          description: friend requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FriendRequest'
+                  responseCode:
+                    type: integer
+                  message:
+                    type: string
+                    example: ""
+        400:
+          description: Invalid request body.
+        401:
+          description: Authorization information is missing or invalid.
+  /friends/list:
+    get:
+      tags:
+      - friends
+      summary: Returns the list of friends
+      description: Returns a list of all friends of the authenticated user
+      responses:
+        200:
+          description: friends listed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  responseCode:
+                    type: integer
+                  message:
+                    type: string
+        401:
+          description: Authorization information is missing or invalid.
+  /game/refresh:
+    post:
+      tags:
+      - game
+      summary: Tells the server to send the state of the game via WS
+      description: Tells the server to send the state of the game the logged in user exists in via a websocket connection. If the user does not participate in any game or lobby then no websocket message is sent.
+      responses:
+        200:
+          description: Success response - a websocket message might have been sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        401:
+          description: Authorization information is missing or invalid.
+  /game/play:
+    post:
+      tags:
+      - game
+      summary: Performs a game turn
+      description: A play action performed upon the game user participates in. If present in a game his seed will be placed at the given coordinates.
+      requestBody:
+        description: Specify a cell in the game board at which user's seed will be placed
+        content:
+          application/json:
+            schema:
+              required:
+              - row
+              - column
+              type: object
+              properties:
+                row:
+                  type: integer
+                column:
+                  type: integer
+        required: true
+      responses:
+        200:
+          description: Result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Success'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                success:
+                  summary: Example of a successful response
+                  value:
+                    responseCode: 0
+                    message: ""
+                error:
+                  summary: Example of an error response
+                  value:
+                    responseCode: 100
+                    message: "It is not user's turn!"
+        400:
+          description: Invalid request body.
+        401:
+          description: Authorization information is missing or invalid.
+  /game/leave:
+    post:
+      tags:
+      - game
+      summary: Leave a game
+      description: Makes the authenticated user leave the game he participates in.
+      responses:
+        200:
+          description: Result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Success'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                success:
+                  summary: Example of a successful response
+                  value:
+                    responseCode: 0
+                    message: ""
+                error:
+                  summary: Example of an error response
+                  value:
+                    responseCode: 100
+                    message: "User not present in a game!"
+        400:
+          description: Invalid request body.
+        401:
+          description: Authorization information is missing or invalid.
+  /game/history:
+    get:
+      tags:
+      - game
+      summary: Returns the user's history of played games
+      description: Returns the authenticated user's history of played games
+      responses:
+        200:
+          description: game history listed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GameResult'
+                  responseCode:
+                    type: integer
+                  message:
+                    type: string
+                    example: ""
+        400:
+          description: Invalid request body.
+        401:
+          description: Authorization information is missing or invalid.
+  /game/turns/{id}:
+    get:
+      tags:
+      - game
+      summary: Returns turns of the given game
+      description: Returns turns of the game specified by an ID. User can list only turns of games he has attended to.
+      parameters:
+      - name: id
+        in: path
+        description: ID of the game which turns should be returned
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: Result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/GameTurnsResponse'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                success:
+                  summary: Example of a successful response
+                  value:
+                    data:
+                      - id: 0
+                        row: 0
+                        column: 0
+                        seed: "X"
+                        victorious: false
+                    responseCode: 0
+                    message: ""
+                error:
+                  summary: Example of an error response
+                  value:
+                    responseCode: 100
+                    message: "You did not participate in this game"
+        401:
+          description: Authorization information is missing or invalid.
+  /lobby/create:
+    post:
+      tags:
+      - lobby
+      summary: Creates a new lobby
+      description: Creates a new game lobby to which other players can be invited
+      requestBody:
+        description: Specify a lobby to be created
+        content:
+          application/json:
+            schema:
+              required:
+              - boardSize
+              - victoriousCells
+              type: object
+              properties:
+                boardSize:
+                  type: integer
+                  example: 3
+                  description: The size of the board (available sizes are 3, 5 and 10)
+                victoriousCells:
+                  type: integer
+                  example: 3
+                  description: The number of cells in one line required to win the game (3, 5 or 10 depending on the board size)
+        required: true
+      responses:
+        200:
+          description: Result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Success'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                success:
+                  summary: Example of a successful response
+                  value:
+                    responseCode: 0
+                    message: ""
+                error:
+                  summary: Example of an error response
+                  value:
+                    responseCode: 100
+                    message: "User is already present in a lobby"
+        400:
+          description: Invalid request body
+        401:
+          description: Authorization information is missing or invalid.
+  /lobby/invite:
+    post:
+      tags:
+      - lobby
+      summary: Invites a friend to the lobby
+      description: Invites a friend specified by an ID to the lobby the authenticated user has created
+      requestBody:
+        description: Specify a friend using it's ID
+        content:
+          application/json:
+            schema:
+              required:
+              - userId
+              type: object
+              properties:
+                userId:
+                  type: integer
+        required: true
+      responses:
+        200:
+          description: Result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Success'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                success:
+                  summary: Example of a successful response
+                  value:
+                    responseCode: 0
+                    message: ""
+                error:
+                  summary: Example of an error response
+                  value:
+                    responseCode: 100
+                    message: "User is already present in a lobby!"
+        400:
+          description: Invalid request body
+        401:
+          description: Authorization information is missing or invalid.
+  /lobby/accept:
+    post:
+      tags:
+      - lobby
+      summary: Accepts an invitation to a lobby
+      description: Accepts an invite to the lobby given by the ID
+      requestBody:
+        description: Specify a lobby using it's ID
+        content:
+          application/json:
+            schema:
+              required:
+              - lobbyId
+              type: object
+              properties:
+                lobbyId:
+                  type: integer
+        required: true
+      responses:
+        200:
+          description: Result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Success'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                success:
+                  summary: Example of a successful response
+                  value:
+                    responseCode: 0
+                    message: ""
+                error:
+                  summary: Example of an error response
+                  value:
+                    responseCode: 100
+                    message: "Lobby not found!"
+        400:
+          description: Invalid request body
+        401:
+          description: Authorization information is missing or invalid.
+  /lobby/decline:
+    post:
+      tags:
+      - lobby
+      summary: Declines an invitation to a lobby
+      description: Declines an invite to the lobby given by the ID
+      requestBody:
+        description: Specify a lobby using it's ID
+        content:
+          application/json:
+            schema:
+              required:
+              - lobbyId
+              type: object
+              properties:
+                lobbyId:
+                  type: integer
+        required: true
+      responses:
+        200:
+          description: Result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Success'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                success:
+                  summary: Example of a successful response
+                  value:
+                    responseCode: 0
+                    message: ""
+                error:
+                  summary: Example of an error response
+                  value:
+                    responseCode: 100
+                    message: "Lobby not found!"
+        400:
+          description: Invalid request body
+        401:
+          description: Authorization information is missing or invalid.
+          
+  /lobby/leave:
+    post:
+      tags:
+      - lobby
+      summary: Leaves a lobby
+      description: Leaves the lobby given by the ID. When an owner of a lobby leaves the whole lobby is destroyed.
+      requestBody:
+        description: Specify a lobby using it's ID
+        content:
+          application/json:
+            schema:
+              required:
+              - lobbyId
+              type: object
+              properties:
+                lobbyId:
+                  type: integer
+        required: true
+      responses:
+        200:
+          description: Result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Success'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                success:
+                  summary: Example of a successful response
+                  value:
+                    responseCode: 0
+                    message: ""
+                error:
+                  summary: Example of an error response
+                  value:
+                    responseCode: 100
+                    message: "Lobby not found!"
+        400:
+          description: Invalid request body
+        401:
+          description: Authorization information is missing or invalid.
+          
+  /lobby/start:
+    post:
+      tags:
+      - lobby
+      summary: Starts a lobby
+      description: Starts the lobby given by the ID. A lobby must be full in order to be sucessfully started. Only an owner of the lobby can start it.
+      requestBody:
+        description: Specify a lobby using it's ID
+        content:
+          application/json:
+            schema:
+              required:
+              - lobbyId
+              type: object
+              properties:
+                lobbyId:
+                  type: integer
+        required: true
+      responses:
+        200:
+          description: Result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Success'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                success:
+                  summary: Example of a successful response
+                  value:
+                    responseCode: 0
+                    message: ""
+                error:
+                  summary: Example of an error response
+                  value:
+                    responseCode: 100
+                    message: "Lobby not found!"
+        400:
+          description: Invalid request body
+        401:
+          description: Authorization information is missing or invalid.
+            
+  /lobby/invites:
+    get:
+      tags:
+      - lobby
+      summary: Returns the list of invites
+      description: Returns a list of all invitations to lobbies sent to the authenticated user
+      responses:
+        200:
+          description: lobby invites listed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LobbyInvite'
+                  responseCode:
+                    type: integer
+                  message:
+                    type: string
+                    example: ""
+        401:
+          description: Authorization information is missing or invalid.
+          
+  /auth/user:
+    get:
+      tags:
+      - auth
+      summary: Returns the authenticated user
+      description: Returns the currently logged in user
+      responses:
+        200:
+          description: friend listed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/User'
+                  responseCode:
+                    type: integer
+                  message:
+                    type: string
+                    example: ""
+        401:
+          description: Authorization information is missing or invalid.
+          
+  /auth/login:
+    post:
+      tags:
+      - auth
+      summary: Tries to authenticate the user using the given credentials
+      description: Tries to authenticate the user using the given credentials.
+      requestBody:
+        description: User login credentials
+        content:
+          application/json:
+            schema:
+              required:
+              - email
+              - password
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+        required: true
+      responses:
+        200:
+          description: Result containing the JWT token
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: JWT token
+                example: JWT token
+            
+        401:
+          description: Invalid login credentials.
+          
+  /auth/register:
+    post:
+      tags:
+      - auth
+      summary: Registers a user specified in the request body.
+      description: Registers a user specified in the request body.
+      requestBody:
+        description: Specify a user to be registered
+        content:
+          application/json:
+            schema:
+              required:
+              - username
+              - email
+              - password
+              - confirmPassword
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: foo
+                email:
+                  type: string
+                  example: foo@bar.cz
+                password:
+                  type: string
+                  example: foopasword
+                confirmPassword:
+                  type: string
+                  example: foopassword
+        required: true
+      responses:
+        200:
+          description: Result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Success'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                success:
+                  summary: Example of a successful response
+                  value:
+                    responseCode: 0
+                    message: ""
+                error:
+                  summary: Example of an error response
+                  value:
+                    responseCode: 100
+                    message: "Username already in use"
+                    
+  /administration/users/list:
+    get:
+      tags:
+      - administration
+      summary: Returns the list of registered users
+      description: Returns a list of all registered users. This request is only available for users that are admins. 
+      responses:
+        200:
+          description: registered users listed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  responseCode:
+                    type: integer
+                  message:
+                    type: string
+                    example: ""
+        401:
+          description: Authorization information is missing, invalid, or the user calling is not an admin.
+          
+  /administration/users/changepassword:
+    post:
+      tags:
+      - administration
+      summary: Changes the password of the given user
+      description: Changes the password of the user specified using the ID. This request is only available for users that are admins.
+      requestBody:
+        description: Specify an user and password.
+        content:
+          application/json:
+            schema:
+              required:
+              - userId
+              - password
+              type: object
+              properties:
+                userId:
+                  type: integer
+                  example: 0
+                password:
+                  type: string
+                  example: new foo password
+        required: true
+      responses:
+        200:
+          description: Result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Success'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                success:
+                  summary: Example of a successful response
+                  value:
+                    responseCode: 0
+                    message: ""
+                error:
+                  summary: Example of an error response
+                  value:
+                    responseCode: 100
+                    message: "User not found by ID"
+        401:
+          description: Authorization information is missing, invalid, or the user calling is not an admin.
+          
+  /administration/users/promote:
+    post:
+      tags:
+      - administration
+      summary: Changes the role of the user to admin
+      description: Promotes the user to the admin role
+      requestBody:
+        description: Specify a user to be promoted using his ID.
+        content:
+          application/json:
+            schema:
+              required:
+              - userId
+              type: object
+              properties:
+                userId:
+                  type: integer
+                  example: 0
+        required: true
+      responses:
+        200:
+          description: Result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Success'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                success:
+                  summary: Example of a successful response
+                  value:
+                    responseCode: 0
+                    message: ""
+                error:
+                  summary: Example of an error response
+                  value:
+                    responseCode: 100
+                    message: "User not found by ID"
+        401:
+          description: Authorization information is missing, invalid, or the user calling is not an admin.
+
+  /administration/users/demote:
+    post:
+      tags:
+      - administration
+      summary: Removes the role of admin from the user
+      description: Demotes the user from the admin role
+      requestBody:
+        description: Specify a user to be demoted using his ID.
+        content:
+          application/json:
+            schema:
+              required:
+              - userId
+              type: object
+              properties:
+                userId:
+                  type: integer
+                  example: 0
+        required: true
+      responses:
+        200:
+          description: Result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Success'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                success:
+                  summary: Example of a successful response
+                  value:
+                    responseCode: 0
+                    message: ""
+                error:
+                  summary: Example of an error response
+                  value:
+                    responseCode: 100
+                    message: "User not found by ID"
+        401:
+          description: Authorization information is missing, invalid, or the user calling is not an admin.
+          
+  /profile/changepassword:
+    post:
+      tags:
+      - profile
+      summary: Changes the password of the currently authenticated user 
+      description: The user that is currently authenticated will have it's password changed if the currently used password is specified. The specified email must match with the email of the logged user.
+      requestBody:
+        description: Specify the email, current and new password
+        content:
+          application/json:
+            schema:
+              required:
+              - email
+              - currentPassword
+              - password
+              - passwordConfirm
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: foo@bar.cz
+                currentPassword:
+                  type: string
+                  example : currentfoopassword
+                password:
+                  type: string
+                  example: newfoopassword
+                passwordConfirm:
+                  type: string
+                  example: newfoopassword
+        required: true
+      responses:
+        200:
+          description: Result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Success'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                success:
+                  summary: Example of a successful response
+                  value:
+                    responseCode: 0
+                    message: ""
+                error:
+                  summary: Example of an error response
+                  value:
+                    responseCode: 100
+                    message: "Cannot change password of other user"
+        401:
+          description: Authorization information is missing or invalid.
+
+
+components:
+  schemas:
+    Success:
+      type: object
+      properties:
+        responseCode:
+          type: integer
+          description: Response code.
+          example: 0
+        message:
+          type: string
+          description: "Additional message"
+          example: ""
+    Error:
+      type: object
+      properties:
+        responseCode:
+          type: integer
+          description: Response code.
+          example: 100
+        message:
+          type: string
+          description: Reason
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        username:
+          type: string
+          example: foo
+        email:
+          type: string
+          example: foo@bar.cz
+        admin:
+          type: boolean
+          example: false
+    FriendRequest:
+      type: object
+      properties:
+        requestId:
+          type: integer
+          format: int32
+        requestorUsername:
+          type: string
+          example: foo
+    LobbyInvite:
+      type: object
+      properties:
+        lobbyId:
+          type: integer
+          format: int32
+        ownerUsername:
+          type: string
+          example: foo
+    GameResult:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        draw:
+          type: boolean
+          example: false
+        crossWon:
+          type: boolean
+        crossUserId:
+          type: integer
+          example: 0
+        noughtUserId:
+          type: integer
+          example: 1
+        boardSize:
+          type: integer
+          example: 3
+        dateCreated:
+          type: string
+          format: datetime
+          example: "13.01.2021 19:34"
+        crossUsername:
+          type: string
+          example: foo
+        noughtUsername:
+          type: string
+          example: bar
+    GameTurnsResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        row:
+          type: integer
+          format: int32
+        column:
+          type: integer
+          format: int32
+        seed:
+          type: string
+          format: "X"
+        victorious:
+          type: boolean
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+      
+security:
+  - bearerAuth: [] 

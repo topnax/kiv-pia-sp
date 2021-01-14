@@ -1,11 +1,10 @@
-package com.zcu.kiv.pia.tictactoe.service
+package com.zcu.kiv.pia.tictactoe.service.game
 
 import com.zcu.kiv.pia.tictactoe.game.Seed
 import com.zcu.kiv.pia.tictactoe.game.TicTacToeGame
 import com.zcu.kiv.pia.tictactoe.model.User
-import com.zcu.kiv.pia.tictactoe.repository.GameResultRepository
-import com.zcu.kiv.pia.tictactoe.service.game.GameMessagingService
-import com.zcu.kiv.pia.tictactoe.service.game.GameResultsService
+import com.zcu.kiv.pia.tictactoe.service.NotificationService
+import com.zcu.kiv.pia.tictactoe.service.RealtimeService
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
@@ -52,7 +51,7 @@ class GameServiceImpl(
     GameService {
 
     init {
-        realtimeService.addOnConnectionStartedListener(object : RealtimeService.ConnectionStatusListener {
+        realtimeService.addConnectionStatusListener(object : RealtimeService.ConnectionStatusListener {
             override fun onConnected(user: User) {
             }
 

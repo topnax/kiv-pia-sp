@@ -23,19 +23,19 @@ class GameLobbyTest {
             override fun removeConnection(connection: DefaultWebSocketServerSession, user: User?) {
             }
 
-            override fun addMessage(message: RealtimeMessage) {
+            override fun receiveMessage(message: RealtimeMessage) {
             }
 
-            override fun addMessage(message: String, connection: DefaultWebSocketServerSession) {
+            override fun receiveMessage(message: String, connection: DefaultWebSocketServerSession) {
             }
 
             override fun sendMessage(message: RealtimeMessage, allUsers: Boolean, exclude: User?, vararg users: User) {
             }
 
-            override fun addOnConnectionStartedListener(listener: RealtimeService.ConnectionStatusListener) {
+            override fun addConnectionStatusListener(listener: RealtimeService.ConnectionStatusListener) {
             }
 
-            override fun removeOnConnectionStartedListener(listener: RealtimeService.ConnectionStatusListener) {
+            override fun removeConnectionStatusListener(listener: RealtimeService.ConnectionStatusListener) {
             }
 
         }

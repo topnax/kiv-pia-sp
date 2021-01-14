@@ -13,8 +13,15 @@ import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import java.util.*
 
+private val logger = KotlinLogging.logger { }
 
+/**
+ * A class representing a message sent over websocket connection
+ */
 class RealtimeMessage(namespace: Namespace, val action: String, val data: Any) {
+    /**
+     * Namespace the message belongs to
+     */
     val namespace = namespace.name.toLowerCase()
 
     enum class Namespace {
@@ -23,17 +30,20 @@ class RealtimeMessage(namespace: Namespace, val action: String, val data: Any) {
         FRIENDS,
         FRIENDREQUESTS,
         GAME,
-        LOBBY,
-        NEWGAME
+        LOBBY
     }
 }
 
-private val logger = KotlinLogging.logger { }
-
+/**
+ * Realtime message listener
+ */
 interface RealtimeMessageListener {
     fun receiveMessage(message: RealtimeMessage)
 }
 
+/**
+ * A simple message parser used for parsing incoming messages (used only when authenticating)
+ */
 class SimpleMessageParser {
     private val delimiter = ";"
     fun parse(text: String): Pair<String, String>? {
@@ -46,34 +56,86 @@ class SimpleMessageParser {
 }
 
 interface RealtimeService {
+    /**
+     * Definition of realtime connection status listener
+     */
     interface ConnectionStatusListener {
         fun onConnected(user: User)
         fun onDisconnected(user: User)
     }
 
+    /**
+     * Adds a new realtime connection
+     */
     fun addConnection(connection: DefaultWebSocketServerSession, user: User? = null)
+
+    /**
+     * Checks whether a user is connected to the realtime service
+     */
     fun isConnected(user: User): Boolean
+
+    /**
+     * Removes a realtime connection. Specify a user to detach the user from the given connection
+     */
     fun removeConnection(connection: DefaultWebSocketServerSession, user: User? = null)
-    fun addMessage(message: RealtimeMessage)
-    fun addMessage(message: String, connection: DefaultWebSocketServerSession)
+
+    /**
+     * Receive a realtime message
+     */
+    fun receiveMessage(message: RealtimeMessage)
+
+    /**
+     * Receive a raw string message from the given connection
+     */
+    fun receiveMessage(message: String, connection: DefaultWebSocketServerSession)
+
+    /**
+     * Send a message to given users
+     */
     fun sendMessage(message: RealtimeMessage, allUsers: Boolean = false, exclude: User? = null, vararg users: User)
-    fun addOnConnectionStartedListener(listener: ConnectionStatusListener)
-    fun removeOnConnectionStartedListener(listener: ConnectionStatusListener)
+
+    /**
+     * Add a connection status listener
+     */
+    fun addConnectionStatusListener(listener: ConnectionStatusListener)
+
+    /**
+     * Remove a connection status listener
+     */
+    fun removeConnectionStatusListener(listener: ConnectionStatusListener)
 }
 
 class WebsocketService(private val configurationService: ConfigurationService) : RealtimeService {
+    /**
+     * A set of websocket connections
+     */
     private val connections = Collections.synchronizedSet(mutableSetOf<DefaultWebSocketServerSession>())
-    private val usersToConnections = Collections.synchronizedMap(mutableMapOf<Int, DefaultWebSocketServerSession>())
-    private val connectionsToUsers = Collections.synchronizedMap(mutableMapOf<DefaultWebSocketServerSession, User>())
-    private val onConnectionStoppedListeners =
-        Collections.synchronizedSet(mutableSetOf<RealtimeService.ConnectionStatusListener>())
-    private val onConnectionStartedListeners =
-        Collections.synchronizedSet(mutableSetOf<RealtimeService.ConnectionStatusListener>())
-//    private val messageListeners =
-//        Collections.synchronizedMap(mutableMapOf<RealtimeMessage.Type, List<RealtimeMessageListener>>())
 
+    /**
+     * Users mapped to connections
+     */
+    private val usersToConnections = Collections.synchronizedMap(mutableMapOf<Int, DefaultWebSocketServerSession>())
+
+    /**
+     * Connections mapped to users
+     */
+    private val connectionsToUsers = Collections.synchronizedMap(mutableMapOf<DefaultWebSocketServerSession, User>())
+
+    /**
+     * A set of connection status listeners
+     */
+    private val connectionStatusListeners =
+        Collections.synchronizedSet(mutableSetOf<RealtimeService.ConnectionStatusListener>())
+
+    /**
+     * JSON mapper
+     */
     private val jsonMapper = ObjectMapper().registerModule(KotlinModule())
-    val messageParser = SimpleMessageParser()
+
+    /**
+     * Simple incoming message parser
+     */
+    private val messageParser = SimpleMessageParser()
 
     override fun isConnected(user: User) = usersToConnections.containsKey(user.id)
 
@@ -85,7 +147,7 @@ class WebsocketService(private val configurationService: ConfigurationService) :
             }
             connectionsToUsers[connection] = user
             usersToConnections[it.id] = connection
-            onConnectionStartedListeners.forEach { listener -> listener.onConnected(it) }
+            connectionStatusListeners.forEach { listener -> listener.onConnected(it) }
         }
         if (connections.contains(connection)) {
             logger.error { "Trying to add connection that is already exists in the set of connections" }
@@ -103,7 +165,7 @@ class WebsocketService(private val configurationService: ConfigurationService) :
         }
         connectionsToUsers[connection]?.let { connUser ->
             logger.info { "Notifying that user #${connUser.id}-${connUser.username} disconnected" }
-            onConnectionStartedListeners.forEach { listener ->
+            connectionStatusListeners.forEach { listener ->
                 listener.onDisconnected(connUser)
             }
             usersToConnections.remove(connUser.id)
@@ -112,7 +174,7 @@ class WebsocketService(private val configurationService: ConfigurationService) :
         connections.remove(connection)
     }
 
-    override fun addMessage(message: String, connection: DefaultWebSocketServerSession) {
+    override fun receiveMessage(message: String, connection: DefaultWebSocketServerSession) {
         messageParser.parse(message)?.let {
             if (it.first == "jwt") {
                 val jwtConfig = JwtConfig(configurationService.jwtIssuer, configurationService.jwtSecret, 10 * 60)
@@ -138,8 +200,8 @@ class WebsocketService(private val configurationService: ConfigurationService) :
         }
     }
 
-    override fun addMessage(message: RealtimeMessage) {
-        // messageListeners[message.type]?.forEach { it.receiveMessage(message) }
+    override fun receiveMessage(message: RealtimeMessage) {
+
     }
 
     override fun sendMessage(message: RealtimeMessage, allUsers: Boolean, exclude: User?, vararg users: User) {
@@ -162,15 +224,11 @@ class WebsocketService(private val configurationService: ConfigurationService) :
         }
     }
 
-    //override fun addListener(listener: RealtimeMessageListener, type: RealtimeMessage.Type) {
-    //    TODO("Not yet implemented")
-    //}
-
-    override fun addOnConnectionStartedListener(listener: RealtimeService.ConnectionStatusListener) {
-        onConnectionStartedListeners.add(listener)
+    override fun addConnectionStatusListener(listener: RealtimeService.ConnectionStatusListener) {
+        connectionStatusListeners.add(listener)
     }
 
-    override fun removeOnConnectionStartedListener(listener: RealtimeService.ConnectionStatusListener) {
-        onConnectionStartedListeners.remove(listener)
+    override fun removeConnectionStatusListener(listener: RealtimeService.ConnectionStatusListener) {
+        connectionStatusListeners.remove(listener)
     }
 }

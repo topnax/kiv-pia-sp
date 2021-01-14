@@ -87,7 +87,7 @@ class UserServiceImpl(
 ) : UserService {
 
     init {
-        realtimeService.addOnConnectionStartedListener(
+        realtimeService.addConnectionStatusListener(
             object : RealtimeService.ConnectionStatusListener {
 
                 override fun onConnected(user: User) {

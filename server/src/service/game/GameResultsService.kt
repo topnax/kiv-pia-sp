@@ -6,7 +6,6 @@ import com.zcu.kiv.pia.tictactoe.model.GameResult
 import com.zcu.kiv.pia.tictactoe.model.GameTurn
 import com.zcu.kiv.pia.tictactoe.model.User
 import com.zcu.kiv.pia.tictactoe.repository.GameResultRepository
-import com.zcu.kiv.pia.tictactoe.service.GameWrapper
 import com.zcu.kiv.pia.tictactoe.service.UserService
 
 interface GameResultsService {

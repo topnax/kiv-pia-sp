@@ -1,7 +1,7 @@
 package com.zcu.kiv.pia.tictactoe.controller
 
 import com.zcu.kiv.pia.tictactoe.request.game.PlayGameRequest
-import com.zcu.kiv.pia.tictactoe.service.GameService
+import com.zcu.kiv.pia.tictactoe.service.game.GameService
 import com.zcu.kiv.pia.tictactoe.service.LobbyService
 import com.zcu.kiv.pia.tictactoe.service.UserService
 import com.zcu.kiv.pia.tictactoe.utils.errorResponse

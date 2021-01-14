@@ -3,7 +3,7 @@ package com.zcu.kiv.pia.tictactoe.model.response
 import com.zcu.kiv.pia.tictactoe.game.Seed
 import com.zcu.kiv.pia.tictactoe.game.TicTacToeGame
 import com.zcu.kiv.pia.tictactoe.model.User
-import com.zcu.kiv.pia.tictactoe.service.GameWrapper
+import com.zcu.kiv.pia.tictactoe.service.game.GameWrapper
 
 class GameStateResponse(gameWrapper: GameWrapper, opponent: User) {
     val turns: List<Any> = gameWrapper.game.turns.map {

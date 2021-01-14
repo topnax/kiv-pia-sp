@@ -6,7 +6,6 @@ import com.zcu.kiv.pia.tictactoe.model.response.GameDrawResponse
 import com.zcu.kiv.pia.tictactoe.model.response.GameWonResponse
 import com.zcu.kiv.pia.tictactoe.model.response.GameStateResponse
 import com.zcu.kiv.pia.tictactoe.model.response.NewTurnResponse
-import com.zcu.kiv.pia.tictactoe.service.GameWrapper
 import com.zcu.kiv.pia.tictactoe.service.RealtimeMessage
 import com.zcu.kiv.pia.tictactoe.service.RealtimeService
 

@@ -5,7 +5,7 @@
     :items-per-page="5"
     :loading="loading"
     loading-text="Loading... Please wait"
-    class="elevation-1"
+    class="elevation-1 row-pointer"
     @click:row="onRowClick"
   >
     <template v-slot:item.result="{ item }">
@@ -55,3 +55,9 @@ export default {
   })
 }
 </script>
+
+<style lang="css" scoped>
+.row-pointer >>> tbody tr :hover {
+  cursor: pointer;
+}
+</style>

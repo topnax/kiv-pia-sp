@@ -41,6 +41,7 @@ interface LobbyService {
     class UserNotPresentInALobby : LobbyServiceException("User not present in a lobby")
     class UserNotAnOwner : LobbyServiceException("Only the owner of this lobby can perform this action")
     class LobbyNotFull : LobbyServiceException("Lobby not not full")
+    class InvalidLobbyParameters(message: String) : LobbyServiceException(message)
 }
 
 class LobbyServiceImpl(
@@ -102,6 +103,7 @@ class LobbyServiceImpl(
     }
 
     override fun createLobby(user: User, boardSize: Int, victoriousCells: Int) {
+        validateLobbyParameters(boardSize, victoriousCells)
         // user mustn't already be in a lobby
         if (usersToLobbies.contains(user)) throw LobbyService.UserAlreadyPresentInALobby()
 
@@ -116,6 +118,37 @@ class LobbyServiceImpl(
 
         // send the new lobby state
         lobbyMessagingService.sendLobbyState(lobby, user)
+    }
+
+    private fun validateLobbyParameters(boardSize: Int, victoriousCells: Int) {
+        when (boardSize) {
+            3 -> {
+                if (victoriousCells != 3) {
+                    throw LobbyService.InvalidLobbyParameters("For board size of 3 the victorious cells option can only be set to 3.")
+                }
+            }
+            5 -> {
+                when (victoriousCells) {
+                    3,5 -> {
+
+                    }
+                    else -> {
+                        throw LobbyService.InvalidLobbyParameters("For board size of 5 the victorious cells option can only be set to 3 or 5.")
+                    }
+                }
+            }
+            10 -> {
+                when (victoriousCells) {
+                    3, 5, 10 -> {
+
+                    }
+                    else -> {
+                        throw LobbyService.InvalidLobbyParameters("For board size of 10 the victorious cells option can only be set to 3, 5 or 10.")
+                    }
+                }
+            }
+            else -> throw LobbyService.InvalidLobbyParameters("Available board sizes are 3, 5 and 10")
+        }
     }
 
     override fun isUserInALobby(user: User) = usersToLobbies.containsKey(user)

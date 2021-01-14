@@ -32,7 +32,6 @@ fun Route.lobbyRoutes() {
             val user = getLoggedUser()
             if (!gameService.isUserPlaying(user)) {
                 tryRun {
-                    // TODO check boardSize and victoriousCells
                     lobbyService.createLobby(getLoggedUser(), request.boardSize, request.victoriousCells)
                     successResponse()
                 }
@@ -47,7 +46,6 @@ fun Route.lobbyRoutes() {
 
             tryRun {
                 if (!gameService.isUserPlaying(user)) {
-                    // TODO check whether invited user is not playing a game
                     userService.getUserById(request.userId)?.let { userToBeInvited ->
                         if (!gameService.isUserPlaying(userToBeInvited)) {
                             lobbyService.getLobby(user)?.let { lobby ->

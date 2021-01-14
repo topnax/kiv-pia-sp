@@ -29,7 +29,6 @@ fun Route.userProfileRoutes() {
             val request = call.receive<ChangePasswordRequest>()
             val user = User.fromJWTToken(call.principal()!!)
             val email = user.email
-            // TODO validate password strength
             with(PasswordRuleVerifier.verifyPassword(request.password).joinToString(separator = "\n") {
                 it.violationMessage
             })

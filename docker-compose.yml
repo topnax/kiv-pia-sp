@@ -8,8 +8,9 @@ services:
             MYSQL_PASSWORD: password
             MYSQL_ROOT_PASSWORD: password
     server:
-        build: server/
-        image: tictactoe-server
+        build:
+            dockerfile: docker/server/Dockerfile
+            context: .
         ports:
             - '8080:8080'
         environment:

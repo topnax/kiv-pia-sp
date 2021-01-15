@@ -66,7 +66,6 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
                 call.respond(HttpStatusCode.Unauthorized)
             } else {
                 // user has logged in
-//                userService.addLoggedInUser(user)
                 call.respond(
                         Token(
                             jvtConfig.makeToken(

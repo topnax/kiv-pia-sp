@@ -148,7 +148,6 @@ class FriendServiceImpl(
 
         request?.let {
             if (it.requestor == requestorId) {
-                // TODO notify via websockets
                 return friendRequestRepository.removeFriendRequest(requestId)
             } else {
                 logger.warn { "Tried to cancel a request which did not belong to the given requestor" }

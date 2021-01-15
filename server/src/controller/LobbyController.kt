@@ -136,7 +136,7 @@ fun Route.lobbyRoutes() {
 
 suspend inline fun PipelineContext<Unit, ApplicationCall>.tryRun(unit: () -> Unit) =
     runCatching { unit() }.exceptionOrNull()?.also {
-        // TODO generalize this
+        // TODO might generalize this?
         when (it) {
             is LobbyService.LobbyServiceException -> {
                 errorResponse(it.reason)

@@ -44,7 +44,6 @@ fun Application.module(testing: Boolean = false) {
             logger.info { "Got MissingKotlinParameterException: ${cause.message}" }
             call.respond(HttpStatusCode.BadRequest)
         }
-        // TODO invalid json
     }
     install(Koin) {
         modules(
@@ -108,8 +107,11 @@ fun Application.module(testing: Boolean = false) {
 
             route("/api") {
                 gameRoutes()
+
                 userAdministrationRoutes()
+
                 gameHistoryRoutes()
+
                 lobbyRoutes()
 
                 loginRoutes(jwtConfig)

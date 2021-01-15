@@ -1,3 +1,4 @@
+
 openapi: 3.0.1
 info:
   title: Tic Tac Toe server
@@ -8,12 +9,12 @@ externalDocs:
   description: See the KIV/PIA semester project assignment
   url: https://github.com/osvetlik/pia2020/tree/master/semester-project
 servers:
-- url: http://<deployment-address>/api
+  - url: http://localhost:8080/api
 paths:
   /friends/new:
     post:
       tags:
-      - friends
+        - friends
       summary: Create a new friend request
       description: Creates a new friend request and sends it to the given user
       requestBody:
@@ -23,7 +24,7 @@ paths:
           application/json:
             schema:
               required:
-              - id
+                - id
               type: object
               properties:
                 id:
@@ -56,7 +57,7 @@ paths:
   /friends/cancelRequest:
     post:
       tags:
-      - friends
+        - friends
       summary: Cancels a friend request
       description: Cancels a previously created friend request
       requestBody:
@@ -65,7 +66,7 @@ paths:
           application/json:
             schema:
               required:
-              - id
+                - id
               type: object
               properties:
                 id:
@@ -98,7 +99,7 @@ paths:
   /friends/acceptRequest:
     post:
       tags:
-      - friends
+        - friends
       summary: Accepts a friend request
       description: Accepts a previously received friend request
       requestBody:
@@ -107,7 +108,7 @@ paths:
           application/json:
             schema:
               required:
-              - id
+                - id
               type: object
               properties:
                 id:
@@ -140,7 +141,7 @@ paths:
   /friends/declineRequest:
     post:
       tags:
-      - friends
+        - friends
       summary: Declines a friend request
       description: Declines a previously received friend request
       requestBody:
@@ -149,7 +150,7 @@ paths:
           application/json:
             schema:
               required:
-              - id
+                - id
               type: object
               properties:
                 id:
@@ -182,7 +183,7 @@ paths:
   /friends/requests:
     get:
       tags:
-      - friends
+        - friends
       summary: Returns pending friend requests
       description: Returns a list of all incoming friend requests of the authenticated user
       responses:
@@ -207,33 +208,33 @@ paths:
         401:
           description: Authorization information is missing or invalid.
   /friends/list:
-    get:
-      tags:
-      - friends
-      summary: Returns the list of friends
-      description: Returns a list of all friends of the authenticated user
-      responses:
-        200:
-          description: friends listed
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/User'
-                  responseCode:
-                    type: integer
-                  message:
-                    type: string
-        401:
-          description: Authorization information is missing or invalid.
+    get:ř
+    tags:
+      - friend
+    summary: Returns the list of friends
+    description: Returns a list of all friends of the authenticated user
+    responses:
+      200:
+        description: friends listed
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/User'
+                responseCode:
+                  type: integer
+                message:
+                  type: string
+      401:
+        description: Authorization information is missing or invalid.
   /game/refresh:
     post:
       tags:
-      - game
+        - game
       summary: Tells the server to send the state of the game via WS
       description: Tells the server to send the state of the game the logged in user exists in via a websocket connection. If the user does not participate in any game or lobby then no websocket message is sent.
       responses:
@@ -248,7 +249,7 @@ paths:
   /game/play:
     post:
       tags:
-      - game
+        - game
       summary: Performs a game turn
       description: A play action performed upon the game user participates in. If present in a game his seed will be placed at the given coordinates.
       requestBody:
@@ -257,8 +258,8 @@ paths:
           application/json:
             schema:
               required:
-              - row
-              - column
+                - row
+                - column
               type: object
               properties:
                 row:
@@ -293,7 +294,7 @@ paths:
   /game/leave:
     post:
       tags:
-      - game
+        - game
       summary: Leave a game
       description: Makes the authenticated user leave the game he participates in.
       responses:
@@ -323,7 +324,7 @@ paths:
   /game/history:
     get:
       tags:
-      - game
+        - game
       summary: Returns the user's history of played games
       description: Returns the authenticated user's history of played games
       responses:
@@ -350,17 +351,17 @@ paths:
   /game/turns/{id}:
     get:
       tags:
-      - game
+        - game
       summary: Returns turns of the given game
       description: Returns turns of the game specified by an ID. User can list only turns of games he has attended to.
       parameters:
-      - name: id
-        in: path
-        description: ID of the game which turns should be returned
-        required: true
-        schema:
-          type: integer
-          format: int32
+        - name: id
+          in: path
+          description: ID of the game which turns should be returned
+          required: true
+          schema:
+            type: integer
+            format: int32
       responses:
         200:
           description: Result
@@ -392,7 +393,7 @@ paths:
   /lobby/create:
     post:
       tags:
-      - lobby
+        - lobby
       summary: Creates a new lobby
       description: Creates a new game lobby to which other players can be invited
       requestBody:
@@ -401,8 +402,8 @@ paths:
           application/json:
             schema:
               required:
-              - boardSize
-              - victoriousCells
+                - boardSize
+                - victoriousCells
               type: object
               properties:
                 boardSize:
@@ -441,7 +442,7 @@ paths:
   /lobby/invite:
     post:
       tags:
-      - lobby
+        - lobby
       summary: Invites a friend to the lobby
       description: Invites a friend specified by an ID to the lobby the authenticated user has created
       requestBody:
@@ -450,7 +451,7 @@ paths:
           application/json:
             schema:
               required:
-              - userId
+                - userId
               type: object
               properties:
                 userId:
@@ -483,7 +484,7 @@ paths:
   /lobby/accept:
     post:
       tags:
-      - lobby
+        - lobby
       summary: Accepts an invitation to a lobby
       description: Accepts an invite to the lobby given by the ID
       requestBody:
@@ -492,7 +493,7 @@ paths:
           application/json:
             schema:
               required:
-              - lobbyId
+                - lobbyId
               type: object
               properties:
                 lobbyId:
@@ -525,7 +526,7 @@ paths:
   /lobby/decline:
     post:
       tags:
-      - lobby
+        - lobby
       summary: Declines an invitation to a lobby
       description: Declines an invite to the lobby given by the ID
       requestBody:
@@ -534,7 +535,7 @@ paths:
           application/json:
             schema:
               required:
-              - lobbyId
+                - lobbyId
               type: object
               properties:
                 lobbyId:
@@ -564,11 +565,11 @@ paths:
           description: Invalid request body
         401:
           description: Authorization information is missing or invalid.
-          
+
   /lobby/leave:
     post:
       tags:
-      - lobby
+        - lobby
       summary: Leaves a lobby
       description: Leaves the lobby given by the ID. When an owner of a lobby leaves the whole lobby is destroyed.
       requestBody:
@@ -577,7 +578,7 @@ paths:
           application/json:
             schema:
               required:
-              - lobbyId
+                - lobbyId
               type: object
               properties:
                 lobbyId:
@@ -607,11 +608,11 @@ paths:
           description: Invalid request body
         401:
           description: Authorization information is missing or invalid.
-          
+
   /lobby/start:
     post:
       tags:
-      - lobby
+        - lobby
       summary: Starts a lobby
       description: Starts the lobby given by the ID. A lobby must be full in order to be sucessfully started. Only an owner of the lobby can start it.
       requestBody:
@@ -620,7 +621,7 @@ paths:
           application/json:
             schema:
               required:
-              - lobbyId
+                - lobbyId
               type: object
               properties:
                 lobbyId:
@@ -650,11 +651,11 @@ paths:
           description: Invalid request body
         401:
           description: Authorization information is missing or invalid.
-            
+
   /lobby/invites:
     get:
       tags:
-      - lobby
+        - lobby
       summary: Returns the list of invites
       description: Returns a list of all invitations to lobbies sent to the authenticated user
       responses:
@@ -676,11 +677,11 @@ paths:
                     example: ""
         401:
           description: Authorization information is missing or invalid.
-          
+
   /auth/user:
     get:
       tags:
-      - auth
+        - auth
       summary: Returns the authenticated user
       description: Returns the currently logged in user
       responses:
@@ -701,11 +702,11 @@ paths:
                     example: ""
         401:
           description: Authorization information is missing or invalid.
-          
+
   /auth/login:
     post:
       tags:
-      - auth
+        - auth
       summary: Tries to authenticate the user using the given credentials
       description: Tries to authenticate the user using the given credentials.
       requestBody:
@@ -714,8 +715,8 @@ paths:
           application/json:
             schema:
               required:
-              - email
-              - password
+                - email
+                - password
               type: object
               properties:
                 email:
@@ -732,14 +733,14 @@ paths:
                 type: string
                 description: JWT token
                 example: JWT token
-            
+
         401:
           description: Invalid login credentials.
-          
+
   /auth/register:
     post:
       tags:
-      - auth
+        - auth
       summary: Registers a user specified in the request body.
       description: Registers a user specified in the request body.
       requestBody:
@@ -748,10 +749,10 @@ paths:
           application/json:
             schema:
               required:
-              - username
-              - email
-              - password
-              - confirmPassword
+                - username
+                - email
+                - password
+                - confirmPassword
               type: object
               properties:
                 username:
@@ -787,13 +788,13 @@ paths:
                   value:
                     responseCode: 100
                     message: "Username already in use"
-                    
+
   /administration/users/list:
     get:
       tags:
-      - administration
+        - administration
       summary: Returns the list of registered users
-      description: Returns a list of all registered users. This request is only available for users that are admins. 
+      description: Returns a list of all registered users. This request is only available for users that are admins.
       responses:
         200:
           description: registered users listed
@@ -813,11 +814,11 @@ paths:
                     example: ""
         401:
           description: Authorization information is missing, invalid, or the user calling is not an admin.
-          
+
   /administration/users/changepassword:
     post:
       tags:
-      - administration
+        - administration
       summary: Changes the password of the given user
       description: Changes the password of the user specified using the ID. This request is only available for users that are admins.
       requestBody:
@@ -826,8 +827,8 @@ paths:
           application/json:
             schema:
               required:
-              - userId
-              - password
+                - userId
+                - password
               type: object
               properties:
                 userId:
@@ -859,11 +860,11 @@ paths:
                     message: "User not found by ID"
         401:
           description: Authorization information is missing, invalid, or the user calling is not an admin.
-          
+
   /administration/users/promote:
     post:
       tags:
-      - administration
+        - administration
       summary: Changes the role of the user to admin
       description: Promotes the user to the admin role
       requestBody:
@@ -872,7 +873,7 @@ paths:
           application/json:
             schema:
               required:
-              - userId
+                - userId
               type: object
               properties:
                 userId:
@@ -905,7 +906,7 @@ paths:
   /administration/users/demote:
     post:
       tags:
-      - administration
+        - administration
       summary: Removes the role of admin from the user
       description: Demotes the user from the admin role
       requestBody:
@@ -914,7 +915,7 @@ paths:
           application/json:
             schema:
               required:
-              - userId
+                - userId
               type: object
               properties:
                 userId:
@@ -943,12 +944,12 @@ paths:
                     message: "User not found by ID"
         401:
           description: Authorization information is missing, invalid, or the user calling is not an admin.
-          
+
   /profile/changepassword:
     post:
       tags:
-      - profile
-      summary: Changes the password of the currently authenticated user 
+        - profile
+      summary: Changes the password of the currently authenticated user
       description: The user that is currently authenticated will have it's password changed if the currently used password is specified. The specified email must match with the email of the logged user.
       requestBody:
         description: Specify the email, current and new password
@@ -956,10 +957,10 @@ paths:
           application/json:
             schema:
               required:
-              - email
-              - currentPassword
-              - password
-              - passwordConfirm
+                - email
+                - currentPassword
+                - password
+                - passwordConfirm
               type: object
               properties:
                 email:
@@ -1107,6 +1108,6 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT    # optional, arbitrary value for documentation purposes
-      
+
 security:
-  - bearerAuth: [] 
+  - bearerAuth: []

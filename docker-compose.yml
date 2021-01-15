@@ -20,6 +20,14 @@ services:
             TTT_DB_PORT: 3306
         depends_on:
             - mariadb
+    frontend:
+        build:
+            dockerfile: docker/client/Dockerfile
+            context: .
+        env_file:
+            - .env
+        ports:
+            - 80:80
     redis:
         image: redis:6-alpine
 

@@ -26,6 +26,7 @@ A repository for the KIV/PIA semester project (on-line version of the 'Piškvork
   - `RealtimeService` - allows other services to send simple messages to connected users over websockets
   - `UserService` - handles user authentication, registration,...
 - JWT token used for user authentication
+- only 15 unit tests 😥
 
 #### Persistent database
 - **MariaDB** database is used to store user registrations, user friend-list, pending friend requests, results of all games played as well as turns made in those games.

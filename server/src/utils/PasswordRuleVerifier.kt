@@ -27,7 +27,7 @@ object PasswordRuleVerifier {
         fun verify(password: String): Boolean = validator(password)
     }
 
-    val rules = listOf(
+    private val rules = listOf(
         Rule.`Must contain uppercase and lowercase`(),
         Rule.`Must not be longer than 20 characters`(),
         Rule.`Must contain atleast one number`(),

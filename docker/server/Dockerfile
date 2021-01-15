@@ -1,10 +1,10 @@
-FROM gradle:6.6.1-jdk8
+FROM gradle:6.6.1-jdk8-openj9
 
 # switch to root so we are able to create a new user
 USER root                
 
 ENV APPLICATION_USER ktor
-RUN adduser --no-create-home $APPLICATION_USER
+RUN adduser --no-create-home --disabled-password --gecos "" $APPLICATION_USER
 
 # create a folder for the server
 RUN mkdir /app

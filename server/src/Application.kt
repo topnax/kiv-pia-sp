@@ -130,4 +130,10 @@ fun Application.module(testing: Boolean = false) {
     } else {
         logger.debug { "testing!!!" }
     }
+
+    routing {
+        get("/") {
+            call.respondText("TTT SERVER", contentType = ContentType.Text.Plain)
+        }
+    }
 }

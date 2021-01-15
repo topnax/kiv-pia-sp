@@ -4,7 +4,6 @@ import com.zcu.kiv.pia.tictactoe.game.Seed
 import com.zcu.kiv.pia.tictactoe.game.TicTacToeGame
 import com.zcu.kiv.pia.tictactoe.model.User
 import com.zcu.kiv.pia.tictactoe.service.NotificationService
-import com.zcu.kiv.pia.tictactoe.service.RealtimeService
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
@@ -65,7 +64,6 @@ class GameWrapper(val id: Int, val cross: User, val nought: User, val game: TicT
 class GameServiceImpl(
     private val gameMessagingService: GameMessagingService,
     private val notificationService: NotificationService,
-    private val realtimeService: RealtimeService,
     private val gameResultService: GameResultsService
 ) :
     GameService {

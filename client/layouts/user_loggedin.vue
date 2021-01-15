@@ -227,6 +227,7 @@ export default {
   methods: {
     async logout() {
       await this.$store.dispatch("users/reset")
+      await this.$store.dispatch("game/finishedGameClose")
       await this.$store.dispatch("websocket/resetToken")
       await this.$store.$auth.logout()
     },

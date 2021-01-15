@@ -5,7 +5,7 @@ A repository for the KIV/PIA semester project (on-line version of the 'Piškvork
 
 ### Server
 - consists of a JVM application, [MariaDB](https://mariadb.org/) database and [redis](https://redis.io/)
-- the server API is documented [here](https://github.com/topnax/kiv-pia-sp/blob/master/server/openapi.yml)
+- the server API is documented [here](https://github.com/topnax/kiv-pia-sp/blob/master/server/openapi.yml) using OpenAPI 3
   - feel free to paste it into the [swagger editor](https://editor.swagger.io/)
 
 #### Application
@@ -54,9 +54,23 @@ In order to **try out the whole application** (while evaluating the semester pro
   - **super-admin account is available** after logging in with following credentials:
     - **email:** `admin@ttt-game.com`
     - **password:** `admin`
-  - super-admin account (and other promoted admins ofcourse) is able to promote other admins to users (and also demote them)
+  - super-admin account (and other promoted admins of course) is able to promote other admins to users (and also demote them)
     - super-admin account cannot be demoted
     
 ## Development notes
   - execute `docker-compose up` in the `./server` folder in order to run the server without the client
   - execute `yarn dev` in the `./client` folder in order to deploy only the client (hot reload supported)
+
+## Implemented bonus parts
+- *password strength evaluation - 2 points*
+    - both client and server side
+      - at least one uppercase and lowercase letter
+      - at least one number
+      - length requirement (8 characters)
+- *save games with all turns and allow a replay - 5 points* 
+    - available upon clicking a game result row in the *Game history* page
+- *OpenAPI, Swagger, RAML or any other API modeling/specification language with code generation - **10 points*** 
+    - see [server/openapi.yml](https://github.com/topnax/kiv-pia-sp/blob/master/server/openapi.yml)
+- *Angular, React, any other frontend technology - 10 points* 
+    - NuxtJS (framework built upon VueJS) used (see client description)
+

@@ -1,0 +1,26 @@
+version: '3.3'
+services:
+    mariadb:
+        image: mariadb:10.2
+        environment:
+            MYSQL_DATABASE: ttt_db
+            MYSQL_USER: user
+            MYSQL_PASSWORD: password
+            MYSQL_ROOT_PASSWORD: password
+    server:
+        build:
+            dockerfile: docker/server/Dockerfile
+            context: ..
+        ports:
+            - '8080:8080'
+        environment:
+            TTT_DB: ttt_db
+            TTT_DB_ADDRESS: mariadb
+            TTT_DB_USER: root
+            TTT_DB_PASSWORD: password
+            TTT_DB_PORT: 3306
+        depends_on:
+            - mariadb
+    redis:
+        image: redis:6-alpine
+

@@ -8,19 +8,39 @@ import com.zcu.kiv.pia.tictactoe.repository.FriendListRepository
 import com.zcu.kiv.pia.tictactoe.repository.FriendRequestRepository
 
 interface FriendService {
-    @Throws(FriendRequestException::class)
+    /**
+     * Tries to add a new friend request
+     */
     suspend fun addFriendRequest(request: FriendRequest): Boolean
 
+    /**
+     * Returns friend requests sent to the given user (Pair<ID, requestorUsername>)
+     */
     suspend fun getFriendRequests(user: User): List<Pair<Int, String>>
 
+    /**
+     * Confirms a friend request
+     */
     suspend fun confirmFriendRequest(requestId: Int, userId: Int): Boolean
 
+    /**
+     * Cancels a friend request based on the requestId and ID of the requestor
+     */
     suspend fun cancelFriendRequest(requestId: Int, requestorId: Int): Boolean
 
+    /**
+     * Declines a friend request
+     */
     suspend fun declineFriendRequest(requestId: Int, requestedId: Int): Boolean
 
+    /**
+     * Cancels a friendship between two users
+     */
     suspend fun cancelFriendship(initiatorId: Int, friendId: Int): Boolean
 
+    /**
+     * Returns a list of friends of the given user
+     */
     suspend fun getFriendList(user: User): List<User>
 
 }

@@ -1,8 +1,10 @@
-package com.zcu.kiv.pia.tictactoe.game
+package game
 
+import com.zcu.kiv.pia.tictactoe.game.Seed
+import com.zcu.kiv.pia.tictactoe.game.TicTacToeGame
 import org.junit.Test
 
-class TicTacToeGameLobbyTest {
+class TicTacToeGameTest {
     @Test
     fun testAddSeed() {
         val g = TicTacToeGame(3, Seed.CROSS, 3)
@@ -36,7 +38,7 @@ class TicTacToeGameLobbyTest {
 
         assert(g.state == TicTacToeGame.State.WON)
         assert(g.winner!! == Seed.CROSS)
-        assert(g.victoriousCells == hashSetOf(g.board[0,0], g.board[1,1], g.board[2,2]))
+        assert(g.victoriousCells == hashSetOf(g.board[0, 0], g.board[1, 1], g.board[2, 2]))
     }
 
     @Test
@@ -57,7 +59,7 @@ class TicTacToeGameLobbyTest {
 
         assert(g.state == TicTacToeGame.State.WON)
         assert(g.winner!! == Seed.CROSS)
-        assert(g.victoriousCells == hashSetOf(g.board[0,1], g.board[1,1], g.board[2,1], g.board[3, 1] ))
+        assert(g.victoriousCells == hashSetOf(g.board[0, 1], g.board[1, 1], g.board[2, 1], g.board[3, 1]))
     }
 
     @Test

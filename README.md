@@ -50,6 +50,9 @@ A repository for the KIV/PIA semester project (on-line version of the 'Piškvork
 ## Deployment notes
 In order to **try out the whole application** (while evaluating the semester project, including both server and client) run `docker-compose up` in the root of this repository.
   - after successful deployment (takes a while) the frontend is running on `http://localhost:80` and the server is running on `http://localhost:8080`
+    - the first time the MariaDB container is run the server container prints few exceptions into logs
+    - this is because the server is trying to connect to the DB, but the DB is not ready yet
+        - the number of attempts is limited, and a small timeout between each attempt is set      
   - **super-admin account is available** after logging in with following credentials:
     - **email:** `admin@ttt-game.com`
     - **password:** `admin`

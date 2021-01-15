@@ -1,14 +1,12 @@
 package com.zcu.kiv.pia.tictactoe.service
 
-import com.zcu.kiv.pia.tictactoe.model.Lobby
 import com.zcu.kiv.pia.tictactoe.model.User
 import com.zcu.kiv.pia.tictactoe.model.response.NotificationResponse
-import com.zcu.kiv.pia.tictactoe.model.response.realtime.LobbyStateResponse
-import com.zcu.kiv.pia.tictactoe.model.response.realtime.NewInviteResponse
-import com.zcu.kiv.pia.tictactoe.service.RealtimeMessage
-import com.zcu.kiv.pia.tictactoe.service.RealtimeService
 
 interface NotificationService {
+    /**
+     * Sends a text notification to the given user
+     */
     fun sendNotification(text: String, user: User)
 }
 

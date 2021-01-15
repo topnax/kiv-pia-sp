@@ -1,6 +1,7 @@
 package com.zcu.kiv.pia.tictactoe
 
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.zcu.kiv.pia.tictactoe.authentication.JwtConfig
 import com.zcu.kiv.pia.tictactoe.controller.*
@@ -43,6 +44,16 @@ fun Application.module(testing: Boolean = false) {
         exception<MissingKotlinParameterException> { cause ->
             logger.info { "Got MissingKotlinParameterException: ${cause.message}" }
             call.respond(HttpStatusCode.BadRequest)
+        }
+
+        exception<UnrecognizedPropertyException> { cause ->
+            logger.info { "Got UnrecognizedPropertyException: ${cause.message}" }
+            call.respond(HttpStatusCode.BadRequest)
+        }
+
+        exception<Exception> {
+            logger.error { "Got UNEXPECTED ${it.javaClass.simpleName} exception"  }
+            call.respond(HttpStatusCode.InternalServerError)
         }
     }
     install(Koin) {

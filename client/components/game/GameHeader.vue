@@ -1,6 +1,6 @@
 <template>
   <v-row no-gutters>
-    <v-col md="4" sm="4" xs="12" cols="12" class="text-center">
+    <v-col md="4" sm="3" xs="12" cols="12" class="text-center">
       <v-chip
         class="ma-2"
         :color="crossWon ? 'green' : 'primary'"
@@ -10,7 +10,7 @@
       </v-chip>
     </v-col>
 
-    <v-col md="4" sm="4" xs="12" cols="12" class="text-center" justify="center">
+    <v-col md="4" sm="6" xs="12" cols="12" class="text-center" justify="center">
       <v-chip
         v-if="usersTurn && !finished"
         class="ma-2"
@@ -47,7 +47,7 @@
 
 
     </v-col>
-    <v-col md="4" sm="4" xs="12" cols="12" class="text-center">
+    <v-col md="4" sm="3" xs="12" cols="12" class="text-center">
       <v-chip
         class="ma-2"
         :color="noughtWon ? 'green' : 'primary'"

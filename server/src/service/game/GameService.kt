@@ -50,19 +50,6 @@ class GameServiceImpl(
 ) :
     GameService {
 
-    init {
-        realtimeService.addConnectionStatusListener(object : RealtimeService.ConnectionStatusListener {
-            override fun onConnected(user: User) {
-            }
-
-            override fun onDisconnected(user: User) {
-//                userToGames[user]?.let {
-//                    removeUser(user, it)
-//                }
-            }
-        })
-    }
-
     var nextGameId = 0
 
     /**

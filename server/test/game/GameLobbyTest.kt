@@ -38,6 +38,9 @@ class GameLobbyTest {
             override fun removeConnectionStatusListener(listener: RealtimeService.ConnectionStatusListener) {
             }
 
+            override fun removeConnection(user: User) {
+
+            }
         }
 
         @BeforeAll

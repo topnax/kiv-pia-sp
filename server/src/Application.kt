@@ -81,7 +81,10 @@ fun Application.module(testing: Boolean = false) {
         logger.debug { "not testing" }
 
         val hashService: HashService by inject()
+
+        // init database
         DatabaseFactory.init(hashService)
+
         val configurationService: ConfigurationService by inject()
         val jwtConfig = JwtConfig(configurationService.jwtIssuer, configurationService.jwtSecret, 10 * 60)
 

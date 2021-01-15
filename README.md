@@ -43,7 +43,6 @@ A repository for the KIV/PIA semester project (on-line version of the 'Piškvork
 ####  Application
 - SPA (single page application)
 - [yarn](https://yarnpkg.com/) as the package/project manager
-- written purely in Javascript
 - uses [Nuxt.js](https://nuxtjs.org/) frontend framework, that wraps and simplifies [Vue.js](https://vuejs.org/) usage
 - [Vuetify](https://vuetifyjs.com) library used to create the UI (easy to use, implements Material Design)
 - [Vuex](https://vuex.vuejs.org/) as the state management framework to separate logic into modules

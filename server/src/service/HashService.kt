@@ -4,6 +4,9 @@ import io.ktor.util.*
 import java.util.*
 
 interface HashService {
+    /**
+     * Hashes the given password
+     */
     fun hashPassword(password: String): String
 }
 

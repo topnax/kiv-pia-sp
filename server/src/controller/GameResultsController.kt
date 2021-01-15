@@ -28,6 +28,8 @@ fun Route.gameHistoryRoutes() {
                         } else {
                             errorResponse("You did not participate in this game!")
                         }
+                    } ?: run {
+                        errorResponse("Game result not found by ID")
                     }
                 } ?: run {
                     errorResponse("ID parameter not specified")

@@ -1,5 +1,5 @@
 # kiv-pia-sp
-A repository for the KIV/PIA semester project (on-line version of the 'Piškvorky' game, also known as *Five in a row*).
+A repository for the KIV/PIA semester project (on-line version of the 'Piškvorky' game, also known as *Five in a row*). See the assignment [here](https://github.com/osvetlik/pia2020/tree/master/semester-project).
 
 ## Technology stack
 

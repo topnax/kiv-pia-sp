@@ -21,7 +21,7 @@ A repository for the KIV/PIA semester project (on-line version of the 'Piškvork
   - `LobbyMessagingService` -  used by `LobbyService` to be able to send messages to lobby members and other users over websockets
   - `ConfigurationService` - makes parameters in the `application.conf` file available to other services in the application
   - `FriendService` - takes care of friend-list listing, friend requests, friend relationships,...
-  - `HashService` - defines `hashPassword` that outputs the hash of the input
+  - `HashService` - defines `hashPassword` method that outputs the hash of the input
   - `NotificationService` - allows other services to send notifications to users in real-time over websockets
   - `RealtimeService` - allows other services to send simple messages to connected users over websockets
   - `UserService` - handles user authentication, registration,...

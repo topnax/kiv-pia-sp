@@ -4,7 +4,6 @@ import com.zcu.kiv.pia.tictactoe.game.Seed
 import com.zcu.kiv.pia.tictactoe.game.TicTacToeGame
 import com.zcu.kiv.pia.tictactoe.model.User
 import com.zcu.kiv.pia.tictactoe.service.NotificationService
-import com.zcu.kiv.pia.tictactoe.service.RealtimeService
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
@@ -13,20 +12,44 @@ import java.util.*
 val gameLogger = KotlinLogging.logger { }
 
 interface GameService {
+    /**
+     * Checks whether the given user is currently able to place a seed in the given game
+     */
     fun isItUsersTurn(user: User, gameWrapper: GameWrapper): Boolean
 
+    /**
+     * Places a seed at the given position as the given user
+     */
     fun placeSeed(user: User, row: Int, column: Int, gameWrapper: GameWrapper)
 
+    /**
+     * Creates a new game with the given users and game parameters
+     */
     fun createGame(user1: User, user2: User, boardSize: Int, victoriousCells: Int)
 
+    /**
+     * Sends the user the state of the game he participates in via WS
+     */
     fun sendUserState(user: User)
 
+    /**
+     * Removes an user from the game
+     */
     fun removeUser(user: User, gameWrapper: GameWrapper)
 
+    /**
+     * Removes a game from the list of games
+     */
     fun removeGame(gameWrapper: GameWrapper)
 
+    /**
+     * Checks whether the given user is currently participating in any game
+     */
     fun isUserPlaying(user: User): Boolean
 
+    /**
+     * Returns a game the user participates in. Throws an exception when the user does not participate in any game
+     */
     fun getGame(user: User): GameWrapper
 
     abstract class GameServiceException(val reason: String) : Exception(reason)
@@ -36,32 +59,14 @@ interface GameService {
     class CouldNotPlaceSeed() : GameServiceException("Could not place seed.")
 }
 
-class GameRepository {
-    fun getGame() = "Tic Tac Toe game played :)"
-}
-
 class GameWrapper(val id: Int, val cross: User, val nought: User, val game: TicTacToeGame)
 
 class GameServiceImpl(
     private val gameMessagingService: GameMessagingService,
     private val notificationService: NotificationService,
-    private val realtimeService: RealtimeService,
     private val gameResultService: GameResultsService
 ) :
     GameService {
-
-    init {
-        realtimeService.addConnectionStatusListener(object : RealtimeService.ConnectionStatusListener {
-            override fun onConnected(user: User) {
-            }
-
-            override fun onDisconnected(user: User) {
-//                userToGames[user]?.let {
-//                    removeUser(user, it)
-//                }
-            }
-        })
-    }
 
     var nextGameId = 0
 
@@ -153,7 +158,10 @@ class GameServiceImpl(
             gameWrapper.cross
         )
 
-        notificationService.sendNotification("Opponent has surrendered", if (gameWrapper.cross == user) gameWrapper.nought else gameWrapper.cross)
+        notificationService.sendNotification(
+            "Opponent has surrendered",
+            if (gameWrapper.cross == user) gameWrapper.nought else gameWrapper.cross
+        )
 
         gameLogger.info { "Removing user ${user.username}..." }
         removeGame(gameWrapper)

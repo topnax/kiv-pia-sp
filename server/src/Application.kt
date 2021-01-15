@@ -1,6 +1,7 @@
 package com.zcu.kiv.pia.tictactoe
 
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.zcu.kiv.pia.tictactoe.authentication.JwtConfig
 import com.zcu.kiv.pia.tictactoe.controller.*
@@ -44,7 +45,16 @@ fun Application.module(testing: Boolean = false) {
             logger.info { "Got MissingKotlinParameterException: ${cause.message}" }
             call.respond(HttpStatusCode.BadRequest)
         }
-        // TODO invalid json
+
+        exception<UnrecognizedPropertyException> { cause ->
+            logger.info { "Got UnrecognizedPropertyException: ${cause.message}" }
+            call.respond(HttpStatusCode.BadRequest)
+        }
+
+        exception<Exception> {
+            logger.error { "Got UNEXPECTED ${it.javaClass.simpleName} exception"  }
+            call.respond(HttpStatusCode.InternalServerError)
+        }
     }
     install(Koin) {
         modules(
@@ -82,7 +92,10 @@ fun Application.module(testing: Boolean = false) {
         logger.debug { "not testing" }
 
         val hashService: HashService by inject()
+
+        // init database
         DatabaseFactory.init(hashService)
+
         val configurationService: ConfigurationService by inject()
         val jwtConfig = JwtConfig(configurationService.jwtIssuer, configurationService.jwtSecret, 10 * 60)
 
@@ -108,8 +121,11 @@ fun Application.module(testing: Boolean = false) {
 
             route("/api") {
                 gameRoutes()
+
                 userAdministrationRoutes()
+
                 gameHistoryRoutes()
+
                 lobbyRoutes()
 
                 loginRoutes(jwtConfig)
@@ -129,5 +145,11 @@ fun Application.module(testing: Boolean = false) {
         }
     } else {
         logger.debug { "testing!!!" }
+    }
+
+    routing {
+        get("/") {
+            call.respondText("TTT SERVER", contentType = ContentType.Text.Plain)
+        }
     }
 }

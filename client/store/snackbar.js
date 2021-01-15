@@ -39,7 +39,7 @@ export const actions = {
     context.commit("SET_SNACKBAR", {
       showing: true,
       text: text,
-      color: "success"
+      color: "green"
     })
   },
   showError: (context, text) => {

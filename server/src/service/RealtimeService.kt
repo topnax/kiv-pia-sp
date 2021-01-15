@@ -80,6 +80,11 @@ interface RealtimeService {
     fun removeConnection(connection: DefaultWebSocketServerSession, user: User? = null)
 
     /**
+     * Removes a realtime connection by specifying an user
+     */
+    fun removeConnection(user: User)
+
+    /**
      * Receive a realtime message
      */
     fun receiveMessage(message: RealtimeMessage)
@@ -172,6 +177,15 @@ class WebsocketService(private val configurationService: ConfigurationService) :
         }
         connectionsToUsers.remove(connection)
         connections.remove(connection)
+    }
+
+    override fun removeConnection(user: User) {
+        usersToConnections[user.id]?.let {
+            connectionsToUsers.remove(it)
+            connections.remove(it)
+
+            usersToConnections.remove(user.id)
+        }
     }
 
     override fun receiveMessage(message: String, connection: DefaultWebSocketServerSession) {

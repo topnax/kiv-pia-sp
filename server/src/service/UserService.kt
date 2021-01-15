@@ -132,7 +132,6 @@ class UserServiceImpl(
     }
 
     override fun addLoggedInUser(user: User) {
-        // TODO do not allow two connections
         inMemoryUserRepository.addLoggedInUser(user)
         realtimeService.sendMessage(
             RealtimeMessage(
@@ -144,7 +143,6 @@ class UserServiceImpl(
     }
 
     override fun removeLoggedInUser(user: User) {
-        // TODO should remove connection :thinking-emoji:
         realtimeService.sendMessage(
             RealtimeMessage(
                 RealtimeMessage.Namespace.USERS,

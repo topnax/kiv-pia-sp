@@ -12,6 +12,7 @@ import com.zcu.kiv.pia.tictactoe.model.response.SuccessResponse
 import com.zcu.kiv.pia.tictactoe.request.game.RegisterRequest
 import com.zcu.kiv.pia.tictactoe.service.UserService
 import com.zcu.kiv.pia.tictactoe.service.HashService
+import com.zcu.kiv.pia.tictactoe.service.RealtimeService
 import com.zcu.kiv.pia.tictactoe.utils.PasswordRuleVerifier
 import com.zcu.kiv.pia.tictactoe.utils.dataResponse
 import com.zcu.kiv.pia.tictactoe.utils.errorResponse
@@ -33,6 +34,7 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
 
     val hashService: HashService by inject()
     val userService: UserService by inject()
+    val realtimeService: RealtimeService by inject()
 
     route("/auth") {
         authenticate(JWT_AUTH_NAME) {
@@ -44,7 +46,9 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
                 }
             }
             post("/logout") {
+                val loggedUser = getLoggedUser()
                 userService.removeLoggedInUser(User.fromJWTToken(call.principal()!!))
+                realtimeService.removeConnection(loggedUser)
                 call.respond(SuccessResponse())
             }
         }
@@ -62,7 +66,6 @@ fun Route.loginRoutes(jvtConfig: JwtConfig) {
                 call.respond(HttpStatusCode.Unauthorized)
             } else {
                 // user has logged in
-//                userService.addLoggedInUser(user)
                 call.respond(
                         Token(
                             jvtConfig.makeToken(

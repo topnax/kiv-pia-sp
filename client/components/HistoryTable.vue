@@ -5,9 +5,17 @@
     :items-per-page="5"
     :loading="loading"
     loading-text="Loading... Please wait"
-    class="elevation-1"
+    class="elevation-1 row-pointer"
     @click:row="onRowClick"
   >
+
+    <template v-slot:top>
+      <v-toolbar
+        flat
+      >
+        <v-toolbar-title>Game history</v-toolbar-title>
+      </v-toolbar>
+    </template>
     <template v-slot:item.result="{ item }">
       <v-icon v-if="item.result === 1" color="yellow">
         mdi-trophy-variant
@@ -16,7 +24,7 @@
         mdi-cancel
       </v-icon>
       <v-icon v-else
-      color="gray">
+              color="gray">
         mdi-handshake
       </v-icon>
     </template>
@@ -55,3 +63,9 @@ export default {
   })
 }
 </script>
+
+<style lang="css" scoped>
+.row-pointer >>> tbody tr :hover {
+  cursor: pointer;
+}
+</style>
